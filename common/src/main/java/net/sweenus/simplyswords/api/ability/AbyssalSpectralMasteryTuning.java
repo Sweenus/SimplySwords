@@ -75,7 +75,8 @@ public final class AbyssalSpectralMasteryTuning implements MasteryTuningSnapshot
         RECALL_RANGE(0, 128), RECALL_TARGET_CAP(0, 64), RECALL_PULL_STRENGTH(0, 16),
         GRAVEWALK_RANGE(0, 128), GRAVEWALK_SPEED(0, 16), GRAVEWALK_DAMAGE_MULTIPLIER(0, 10),
         BURST_RANGE(0, 128), BURST_TARGET_CAP(0, 64),
-        BURST_DAMAGE_MULTIPLIER(0, 10), BURST_WINDOW_TICKS(0, 72000);
+        BURST_DAMAGE_MULTIPLIER(0, 10), BURST_WINDOW_TICKS(0, 72000),
+        GLOAM_GROWTH_DURATION_TICKS(0, 72000);
 
         private final double minimum;
         private final double maximum;

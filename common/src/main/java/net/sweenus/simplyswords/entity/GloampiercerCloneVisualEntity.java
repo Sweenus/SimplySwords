@@ -18,6 +18,8 @@ public final class GloampiercerCloneVisualEntity extends Entity {
             GloampiercerCloneVisualEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Integer> THROW_INTERVAL = DataTracker.registerData(
             GloampiercerCloneVisualEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    private static final TrackedData<Integer> THROW_COUNT = DataTracker.registerData(
+            GloampiercerCloneVisualEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Integer> SEED = DataTracker.registerData(
             GloampiercerCloneVisualEntity.class, TrackedDataHandlerRegistry.INTEGER);
 
@@ -29,7 +31,7 @@ public final class GloampiercerCloneVisualEntity extends Entity {
 
     public GloampiercerCloneVisualEntity(World world, double x, double y, double z,
                                          float visualYaw, int lifetime, int throwTick,
-                                         int throwInterval, int seed) {
+                                         int throwInterval, int throwCount, int seed) {
         this(EntityRegistry.GLOAMPIERCER_CLONE_VISUAL.get(), world);
         setPosition(x, y, z);
         setVisualYaw(visualYaw);
@@ -37,6 +39,7 @@ public final class GloampiercerCloneVisualEntity extends Entity {
         setLifetime(lifetime);
         setThrowTick(throwTick);
         setThrowInterval(throwInterval);
+        setThrowCount(throwCount);
         setSeed(seed);
     }
 
@@ -46,6 +49,7 @@ public final class GloampiercerCloneVisualEntity extends Entity {
         builder.add(LIFETIME, 20);
         builder.add(THROW_TICK, 10);
         builder.add(THROW_INTERVAL, 0);
+        builder.add(THROW_COUNT, 1);
         builder.add(SEED, 0);
     }
 
@@ -89,6 +93,14 @@ public final class GloampiercerCloneVisualEntity extends Entity {
         dataTracker.set(THROW_INTERVAL, Math.max(0, value));
     }
 
+    public int getThrowCount() {
+        return dataTracker.get(THROW_COUNT);
+    }
+
+    public void setThrowCount(int value) {
+        dataTracker.set(THROW_COUNT, Math.max(0, value));
+    }
+
     public int getSeed() {
         return dataTracker.get(SEED);
     }
@@ -108,6 +120,7 @@ public final class GloampiercerCloneVisualEntity extends Entity {
         setLifetime(nbt.getInt("lifetime"));
         setThrowTick(nbt.getInt("throw_tick"));
         setThrowInterval(nbt.getInt("throw_interval"));
+        setThrowCount(nbt.contains("throw_count") ? nbt.getInt("throw_count") : 1);
         setSeed(nbt.getInt("seed"));
     }
 
@@ -117,6 +130,7 @@ public final class GloampiercerCloneVisualEntity extends Entity {
         nbt.putInt("lifetime", getLifetime());
         nbt.putInt("throw_tick", getThrowTick());
         nbt.putInt("throw_interval", getThrowInterval());
+        nbt.putInt("throw_count", getThrowCount());
         nbt.putInt("seed", getSeed());
     }
 }

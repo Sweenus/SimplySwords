@@ -107,19 +107,40 @@ public record GloampiercerTuningSnapshot(
     public static GloampiercerTuningSnapshot read(NbtCompound parent) {
         if (!parent.contains(NBT_KEY)) return from(null);
         NbtCompound nbt = parent.getCompound(NBT_KEY);
+        GloampiercerTuningSnapshot defaults = from(null);
         return new GloampiercerTuningSnapshot(
-                nbt.getDouble("projectile_speed"), nbt.getDouble("homing_turn"),
-                nbt.getInt("projectile_lifetime"), nbt.getDouble("projectile_range"),
-                nbt.getInt("embedded_duration"), nbt.getDouble("trigger_radius"),
-                nbt.getDouble("explosion_radius"), nbt.getInt("explosion_cap"),
-                nbt.getDouble("stain_radius"), nbt.getInt("stain_duration"),
-                nbt.getInt("stain_amplifier"), nbt.getInt("slow_duration"), nbt.getInt("mode"),
-                nbt.getDouble("vulnerability_bonus"), nbt.getInt("pull_cap"),
-                nbt.getDouble("pull_strength"), nbt.getDouble("explosion_damage"),
-                nbt.getDouble("chain_range"), nbt.getInt("chain_delay"),
-                nbt.getDouble("move_range"), nbt.getDouble("move_speed"),
-                nbt.getDouble("expiry_damage"), nbt.getDouble("expiry_radius"),
-                nbt.getInt("expiry_cap"));
+                readDouble(nbt, "projectile_speed", defaults.projectileSpeed()),
+                readDouble(nbt, "homing_turn", defaults.homingTurnDegrees()),
+                readInt(nbt, "projectile_lifetime", defaults.projectileLifetimeTicks()),
+                readDouble(nbt, "projectile_range", defaults.projectileRange()),
+                readInt(nbt, "embedded_duration", defaults.embeddedDurationTicks()),
+                readDouble(nbt, "trigger_radius", defaults.triggerRadius()),
+                readDouble(nbt, "explosion_radius", defaults.explosionRadius()),
+                readInt(nbt, "explosion_cap", defaults.explosionTargetCap()),
+                readDouble(nbt, "stain_radius", defaults.stainRadius()),
+                readInt(nbt, "stain_duration", defaults.stainDurationTicks()),
+                readInt(nbt, "stain_amplifier", defaults.stainAmplifier()),
+                readInt(nbt, "slow_duration", defaults.slowDurationTicks()),
+                readInt(nbt, "mode", defaults.mode()),
+                readDouble(nbt, "vulnerability_bonus", defaults.vulnerabilityBonus()),
+                readInt(nbt, "pull_cap", defaults.pullTargetCap()),
+                readDouble(nbt, "pull_strength", defaults.pullStrength()),
+                readDouble(nbt, "explosion_damage", defaults.explosionDamageMultiplier()),
+                readDouble(nbt, "chain_range", defaults.chainRange()),
+                readInt(nbt, "chain_delay", defaults.chainDelayTicks()),
+                readDouble(nbt, "move_range", defaults.moveRange()),
+                readDouble(nbt, "move_speed", defaults.moveSpeed()),
+                readDouble(nbt, "expiry_damage", defaults.expiryDamageMultiplier()),
+                readDouble(nbt, "expiry_radius", defaults.expiryRadius()),
+                readInt(nbt, "expiry_cap", defaults.expiryTargetCap()));
+    }
+
+    private static double readDouble(NbtCompound nbt, String key, double fallback) {
+        return nbt.contains(key) ? nbt.getDouble(key) : fallback;
+    }
+
+    private static int readInt(NbtCompound nbt, String key, int fallback) {
+        return nbt.contains(key) ? nbt.getInt(key) : fallback;
     }
 
     public boolean hasMode(int bit) {

@@ -61,7 +61,9 @@ public final class SoulstalkerAbilityManager {
     private static final Map<ServerWorld, Map<UUID, Long>> LAST_PASSIVE_CHECK = new HashMap<>();
     private static final Map<ServerWorld, Map<UUID, Long>> PASSIVE_LOCKOUT = new HashMap<>();
     private static final Map<ServerWorld, Map<UUID, Long>> SNARE_LOCKOUT = new HashMap<>();
-    private static final Map<UUID, Long> LAST_CLEAVE = new HashMap<>();
+    private static final Map<ServerWorld, Map<UUID, Long>> LAST_CLEAVE = new HashMap<>();
+    private static final Map<ServerWorld, Map<UUID, StrideTracking>> TRACKING = new HashMap<>();
+    private static final long STALE_TRACKING_TICKS = 400L;
 
     private static final int MODE_HUNGERING = 16;
 
@@ -123,6 +125,8 @@ public final class SoulstalkerAbilityManager {
                 context.activationSource() == WeaponAbilityActivationSource.MOB ? now : Long.MIN_VALUE,
                 owner.getPos(), tuning, execution);
         ACTIVE.computeIfAbsent(world, ignored -> new HashMap<>()).put(owner.getUuid(), active);
+        TRACKING.computeIfAbsent(world, ignored -> new HashMap<>())
+                .put(owner.getUuid(), new StrideTracking(execution, now));
         spawnActivation(world, owner);
         return true;
     }
@@ -155,18 +159,24 @@ public final class SoulstalkerAbilityManager {
                 Math.max(1.0, active.tuning.get(StormSoulMasteryTuning.Setting.CLEAVE_RANGE,
                         Config.uniqueEffects.soulstalker.cleaveRange)),
                 Math.max(0.05, Config.uniqueEffects.soulstalker.cleaveSpeed),
-                (float) Math.max(1.0F, HelperMethods.abilityScaledDamage(SpellScalingProfile.SOUL, owner, active.stackSnapshot,
+                (float) (Math.max(1.0F, HelperMethods.abilityScaledDamage(SpellScalingProfile.SOUL, owner,
+                        active.stackSnapshot,
                         Config.uniqueEffects.soulstalker.strikeDamageScaling,
-                        Config.uniqueEffects.soulstalker.strikeSpellScaling)
+                        Config.uniqueEffects.soulstalker.strikeSpellScaling))
                         * active.tuning.get(StormSoulMasteryTuning.Setting.CLEAVE_DAMAGE_MULTIPLIER, 1)
-                        * momentumMultiplier(world, owner, active)),
-                (float) Math.max(0.25, Config.uniqueEffects.soulstalker.cleaveInitialWidth),
+                        * meteorCleavePenalty(stride, active)
+                        * momentumMultiplier(stride, active)),
+                (float) Math.max(0.25, active.tuning.get(StormSoulMasteryTuning.Setting.CLEAVE_INITIAL_WIDTH,
+                        Config.uniqueEffects.soulstalker.cleaveInitialWidth)),
                 (float) Math.max(0.25, active.tuning.get(StormSoulMasteryTuning.Setting.CLEAVE_FINAL_WIDTH,
                         Config.uniqueEffects.soulstalker.cleaveFinalWidth)),
                 active.tuning.integer(StormSoulMasteryTuning.Setting.CLEAVE_TARGET_CAP,
                         Config.uniqueEffects.soulstalker.cleaveTargetCap),
                 active.strideId);
-        world.spawnEntity(cleave);
+        if (!world.spawnEntity(cleave)) {
+            cleave.releaseTracking();
+            return;
+        }
         active.lastCleaveTick = world.getTime();
         world.spawnParticles(GLOAM_DUST, origin.x, origin.y, origin.z,
                 14, 0.28, 0.24, 0.28, 0.035);
@@ -181,20 +191,21 @@ public final class SoulstalkerAbilityManager {
     private static boolean isCleaveReady(ServerWorld world, LivingEntity user, ItemStack stack,
                                          StormSoulMasteryTuning tuning) {
         long now = world.getTime();
+        Map<UUID, Long> swings = LAST_CLEAVE.computeIfAbsent(world, ignored -> new HashMap<>());
         if (now % 200L == 0L) {
-            LAST_CLEAVE.entrySet().removeIf(entry -> entry.getValue() <= now);
+            swings.entrySet().removeIf(entry -> entry.getValue() <= now);
         }
         int cooldown = SimplySwordsAPI.getEffectiveWeaponCooldownTicks(stack, user,
                 getCleaveCooldownTicks(user, tuning));
         if (RunicSlashManager.isIgnoringAttackReady()) {
-            LAST_CLEAVE.put(user.getUuid(), now + cooldown);
+            swings.put(user.getUuid(), now + cooldown);
             return true;
         }
-        Long nextEligible = LAST_CLEAVE.get(user.getUuid());
+        Long nextEligible = swings.get(user.getUuid());
         if (nextEligible != null && now < nextEligible) {
             return false;
         }
-        LAST_CLEAVE.put(user.getUuid(), now + cooldown);
+        swings.put(user.getUuid(), now + cooldown);
         return true;
     }
 
@@ -206,15 +217,21 @@ public final class SoulstalkerAbilityManager {
         }
         int minimum = Math.max(1, tuning.integer(StormSoulMasteryTuning.Setting.CLEAVE_SWING_COOLDOWN_TICKS,
                 Config.uniqueEffects.soulstalker.cleaveMinimumSwingCooldownTicks));
-        return Math.max(minimum, (int) Math.ceil(20.0 / value));
+        double scaled = 20.0 / value
+                * Math.max(0.0, tuning.get(StormSoulMasteryTuning.Setting.CLEAVE_COOLDOWN_MULTIPLIER, 1));
+        return Math.max(minimum, (int) Math.ceil(scaled));
     }
 
     // Predatory Momentum: distance ridden without stopping raises cleave and footfall damage.
-    private static double momentumMultiplier(ServerWorld world, LivingEntity owner, ActiveStride active) {
-        double required = active.tuning.get(StormSoulMasteryTuning.Setting.MOMENTUM_DISTANCE, 0);
+    private static double momentumMultiplier(SoulstalkerStrideEntity stride, ActiveStride active) {
         double bonus = active.tuning.get(StormSoulMasteryTuning.Setting.MOMENTUM_BONUS, 0);
-        if (required <= 0 || bonus <= 0) return 1.0;
-        return active.momentum >= required ? 1.0 + bonus : 1.0;
+        if (bonus <= 0 || stride == null || !stride.isMomentumActive()) return 1.0;
+        return 1.0 + bonus;
+    }
+
+    private static double meteorCleavePenalty(SoulstalkerStrideEntity stride, ActiveStride active) {
+        double penalty = active.tuning.get(StormSoulMasteryTuning.Setting.METEOR_CLEAVE_PENALTY, 1);
+        return stride != null && stride.isMeteorPenaltyActive() ? Math.max(0.0, penalty) : 1.0;
     }
 
     public static void tickHeldPassive(LivingEntity owner, ItemStack stack) {
@@ -266,19 +283,28 @@ public final class SoulstalkerAbilityManager {
             UniqueAbilityApi.cancel(execution);
             return;
         }
-        float baseDamage = (float) Math.max(1.0F, HelperMethods.abilityScaledDamage(
+        float baseDamage = (float) (Math.max(1.0F, HelperMethods.abilityScaledDamage(
                 SpellScalingProfile.SOUL, owner, stack,
                 Config.uniqueEffects.soulstalker.strikeDamageScaling,
-                Config.uniqueEffects.soulstalker.strikeSpellScaling)
+                Config.uniqueEffects.soulstalker.strikeSpellScaling))
                 * tuning.get(StormSoulMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1));
+        Volley volley = new Volley(execution);
         for (LivingEntity target : targets) {
             SoulstalkerTentacleVisualEntity visual = new SoulstalkerTentacleVisualEntity(
                     world, owner, target, PASSIVE_IMPACT_DELAY, PASSIVE_VISUAL_LIFETIME);
-            world.spawnEntity(visual);
+            if (!world.spawnEntity(visual)) {
+                continue;
+            }
+            volley.outstanding++;
+            volley.reserved.add(target.getUuid());
             PENDING_STRIKES.computeIfAbsent(world, ignored -> new ArrayList<>())
                     .add(new PendingStrike(owner.getUuid(), target.getUuid(), visual.getUuid(),
                             stack.copy(), baseDamage, now + PASSIVE_IMPACT_DELAY, tuning,
-                            target == targets.getFirst() ? execution : null));
+                            volley, target.getPos()));
+        }
+        if (volley.outstanding == 0) {
+            UniqueAbilityApi.cancel(execution);
+            return;
         }
         lockouts.put(owner.getUuid(), now + SimplySwordsAPI.getEffectiveWeaponCooldownTicks(
                 stack, owner, tuning.integer(StormSoulMasteryTuning.Setting.TENDRIL_LOCKOUT_TICKS,
@@ -293,7 +319,77 @@ public final class SoulstalkerAbilityManager {
     public static boolean hasActive(ServerWorld world) {
         return !ACTIVE.getOrDefault(world, Map.of()).isEmpty()
                 || !PENDING_STRIKES.getOrDefault(world, List.of()).isEmpty()
+                || !TRACKING.getOrDefault(world, Map.of()).isEmpty()
                 || world.getTime() % 40L == 0L;
+    }
+
+    public static void retainStride(ServerWorld world, UUID ownerId) {
+        StrideTracking tracking = TRACKING.getOrDefault(world, Map.of()).get(ownerId);
+        if (tracking == null) {
+            return;
+        }
+        tracking.outstanding++;
+        tracking.touchedAt = world.getTime();
+    }
+
+    public static void releaseStride(ServerWorld world, UUID ownerId) {
+        StrideTracking tracking = TRACKING.getOrDefault(world, Map.of()).get(ownerId);
+        if (tracking == null) {
+            return;
+        }
+        tracking.outstanding = Math.max(0, tracking.outstanding - 1);
+        tracking.touchedAt = world.getTime();
+        settleStride(world, ownerId, tracking);
+    }
+
+    public static void reportStrideHit(ServerWorld world, LivingEntity owner,
+                                       LivingEntity target, float damage) {
+        if (world == null || owner == null || target == null) {
+            return;
+        }
+        StrideTracking tracking = TRACKING.getOrDefault(world, Map.of()).get(owner.getUuid());
+        if (tracking == null) {
+            return;
+        }
+        tracking.hits++;
+        tracking.touchedAt = world.getTime();
+        UniqueAbilityApi.emit(tracking.execution, UniqueAbilityPhase.HIT,
+                StormSoulMasteryAbilities.HIT, target, 1, damage);
+    }
+
+    private static void settleStride(ServerWorld world, UUID ownerId, StrideTracking tracking) {
+        if (!tracking.completed || tracking.outstanding > 0) {
+            return;
+        }
+        Map<UUID, StrideTracking> tracked = TRACKING.get(world);
+        if (tracked != null) {
+            tracked.remove(ownerId);
+            if (tracked.isEmpty()) {
+                TRACKING.remove(world);
+            }
+        }
+        UniqueAbilityApi.finish(tracking.execution, StormSoulMasteryAbilities.FINISH, tracking.hits);
+    }
+
+    private static void sweepTracking(ServerWorld world) {
+        Map<UUID, StrideTracking> tracked = TRACKING.get(world);
+        if (tracked == null || tracked.isEmpty()) {
+            return;
+        }
+        long now = world.getTime();
+        Iterator<Map.Entry<UUID, StrideTracking>> iterator = tracked.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<UUID, StrideTracking> entry = iterator.next();
+            StrideTracking tracking = entry.getValue();
+            if (!tracking.completed || now - tracking.touchedAt < STALE_TRACKING_TICKS) {
+                continue;
+            }
+            iterator.remove();
+            UniqueAbilityApi.finish(tracking.execution, StormSoulMasteryAbilities.FINISH, tracking.hits);
+        }
+        if (tracked.isEmpty()) {
+            TRACKING.remove(world);
+        }
     }
 
     public static void tick(ServerWorld world) {
@@ -301,6 +397,7 @@ public final class SoulstalkerAbilityManager {
         tickPendingStrikes(world);
         if (world.getTime() % 40L == 0L) {
             purgeOrphans(world);
+            sweepTracking(world);
         }
         if (world.getTime() % 200L == 0L) {
             purgePassiveState(world);
@@ -326,8 +423,6 @@ public final class SoulstalkerAbilityManager {
                 iterator.remove();
                 continue;
             }
-            trackMomentum(stride, state);
-            tickRiftStride(world, owner, stride, state);
             if ((now - state.startedAt) % TRAIL_INTERVAL == 0L) {
                 createTrailPatch(world, owner, stride, state);
             }
@@ -346,6 +441,7 @@ public final class SoulstalkerAbilityManager {
         Iterator<PendingStrike> iterator = pending.iterator();
         while (iterator.hasNext()) {
             PendingStrike strike = iterator.next();
+            observeTarget(world, strike);
             if (now < strike.impactTick) {
                 continue;
             }
@@ -353,20 +449,26 @@ public final class SoulstalkerAbilityManager {
             LivingEntity target = resolveLiving(world, strike.targetId);
             double range = Math.max(1.0, strike.tuning.get(StormSoulMasteryTuning.Setting.TENDRIL_RANGE,
                     Config.uniqueEffects.soulstalker.passiveRange)) + 2.0;
-            if (owner != null && (target == null || !target.isAlive())) {
+            if (owner != null && target == null && strike.targetDied) {
                 target = redirectStrike(world, owner, strike);
+                if (target != null) {
+                    strike.redirected = true;
+                    strike.volley.reserved.add(target.getUuid());
+                    retargetVisual(world, strike.visualId, target);
+                }
             }
             if (owner != null && target != null
                     && HelperMethods.isHoldingItem(ItemsRegistry.SOULSTALKER.get(), owner)
-                    && owner.squaredDistanceTo(target) <= range * range
-                    && owner.canSee(target) && HelperMethods.checkAbilityTarget(target, owner)) {
+                    && (strike.redirected || owner.squaredDistanceTo(target) <= range * range)
+                    && owner.canSee(target) && HelperMethods.checkAbilityTarget(target, owner)
+                    && strike.volley.victims.add(target.getUuid())) {
                 float damage = strike.damage;
                 double gloamBonus = strike.tuning.get(StormSoulMasteryTuning.Setting.GLOAM_DAMAGE_BONUS, 0);
-                if (gloamBonus > 0 && GloamStainManager.isOnOwnerGloam(world, owner.getUuid(), target)) {
+                if (gloamBonus > 0 && target.isOnGround() && GloamStainManager.isOnAnyGloam(world, target)) {
                     damage *= (float) (1.0 + gloamBonus);
                 }
                 if (SimplySwordsAPI.applyEntityWeaponHit(strike.stack, target, owner, damage)) {
-                    createImpactStain(world, owner, target.getPos());
+                    createImpactStain(world, owner, target.getPos(), strike.tuning);
                     world.spawnParticles(GLOAM_DUST, target.getX(), target.getBodyY(0.55), target.getZ(),
                             22, 0.38, 0.34, 0.38, 0.055);
                     world.spawnParticles(ParticleTypes.SCULK_SOUL,
@@ -381,16 +483,14 @@ public final class SoulstalkerAbilityManager {
                             StatusEffects.SLOWNESS, statusTicks, 0), owner);
                     applySnare(world, owner, target, strike.tuning);
                     if (!target.isAlive()) refundTendrilLockout(world, owner, strike.tuning);
-                    if (strike.execution != null) {
-                        UniqueAbilityApi.emit(strike.execution, UniqueAbilityPhase.HIT,
-                                StormSoulMasteryAbilities.HIT, target, 1, damage);
-                        UniqueAbilityApi.finish(strike.execution, StormSoulMasteryAbilities.FINISH, 1);
-                    }
-                } else if (strike.execution != null) UniqueAbilityApi.cancel(strike.execution);
+                    strike.volley.hits++;
+                    UniqueAbilityApi.emit(strike.volley.execution, UniqueAbilityPhase.HIT,
+                            StormSoulMasteryAbilities.HIT, target, 1, damage);
+                }
             } else {
                 discard(world, strike.visualId);
-                if (strike.execution != null) UniqueAbilityApi.cancel(strike.execution);
             }
+            settleVolley(strike.volley);
             iterator.remove();
         }
         if (pending.isEmpty()) {
@@ -398,11 +498,43 @@ public final class SoulstalkerAbilityManager {
         }
     }
 
+    private static void observeTarget(ServerWorld world, PendingStrike strike) {
+        Entity entity = strike.targetId == null ? null : world.getEntity(strike.targetId);
+        if (!(entity instanceof LivingEntity living)) {
+            return;
+        }
+        if (living.isAlive() && !living.isRemoved()) {
+            strike.lastKnownPosition = living.getPos();
+        } else {
+            strike.targetDied = true;
+        }
+    }
+
+    private static void settleVolley(Volley volley) {
+        volley.outstanding = Math.max(0, volley.outstanding - 1);
+        if (volley.outstanding > 0 || volley.finished) {
+            return;
+        }
+        volley.finished = true;
+        if (volley.hits > 0) {
+            UniqueAbilityApi.finish(volley.execution, StormSoulMasteryAbilities.FINISH, volley.hits);
+        } else {
+            UniqueAbilityApi.cancel(volley.execution);
+        }
+    }
+
+    private static void retargetVisual(ServerWorld world, UUID visualId, LivingEntity target) {
+        Entity entity = visualId == null ? null : world.getEntity(visualId);
+        if (entity instanceof SoulstalkerTentacleVisualEntity visual) {
+            visual.setTarget(target);
+        }
+    }
+
     private static List<LivingEntity> findPassiveTargets(ServerWorld world, LivingEntity owner,
                                                         double configuredRange, int count,
                                                         boolean lowestHealth) {
         double range = Math.max(1.0, configuredRange);
-        Box search = owner.getBoundingBox().expand(range, Math.max(2.0, range * 0.65), range);
+        Box search = owner.getBoundingBox().expand(range);
         List<LivingEntity> candidates = new ArrayList<>(world.getEntitiesByClass(LivingEntity.class, search,
                 entity -> entity != owner && entity.isAlive() && !entity.isRemoved()
                         && EntityPredicates.VALID_LIVING_ENTITY.test(entity)
@@ -410,6 +542,7 @@ public final class SoulstalkerAbilityManager {
                         && owner.canSee(entity) && HelperMethods.checkAbilityTarget(entity, owner)));
         candidates.sort(lowestHealth
                 ? Comparator.comparingDouble(LivingEntity::getHealth)
+                        .thenComparingDouble(owner::squaredDistanceTo)
                 : Comparator.comparingDouble(owner::squaredDistanceTo));
         int limit = lowestHealth ? 1 : Math.max(1, count);
         return candidates.size() > limit ? new ArrayList<>(candidates.subList(0, limit)) : candidates;
@@ -419,14 +552,15 @@ public final class SoulstalkerAbilityManager {
     private static LivingEntity redirectStrike(ServerWorld world, LivingEntity owner, PendingStrike strike) {
         double range = strike.tuning.get(StormSoulMasteryTuning.Setting.SEEKING_ROOT_RANGE, 0);
         if (range <= 0) return null;
-        Entity previous = strike.targetId == null ? null : world.getEntity(strike.targetId);
-        Vec3d origin = previous == null ? owner.getPos() : previous.getPos();
+        Vec3d origin = strike.lastKnownPosition == null ? owner.getPos() : strike.lastKnownPosition;
         Box search = Box.of(origin, range * 2.0, range * 2.0, range * 2.0);
         return world.getEntitiesByClass(LivingEntity.class, search,
                         entity -> entity != owner && entity.isAlive() && !entity.isRemoved()
                                 && EntityPredicates.VALID_LIVING_ENTITY.test(entity)
+                                && !strike.volley.reserved.contains(entity.getUuid())
                                 && entity.squaredDistanceTo(origin.x, origin.y, origin.z) <= range * range
-                                && HelperMethods.checkAbilityTarget(entity, owner))
+                                && HelperMethods.checkAbilityTarget(entity, owner)
+                                && owner.canSee(entity))
                 .stream()
                 .min(Comparator.comparingDouble(entity ->
                         entity.squaredDistanceTo(origin.x, origin.y, origin.z)))
@@ -486,78 +620,13 @@ public final class SoulstalkerAbilityManager {
 
     private static void createTunedPatch(ServerWorld world, LivingEntity owner, Vec3d point,
                                          double radius, StormSoulMasteryTuning tuning) {
-        int slowAmplifier = Math.clamp(tuning.integer(StormSoulMasteryTuning.Setting.TRAIL_SLOW_AMPLIFIER,
-                Config.uniqueEffects.soulstalker.stainSlowAmplifier), 0, 4);
-        int slowTicks = tuning.integer(StormSoulMasteryTuning.Setting.TRAIL_SLOW_DURATION_TICKS, 0);
-        GloamStainManager.PatchBehavior behavior = slowTicks > 0
-                ? new GloamStainManager.PatchBehavior(ItemStack.EMPTY, 0, slowTicks, true, 0, 0, 0, 0, 0)
-                : GloamStainManager.PatchBehavior.NONE;
-        GloamStainManager.createPatch(world, owner.getUuid(), point, radius,
-                Math.max(20, tuning.integer(StormSoulMasteryTuning.Setting.TRAIL_STAIN_DURATION_TICKS,
-                        Config.uniqueEffects.soulstalker.stainDuration)),
-                Math.max(1, Config.uniqueEffects.soulstalker.stainFadeDuration),
-                slowAmplifier, behavior);
+        SoulstalkerGloam.createPatch(world, owner.getUuid(), tuning, point, radius, 0);
     }
 
-    private static void trackMomentum(SoulstalkerStrideEntity stride, ActiveStride state) {
-        if (state.tuning.get(StormSoulMasteryTuning.Setting.MOMENTUM_DISTANCE, 0) <= 0) return;
-        Vec3d position = stride.getPos();
-        if (state.lastMomentumPoint == null) {
-            state.lastMomentumPoint = position;
-            return;
-        }
-        double moved = position.distanceTo(state.lastMomentumPoint);
-        state.lastMomentumPoint = position;
-        state.momentum = moved < 0.02 ? 0.0 : state.momentum + moved;
-        stride.setMomentumActive(
-                state.momentum >= state.tuning.get(StormSoulMasteryTuning.Setting.MOMENTUM_DISTANCE, 0));
-    }
-
-    // Rift Stride: a fully charged leap opens a short teleport along the rider's aim.
-    private static void tickRiftStride(ServerWorld world, LivingEntity owner,
-                                       SoulstalkerStrideEntity stride, ActiveStride state) {
-        double range = state.tuning.get(StormSoulMasteryTuning.Setting.RIFT_RANGE, 0);
-        if (range <= 0 || !stride.consumeChargedLeap()) return;
-        long now = world.getTime();
-        if (now < state.riftReady) return;
-        state.riftReady = now + Math.max(1,
-                state.tuning.integer(StormSoulMasteryTuning.Setting.RIFT_LOCKOUT_TICKS, 60));
-        Vec3d aim = owner.getRotationVec(1.0F).multiply(1.0, 0.0, 1.0);
-        if (aim.horizontalLengthSquared() < 1.0E-4) return;
-        aim = aim.normalize();
-        Vec3d from = stride.getPos();
-        Vec3d destination = from;
-        for (double step = 1.0; step <= range; step += 1.0) {
-            Vec3d candidate = from.add(aim.multiply(step));
-            Box box = stride.getBoundingBox().offset(candidate.subtract(from));
-            if (!world.isSpaceEmpty(stride, box)) break;
-            destination = candidate;
-        }
-        if (destination.squaredDistanceTo(from) < 1.0) return;
-        stride.refreshPositionAfterTeleport(destination.x, destination.y, destination.z);
-        double stainRadius = state.tuning.get(StormSoulMasteryTuning.Setting.RIFT_STAIN_RADIUS, 0);
-        if (stainRadius > 0) {
-            double y = LivyatanWaveManager.findGroundTopY(world, from.x, from.z, from.y + 1.5);
-            createTunedPatch(world, owner, new Vec3d(from.x, y, from.z), stainRadius, state.tuning);
-            double toY = LivyatanWaveManager.findGroundTopY(world,
-                    destination.x, destination.z, destination.y + 1.5);
-            createTunedPatch(world, owner, new Vec3d(destination.x, toY, destination.z),
-                    stainRadius, state.tuning);
-        }
-        world.spawnParticles(GLOAM_DUST, destination.x, destination.y + 0.6, destination.z,
-                28, 0.6, 0.5, 0.6, 0.06);
-        world.playSound(null, stride.getBlockPos(), SoundRegistry.DARK_ACTIVATION_DISTORTED.get(),
-                SoundCategory.PLAYERS, 0.6F, 1.1F);
-    }
-
-    private static void createImpactStain(ServerWorld world, LivingEntity owner, Vec3d position) {
-        double y = LivyatanWaveManager.findGroundTopY(world, position.x, position.z, position.y + 1.5);
-        GloamStainManager.createPatch(world, owner.getUuid(),
-                new Vec3d(position.x, y, position.z),
-                Math.max(0.25, Config.uniqueEffects.soulstalker.stainRadius),
-                Math.max(20, Config.uniqueEffects.soulstalker.stainDuration),
-                Math.max(1, Config.uniqueEffects.soulstalker.stainFadeDuration),
-                Math.clamp(Config.uniqueEffects.soulstalker.stainSlowAmplifier, 0, 4));
+    private static void createImpactStain(ServerWorld world, LivingEntity owner, Vec3d position,
+                                          StormSoulMasteryTuning tuning) {
+        SoulstalkerGloam.createPatch(world, owner.getUuid(), tuning, position,
+                Math.max(0.25, Config.uniqueEffects.soulstalker.stainRadius), 0);
     }
 
     private static void finishStride(ServerWorld world, LivingEntity owner, SoulstalkerStrideEntity stride,
@@ -583,7 +652,14 @@ public final class SoulstalkerAbilityManager {
             stride.removeAllPassengers();
             stride.discard();
         }
-        UniqueAbilityApi.finish(state.execution, StormSoulMasteryAbilities.FINISH, 0);
+        StrideTracking tracking = TRACKING.getOrDefault(world, Map.of()).get(state.ownerId);
+        if (tracking == null) {
+            UniqueAbilityApi.finish(state.execution, StormSoulMasteryAbilities.FINISH, 0);
+            return;
+        }
+        tracking.completed = true;
+        tracking.touchedAt = world.getTime();
+        settleStride(world, state.ownerId, tracking);
     }
 
     private static void spawnActivation(ServerWorld world, LivingEntity owner) {
@@ -655,36 +731,108 @@ public final class SoulstalkerAbilityManager {
                     stride.removeAllPassengers();
                     stride.discard();
                 }
-                UniqueAbilityApi.cancel(state.execution);
             }
+        }
+        Map<UUID, StrideTracking> tracked = TRACKING.remove(world);
+        if (tracked != null) {
+            for (StrideTracking tracking : tracked.values()) UniqueAbilityApi.cancel(tracking.execution);
         }
         List<PendingStrike> pending = PENDING_STRIKES.remove(world);
         if (pending != null) {
             for (PendingStrike strike : pending) {
                 discard(world, strike.visualId);
-                if (strike.execution != null) UniqueAbilityApi.cancel(strike.execution);
+                cancelVolley(strike.volley);
             }
         }
         LAST_PASSIVE_CHECK.remove(world);
         PASSIVE_LOCKOUT.remove(world);
         SNARE_LOCKOUT.remove(world);
+        LAST_CLEAVE.remove(world);
     }
 
     public static void clearAll() {
-        for (Map<UUID, ActiveStride> active : ACTIVE.values()) {
-            for (ActiveStride state : active.values()) UniqueAbilityApi.cancel(state.execution);
+        for (Map<UUID, StrideTracking> tracked : TRACKING.values()) {
+            for (StrideTracking tracking : tracked.values()) UniqueAbilityApi.cancel(tracking.execution);
         }
         for (List<PendingStrike> pending : PENDING_STRIKES.values()) {
-            for (PendingStrike strike : pending) {
-                if (strike.execution != null) UniqueAbilityApi.cancel(strike.execution);
-            }
+            for (PendingStrike strike : pending) cancelVolley(strike.volley);
         }
         ACTIVE.clear();
+        TRACKING.clear();
         PENDING_STRIKES.clear();
         LAST_PASSIVE_CHECK.clear();
         PASSIVE_LOCKOUT.clear();
         SNARE_LOCKOUT.clear();
         LAST_CLEAVE.clear();
+    }
+
+    public static void clearActor(LivingEntity owner) {
+        if (owner == null || !(owner.getWorld() instanceof ServerWorld world)
+                || ACTIVE.isEmpty() && PENDING_STRIKES.isEmpty() && TRACKING.isEmpty()
+                && LAST_PASSIVE_CHECK.isEmpty() && PASSIVE_LOCKOUT.isEmpty() && LAST_CLEAVE.isEmpty()) {
+            return;
+        }
+        UUID ownerId = owner.getUuid();
+        Map<UUID, ActiveStride> active = ACTIVE.get(world);
+        ActiveStride state = active == null ? null : active.remove(ownerId);
+        if (state != null) {
+            SoulstalkerStrideEntity stride = resolveStride(world, state.strideId);
+            if (stride != null) {
+                stride.removeAllPassengers();
+                stride.discard();
+            }
+            if (active.isEmpty()) {
+                ACTIVE.remove(world);
+            }
+        }
+        Map<UUID, StrideTracking> tracked = TRACKING.get(world);
+        StrideTracking tracking = tracked == null ? null : tracked.remove(ownerId);
+        if (tracking != null) {
+            UniqueAbilityApi.cancel(tracking.execution);
+            if (tracked.isEmpty()) {
+                TRACKING.remove(world);
+            }
+        }
+        List<PendingStrike> pending = PENDING_STRIKES.get(world);
+        if (pending != null) {
+            Iterator<PendingStrike> iterator = pending.iterator();
+            while (iterator.hasNext()) {
+                PendingStrike strike = iterator.next();
+                if (!ownerId.equals(strike.ownerId)) {
+                    continue;
+                }
+                discard(world, strike.visualId);
+                cancelVolley(strike.volley);
+                iterator.remove();
+            }
+            if (pending.isEmpty()) {
+                PENDING_STRIKES.remove(world);
+            }
+        }
+        removeOwner(LAST_PASSIVE_CHECK, world, ownerId);
+        removeOwner(PASSIVE_LOCKOUT, world, ownerId);
+        removeOwner(LAST_CLEAVE, world, ownerId);
+    }
+
+    private static void removeOwner(Map<ServerWorld, Map<UUID, Long>> source,
+                                    ServerWorld world, UUID ownerId) {
+        Map<UUID, Long> entries = source.get(world);
+        if (entries == null) {
+            return;
+        }
+        entries.remove(ownerId);
+        if (entries.isEmpty()) {
+            source.remove(world);
+        }
+    }
+
+    private static void cancelVolley(Volley volley) {
+        if (volley == null || volley.finished) {
+            return;
+        }
+        volley.finished = true;
+        volley.outstanding = 0;
+        UniqueAbilityApi.cancel(volley.execution);
     }
 
     private static void purgePassiveState(ServerWorld world) {
@@ -722,9 +870,6 @@ public final class SoulstalkerAbilityManager {
         private final long expiresAt;
         private final long suppressedSwingTick;
         private Vec3d lastTrailPoint;
-        private double momentum;
-        private Vec3d lastMomentumPoint;
-        private long riftReady = Long.MIN_VALUE;
         private long lastCleaveTick = Long.MIN_VALUE;
         private final StormSoulMasteryTuning tuning;
         private final UniqueAbilityExecution execution;
@@ -748,8 +893,57 @@ public final class SoulstalkerAbilityManager {
         }
     }
 
-    private record PendingStrike(UUID ownerId, UUID targetId, UUID visualId,
-                                 ItemStack stack, float damage, long impactTick,
-                                 StormSoulMasteryTuning tuning, UniqueAbilityExecution execution) {
+    private static final class PendingStrike {
+        private final UUID ownerId;
+        private final UUID targetId;
+        private final UUID visualId;
+        private final ItemStack stack;
+        private final float damage;
+        private final long impactTick;
+        private final StormSoulMasteryTuning tuning;
+        private final Volley volley;
+        private Vec3d lastKnownPosition;
+        private boolean targetDied;
+        private boolean redirected;
+
+        private PendingStrike(UUID ownerId, UUID targetId, UUID visualId, ItemStack stack,
+                              float damage, long impactTick, StormSoulMasteryTuning tuning,
+                              Volley volley, Vec3d lastKnownPosition) {
+            this.ownerId = ownerId;
+            this.targetId = targetId;
+            this.visualId = visualId;
+            this.stack = stack;
+            this.damage = damage;
+            this.impactTick = impactTick;
+            this.tuning = tuning;
+            this.volley = volley;
+            this.lastKnownPosition = lastKnownPosition;
+        }
+    }
+
+    private static final class Volley {
+        private final UniqueAbilityExecution execution;
+        private final Set<UUID> reserved = new HashSet<>();
+        private final Set<UUID> victims = new HashSet<>();
+        private int outstanding;
+        private int hits;
+        private boolean finished;
+
+        private Volley(UniqueAbilityExecution execution) {
+            this.execution = execution;
+        }
+    }
+
+    private static final class StrideTracking {
+        private final UniqueAbilityExecution execution;
+        private int outstanding;
+        private int hits;
+        private boolean completed;
+        private long touchedAt;
+
+        private StrideTracking(UniqueAbilityExecution execution, long touchedAt) {
+            this.execution = execution;
+            this.touchedAt = touchedAt;
+        }
     }
 }

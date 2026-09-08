@@ -276,7 +276,13 @@ public class SimplySwords {
             ArcaneCosmicMasteryCombatManager.clearAll();
             RibboncleaverDreadtideMasteryManager.clearAll();
         });
+        PlayerEvent.CHANGE_DIMENSION.register((player, oldLevel, newLevel) -> {
+            GloampiercerAbilityManager.clearActor(player);
+            SoulstalkerAbilityManager.clearActor(player);
+        });
         PlayerEvent.PLAYER_QUIT.register(player -> {
+            GloampiercerAbilityManager.clearActor(player);
+            SoulstalkerAbilityManager.clearActor(player);
             LongPathFinalFormsMasteryCombatManager.clearSunfireOwner(player);
             SoulPyreAbilityManager.clear(player.getServerWorld(), player);
             StormbringerAbilityManager.clearActor(player);

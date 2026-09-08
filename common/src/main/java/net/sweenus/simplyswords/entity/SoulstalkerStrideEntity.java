@@ -40,7 +40,8 @@ import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.registry.SoulstalkerVoice;
 import net.sweenus.simplyswords.api.ability.StormSoulMasteryTuning;
 import net.sweenus.simplyswords.util.HelperMethods;
-import net.sweenus.simplyswords.world.GloamStainManager;
+import net.sweenus.simplyswords.world.SoulstalkerAbilityManager;
+import net.sweenus.simplyswords.world.SoulstalkerGloam;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
@@ -105,14 +106,22 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
             DataTracker.registerData(SoulstalkerStrideEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Boolean> CEILING_FORWARD_LOCKED =
             DataTracker.registerData(SoulstalkerStrideEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+    private static final TrackedData<Float> TUNED_MOVEMENT_SPEED =
+            DataTracker.registerData(SoulstalkerStrideEntity.class, TrackedDataHandlerRegistry.FLOAT);
+    private static final TrackedData<Float> TUNED_CLIMB_SPEED =
+            DataTracker.registerData(SoulstalkerStrideEntity.class, TrackedDataHandlerRegistry.FLOAT);
     private static final DustColorTransitionParticleEffect GLOAM_DUST =
             new DustColorTransitionParticleEffect(new Vector3f(0.015F, 0.004F, 0.035F),
                     new Vector3f(0.24F, 0.035F, 0.38F), 1.1F);
 
     private StormSoulMasteryTuning tuning = StormSoulMasteryTuning.EMPTY;
     private double cleaveHitBonus;
-    private boolean chargedLeapPending;
+    private boolean leapCharged;
+    private boolean meteorPenaltyActive;
     private boolean momentumActive;
+    private double momentumDistance;
+    private Vec3d lastMomentumPoint;
+    private long riftReadyTick = Long.MIN_VALUE;
     private final List<PendingFootfall> pendingFootfalls = new ArrayList<>();
     private final Map<UUID, Long> footfallImmunity = new HashMap<>();
     private boolean jumpQueued;
@@ -203,25 +212,68 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
         builder.add(VOICE_INDEX, -1);
         builder.add(VOICE_SEQUENCE, 0);
         builder.add(CEILING_FORWARD_LOCKED, false);
+        builder.add(TUNED_MOVEMENT_SPEED,
+                (float) MathHelper.clamp(Config.uniqueEffects.soulstalker.movementSpeed, 0.05, 1.0));
+        builder.add(TUNED_CLIMB_SPEED,
+                (float) MathHelper.clamp(Config.uniqueEffects.soulstalker.climbSpeed, 0.05, 1.0));
     }
 
     public void setTuning(StormSoulMasteryTuning tuning) {
         this.tuning = tuning == null ? StormSoulMasteryTuning.EMPTY : tuning;
+        dataTracker.set(TUNED_MOVEMENT_SPEED, (float) MathHelper.clamp(
+                this.tuning.get(StormSoulMasteryTuning.Setting.MOVEMENT_SPEED,
+                        Config.uniqueEffects.soulstalker.movementSpeed), 0.05, 1.0));
+        dataTracker.set(TUNED_CLIMB_SPEED, (float) MathHelper.clamp(
+                this.tuning.get(StormSoulMasteryTuning.Setting.CLIMB_SPEED,
+                        Config.uniqueEffects.soulstalker.climbSpeed), 0.05, 1.0));
+    }
+
+    public double getTunedMovementSpeed() {
+        return MathHelper.clamp(dataTracker.get(TUNED_MOVEMENT_SPEED), 0.05F, 1.0F);
+    }
+
+    public double getTunedClimbSpeed() {
+        return MathHelper.clamp(dataTracker.get(TUNED_CLIMB_SPEED), 0.05F, 1.0F);
     }
 
     public StormSoulMasteryTuning getTuning() {
         return tuning;
     }
 
-    public void setMomentumActive(boolean active) {
-        this.momentumActive = active;
+    public boolean isMomentumActive() {
+        return momentumActive;
     }
 
-    // Rift Stride reads this once per fully charged launch.
-    public boolean consumeChargedLeap() {
-        boolean charged = chargedLeapPending;
-        chargedLeapPending = false;
-        return charged;
+    public boolean isMeteorPenaltyActive() {
+        return meteorPenaltyActive;
+    }
+
+    private void trackMomentum() {
+        double required = tuning.get(StormSoulMasteryTuning.Setting.MOMENTUM_DISTANCE, 0);
+        if (required <= 0) {
+            momentumActive = false;
+            momentumDistance = 0.0;
+            lastMomentumPoint = getPos();
+            return;
+        }
+        Vec3d position = getPos();
+        if (lastMomentumPoint == null) {
+            lastMomentumPoint = position;
+            return;
+        }
+        double moved = position.distanceTo(lastMomentumPoint);
+        lastMomentumPoint = position;
+        momentumDistance = moved < 0.02 ? 0.0 : momentumDistance + moved;
+        momentumActive = momentumDistance >= required;
+    }
+
+    private void resetMotionObservation() {
+        lastMomentumPoint = getPos();
+        leapOrigin = getPos();
+        leapLastObservedPosition = getPos();
+        leapLastObservedMotion = Vec3d.ZERO;
+        leapTravelDistance = 0.0;
+        leapDepartureConfirmed = false;
     }
 
     // Gathering Hunger accumulates on cleave hits and is spent by the next leap impact.
@@ -287,7 +339,7 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
 
     @Override
     protected float getSaddledSpeed(PlayerEntity player) {
-        return (float) MathHelper.clamp(Config.uniqueEffects.soulstalker.movementSpeed, 0.05, 1.0);
+        return (float) getTunedMovementSpeed();
     }
 
     @Override
@@ -321,6 +373,7 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
             return;
         }
         if (!getWorld().isClient() && getWorld() instanceof ServerWorld world) {
+            trackMomentum();
             resolveLeapContact(world, controller, leapObservationStart,
                     getPos().subtract(leapObservationStart));
             if (isLeapInProgress()) {
@@ -365,7 +418,7 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
             headYaw = getYaw();
             forwardSpeed = 1.0F;
             sidewaysSpeed = 0.0F;
-            setMovementSpeed((float) MathHelper.clamp(Config.uniqueEffects.soulstalker.movementSpeed, 0.05, 1.0));
+            setMovementSpeed((float) getTunedMovementSpeed());
         }
     }
 
@@ -519,8 +572,7 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
             }
             lastWallNormal = normal;
             Vec3d motion = wallMotion(controller, normal);
-            double speed = MathHelper.clamp(tuning.get(StormSoulMasteryTuning.Setting.CLIMB_SPEED,
-                    Config.uniqueEffects.soulstalker.climbSpeed), 0.05, 1.0);
+            double speed = getTunedClimbSpeed();
             Vec3d velocity = motion.multiply(speed);
             boolean climbing = motion.y > 0.05;
             if (tickStandoff(normal, climbing)) {
@@ -545,7 +597,7 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
             float frameYaw = controller.getYaw() + getFrameYaw();
             Vec3d forward = horizontalFacing(frameYaw);
             Vec3d right = rightFacing(frameYaw);
-            double speed = MathHelper.clamp(Config.uniqueEffects.soulstalker.movementSpeed, 0.05, 1.0) * 0.9;
+            double speed = getTunedMovementSpeed() * 0.9;
             double correction = ceilingCorrection();
             Vec3d horizontal = forward.multiply(controller.forwardSpeed * speed)
                     .add(right.multiply(controller.sidewaysSpeed * speed * 0.72));
@@ -1054,11 +1106,14 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
     }
 
     private boolean canOccupy(Vec3d position) {
+        return !getWorld().getBlockCollisions(this, assemblyBox(position).contract(0.035))
+                .iterator().hasNext();
+    }
+
+    private Box assemblyBox(Vec3d position) {
         double halfWidth = getDimensions(EntityPose.STANDING).width() * 0.5;
-        Box box = new Box(position.x - halfWidth, position.y, position.z - halfWidth,
-                position.x + halfWidth, position.y + getAssemblyHeight(), position.z + halfWidth)
-                .contract(0.035);
-        return !getWorld().getBlockCollisions(this, box).iterator().hasNext();
+        return new Box(position.x - halfWidth, position.y, position.z - halfWidth,
+                position.x + halfWidth, position.y + getAssemblyHeight(), position.z + halfWidth);
     }
 
     private double getAssemblyHeight() {
@@ -1070,7 +1125,7 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
 
     private void performLeap(LivingEntity controller) {
         jumpQueued = false;
-        chargedLeapPending = jumpScale >= tuning.get(StormSoulMasteryTuning.Setting.LEAP_CHARGE_THRESHOLD, 1);
+        boolean charged = jumpScale >= tuning.get(StormSoulMasteryTuning.Setting.LEAP_CHARGE_THRESHOLD, 1);
         byte mode = queuedLeapSurfaceMode == Byte.MIN_VALUE
                 ? getSurfaceMode() : queuedLeapSurfaceMode;
         Vec3d sourceNormal = queuedLeapSurfaceNormal.lengthSquared() < 1.0E-6
@@ -1082,12 +1137,15 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
         queuedLeapLook = Vec3d.ZERO;
         if (!isAnchoredSurface(mode) && !nearGround) {
             jumpScale = 0.6F;
-            chargedLeapPending = false;
             return;
         }
+        leapCharged = charged;
         BlockHitResult sourceContact = mode == SURFACE_WALL
                 ? findWall(getPos(), sourceNormal.multiply(-1.0), wallHoldReach())
                 : mode == SURFACE_CEILING ? findCeiling() : null;
+        if (!getWorld().isClient() && getWorld() instanceof ServerWorld riftWorld) {
+            tryRiftRelocation(riftWorld, controller, look, charged);
+        }
         Vec3d horizontal = new Vec3d(look.x, 0.0, look.z);
         if (horizontal.lengthSquared() < 1.0E-6) {
             horizontal = horizontalFacing(controller.getYaw());
@@ -1158,6 +1216,64 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
             world.playSound(null, getBlockPos(), SoundRegistry.ELEMENTAL_BOW_WIND_SHOOT_FLYBY_01.get(),
                     SoundCategory.PLAYERS, 0.38F, 1.28F);
         }
+    }
+
+    private boolean tryRiftRelocation(ServerWorld world, LivingEntity controller,
+                                      Vec3d look, boolean charged) {
+        double range = tuning.get(StormSoulMasteryTuning.Setting.RIFT_RANGE, 0);
+        if (range <= 0 || !charged || world.getTime() < riftReadyTick) {
+            return false;
+        }
+        Vec3d aim = look.lengthSquared() < 1.0E-6 ? controller.getRotationVec(1.0F) : look;
+        if (aim.lengthSquared() < 1.0E-6) {
+            return false;
+        }
+        aim = aim.normalize();
+        Vec3d from = getPos();
+        Vec3d destination = null;
+        for (double step = 0.5; step <= range + 1.0E-6; step += 0.5) {
+            Vec3d candidate = from.add(aim.multiply(step));
+            if (!isRiftDestinationClear(world, candidate)) {
+                break;
+            }
+            destination = candidate;
+        }
+        if (destination == null || destination.squaredDistanceTo(from) < 1.0) {
+            return false;
+        }
+        double stainRadius = tuning.get(StormSoulMasteryTuning.Setting.RIFT_STAIN_RADIUS, 0);
+        if (stainRadius > 0) {
+            createStrideStain(world, from, stainRadius);
+            createStrideStain(world, destination, stainRadius);
+        }
+        refreshPositionAfterTeleport(destination.x, destination.y, destination.z);
+        riftReadyTick = world.getTime() + Math.max(1,
+                tuning.integer(StormSoulMasteryTuning.Setting.RIFT_LOCKOUT_TICKS, 60));
+        resetMotionObservation();
+        world.spawnParticles(GLOAM_DUST, destination.x, destination.y + 0.6, destination.z,
+                28, 0.6, 0.5, 0.6, 0.06);
+        world.playSound(null, getBlockPos(), SoundRegistry.DARK_ACTIVATION_DISTORTED.get(),
+                SoundCategory.PLAYERS, 0.6F, 1.1F);
+        return true;
+    }
+
+    private boolean isRiftDestinationClear(ServerWorld world, Vec3d candidate) {
+        Box box = assemblyBox(candidate);
+        BlockPos block = BlockPos.ofFloored(candidate);
+        return candidate.y >= world.getBottomY()
+                && box.maxY < world.getTopY()
+                && world.isChunkLoaded(block)
+                && world.getWorldBorder().contains(box)
+                && canOccupy(candidate);
+    }
+
+    private void createStrideStain(ServerWorld world, Vec3d position, double radius) {
+        LivingEntity owner = getOwner();
+        if (owner == null) {
+            return;
+        }
+        SoulstalkerGloam.createPatch(world, owner.getUuid(), tuning, position,
+                radius * SoulstalkerGloam.widthScale(tuning), 0);
     }
 
     private void restoreServerLeapVelocity(LivingEntity controller) {
@@ -1279,15 +1395,19 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
 
     private void resolveLeapImpact(ServerWorld world, LivingEntity owner, Vec3d impact,
                                    Vec3d surfaceNormal, boolean createStain) {
-        boolean charged = jumpScale >= tuning.get(StormSoulMasteryTuning.Setting.LEAP_CHARGE_THRESHOLD, 1);
+        boolean charged = leapCharged;
+        leapCharged = false;
         double chargedMultiplier = tuning.get(StormSoulMasteryTuning.Setting.LEAP_CHARGED_DAMAGE_MULTIPLIER, 0);
         double chargedRadius = tuning.get(StormSoulMasteryTuning.Setting.LEAP_CHARGED_RADIUS, 0);
+        boolean meteor = charged && chargedMultiplier > 0;
         double radius = Math.max(0.25, charged && chargedRadius > 0 ? chargedRadius
                 : tuning.get(StormSoulMasteryTuning.Setting.LEAP_IMPACT_RADIUS,
                         Config.uniqueEffects.soulstalker.leapImpactRadius));
-        double damageMultiplier = (charged && chargedMultiplier > 0 ? chargedMultiplier
-                : tuning.get(StormSoulMasteryTuning.Setting.LEAP_IMPACT_DAMAGE_MULTIPLIER, 1))
-                + cleaveHitBonus;
+        double damageMultiplier = tuning.get(StormSoulMasteryTuning.Setting.LEAP_IMPACT_DAMAGE_MULTIPLIER, 1)
+                * (meteor ? chargedMultiplier : 1.0) * (1.0 + cleaveHitBonus);
+        if (meteor) {
+            meteorPenaltyActive = true;
+        }
         float damage = Math.max(0.0F, (float) (HelperMethods.getEntityAttackDamage(owner)
                 * Math.max(0.0, Config.uniqueEffects.soulstalker.leapImpactDamageScaling) * damageMultiplier));
         double knockback = Math.max(0.0, tuning.get(StormSoulMasteryTuning.Setting.LEAP_IMPACT_KNOCKBACK,
@@ -1305,15 +1425,17 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
                         && EntityPredicates.VALID_LIVING_ENTITY.test(entity)
                         && HelperMethods.checkAbilityTarget(entity, owner)
                         && squaredDistanceToBox(impact, entity.getBoundingBox()) <= radius * radius)) {
+            if (affected >= targetCap) {
+                break;
+            }
             float resolvedDamage = HelperMethods.applyWeaponAbilityDamageToPlayersModifier(target, damage);
             boolean[] damaged = {false};
             WeaponImplicitRegistry.runSuppressed(() -> damaged[0] = target.damage(source, resolvedDamage));
             if (!damaged[0]) {
                 continue;
             }
-            if (++affected > targetCap) {
-                break;
-            }
+            affected++;
+            SoulstalkerAbilityManager.reportStrideHit(world, owner, target, resolvedDamage);
             Vec3d outward = target.getPos().subtract(impact).multiply(1.0, 0.0, 1.0);
             if (outward.horizontalLengthSquared() < 1.0E-4) {
                 outward = new Vec3d(leapDirection.x, 0.0, leapDirection.z);
@@ -1335,15 +1457,14 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
         cueVoice(SoulstalkerVoice.LEAP_ATTACK_LAND);
         double meteorStain = charged ? tuning.get(StormSoulMasteryTuning.Setting.LEAP_STAIN_RADIUS, 0) : 0.0;
         if (createStain || meteorStain > 0) {
-            GloamStainManager.createPatch(world, owner.getUuid(), impact,
+            SoulstalkerGloam.createPatch(world, owner.getUuid(), tuning, impact,
                     Math.max(0.25, Math.max(meteorStain,
-                            Config.uniqueEffects.soulstalker.leapImpactStainRadius)),
-                    Math.max(20, meteorStain > 0
+                            Config.uniqueEffects.soulstalker.leapImpactStainRadius))
+                            * SoulstalkerGloam.widthScale(tuning),
+                    meteorStain > 0
                             ? tuning.integer(StormSoulMasteryTuning.Setting.LEAP_STAIN_DURATION_TICKS,
                                     Config.uniqueEffects.soulstalker.stainDuration)
-                            : Config.uniqueEffects.soulstalker.stainDuration),
-                    Math.max(1, Config.uniqueEffects.soulstalker.stainFadeDuration),
-                    Math.clamp(Config.uniqueEffects.soulstalker.stainSlowAmplifier, 0, 4));
+                            : 0);
         }
         double particleRadius = Math.max(0.45, radius * 0.42);
         Vec3d center = impact.add(surfaceNormal.multiply(0.12));
@@ -1457,7 +1578,7 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
                         && EntityPredicates.VALID_LIVING_ENTITY.test(entity)
                         && HelperMethods.checkAbilityTarget(entity, owner))) {
             if (footfallImmunity.getOrDefault(target.getUuid(), Long.MIN_VALUE) > now
-                    || !target.getBoundingBox().expand(radius).contains(footfall.position)) {
+                    || squaredDistanceToBox(footfall.position, target.getBoundingBox()) > radius * radius) {
                 continue;
             }
             float resolvedDamage = HelperMethods.applyWeaponAbilityDamageToPlayersModifier(target, damage);
@@ -1465,6 +1586,7 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
             WeaponImplicitRegistry.runSuppressed(() -> damaged[0] = target.damage(source, resolvedDamage));
             if (damaged[0]) {
                 footfallImmunity.put(target.getUuid(), now + immunityTicks);
+                SoulstalkerAbilityManager.reportStrideHit(world, owner, target, resolvedDamage);
                 world.spawnParticles(GLOAM_DUST, target.getX(), target.getBodyY(0.4), target.getZ(),
                         7, 0.24, 0.16, 0.24, 0.025);
             }

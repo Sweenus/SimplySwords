@@ -332,6 +332,8 @@ public abstract class LivingEntityMixin {
         EmberlashAbilityManager.onKill(livingEntity, damageSource);
         FlameSeedEffect.triggerDeathDetonation(livingEntity);
         GloamMechanicsManager.onTargetDeath(livingEntity);
+        net.sweenus.simplyswords.world.GloampiercerAbilityManager.clearActor(livingEntity);
+        net.sweenus.simplyswords.world.SoulstalkerAbilityManager.clearActor(livingEntity);
         WraithfangAbilityManager.onTargetDeath(livingEntity, damageSource);
         StormbringerAbilityManager.clearActor(livingEntity);
         StormbringerParryManager.clearActor(livingEntity);

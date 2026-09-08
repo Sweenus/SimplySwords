@@ -4,6 +4,9 @@ import net.sweenus.simplyswords.api.SimplySwordsAPI;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.attribute.EntityAttributeInstance;
+import net.minecraft.entity.attribute.EntityAttributeModifier;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.DustColorTransitionParticleEffect;
 import net.minecraft.particle.ParticleTypes;
@@ -12,6 +15,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Box;
@@ -36,6 +40,7 @@ import org.joml.Vector3f;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +50,11 @@ public final class GloampiercerAbilityManager {
     private static final double GOLDEN_ANGLE = 2.399963229728653;
     private static final int FIRE_START_TICK = 12;
     private static final int FIRE_END_MARGIN = 12;
+    private static final int PASSIVE_FIRE_DELAY_TICKS = 9;
+    private static final int CHANNEL_MODE = 16;
+    private static final Identifier CHANNEL_ROOT_ID =
+            Identifier.of("simplyswords", "gloampiercer_channel_root");
+    private static final UUID CAST_NAMESPACE = UUID.randomUUID();
     private static final DustColorTransitionParticleEffect GLOAM_DUST =
             new DustColorTransitionParticleEffect(new Vector3f(0.025F, 0.008F, 0.07F),
                     new Vector3f(0.14F, 0.94F, 0.96F), 1.35F);
@@ -53,6 +63,9 @@ public final class GloampiercerAbilityManager {
     private static final Map<ServerWorld, Map<UUID, Long>> LAST_PASSIVE = new HashMap<>();
     private static final Map<ServerWorld, Map<UUID, Integer>> PASSIVE_PROCS = new HashMap<>();
     private static final Map<ServerWorld, Map<UUID, StoredPassive>> STORED_PASSIVES = new HashMap<>();
+    private static final Map<UniqueAbilityExecution, PendingExecution> PENDING = new IdentityHashMap<>();
+    private static final long STALE_TRACKING_TICKS = 1200L;
+    private static long sweepTick;
 
     private GloampiercerAbilityManager() {
     }
@@ -82,7 +95,7 @@ public final class GloampiercerAbilityManager {
         UniqueAbilityExecution execution = UniqueAbilityApi.begin(AbyssalSpectralMasteryAbilities.GLOAMPIERCER_BARRAGE,
                 UniqueAbilityContext.active(context), builder -> builder
                         .set(AbyssalSpectralMasteryAbilities.COOLDOWN_TICKS, Config.uniqueEffects.gloampiercer.cooldown)
-                        .set(AbyssalSpectralMasteryAbilities.TUNING, baseTuning(Config.uniqueEffects.gloampiercer.cooldown,
+                        .set(AbyssalSpectralMasteryAbilities.TUNING, barrageTuning(Config.uniqueEffects.gloampiercer.cooldown,
                                 Config.uniqueEffects.gloampiercer.channelDuration,
                                 Config.uniqueEffects.gloampiercer.spearCount,
                                 Config.uniqueEffects.gloampiercer.cloneCount)));
@@ -105,6 +118,10 @@ public final class GloampiercerAbilityManager {
                     : royalTarget.getPos().add(0, royalTarget.getHeight() * .55, 0);
         }
         spawnActiveClones(world, owner, channel, cloneCount);
+        if ((tuning.integer(AbyssalSpectralMasteryTuning.Setting.MODE, 0) & CHANNEL_MODE) != 0) {
+            channel.rooted = true;
+            applyChannelRoot(owner);
+        }
         ACTIVE.computeIfAbsent(world, ignored -> new HashMap<>()).put(owner.getUuid(), channel);
         spawnActivationEffects(world, owner, center);
         return true;
@@ -123,7 +140,7 @@ public final class GloampiercerAbilityManager {
         }
         UniqueAbilityExecution execution = UniqueAbilityApi.begin(AbyssalSpectralMasteryAbilities.GLOAMPIERCER_AMBUSH,
                 UniqueAbilityContext.passive(world, stack, owner, null, null), builder -> builder
-                        .set(AbyssalSpectralMasteryAbilities.TUNING, baseTuning(0, 0, 1, 1)));
+                        .set(AbyssalSpectralMasteryAbilities.TUNING, passiveTuning()));
         UniqueAbilityApi.takeStartedExecution();
         UniqueAbilityApi.start(execution);
         AbyssalSpectralMasteryTuning tuning = AbyssalSpectralMasteryAbilities.tuning(execution);
@@ -132,48 +149,58 @@ public final class GloampiercerAbilityManager {
         int proc = nextPassiveProc(procCounts == null ? 0 : procCounts.getOrDefault(owner.getUuid(), 0));
         int cloneCount = passiveCloneCount(mode, proc,
                 tuning.integer(AbyssalSpectralMasteryTuning.Setting.CLONE_COUNT, 1));
-        List<LivingEntity> targets = findPassiveTargets(world, owner, tuning, cloneCount);
+        StoredPassive stored = peekStoredPassive(world, owner, stack, now);
+        int totalClones = cloneCount + (stored == null ? 0 : 1);
+        List<LivingEntity> targets = findPassiveTargets(world, owner, tuning, totalClones);
         if (targets.isEmpty()) {
             if ((mode & 2) == 0) {
-                UniqueAbilityApi.cancel(execution);
+                abandon(execution);
                 return;
             }
             int duration = Math.max(1, tuning.integer(AbyssalSpectralMasteryTuning.Setting.DURATION_TICKS, 80));
-            STORED_PASSIVES.computeIfAbsent(world, ignored -> new HashMap<>())
-                    .put(owner.getUuid(), new StoredPassive(stack, now + duration));
-            commitPassiveActivation(world, owner, stack, tuning, proc, now);
-            UniqueAbilityApi.finish(execution, execution.definition().id(), 0);
+            if (stored == null) {
+                STORED_PASSIVES.computeIfAbsent(world, ignored -> new HashMap<>())
+                        .put(owner.getUuid(), new StoredPassive(stack, now + duration));
+            }
+            commitPassiveCooldown(world, owner, stack, tuning, now);
+            complete(execution, 0);
             return;
         }
         commitPassiveActivation(world, owner, stack, tuning, proc, now);
-        StoredPassive stored = takeStoredPassive(world, owner, stack, now);
+        if (stored != null) removeStoredPassive(world, owner);
         int seed = owner.getRandom().nextInt();
-        int throwTick = tuning.integer(AbyssalSpectralMasteryTuning.Setting.FIRE_DELAY_TICKS, 9);
+        int throwTick = tuning.integer(AbyssalSpectralMasteryTuning.Setting.FIRE_DELAY_TICKS,
+                PASSIVE_FIRE_DELAY_TICKS);
         float baseDamage = Math.max(1.0F, HelperMethods.abilityScaledDamage(SpellScalingProfile.SOUL, owner, stack,
                 Config.uniqueEffects.gloampiercer.strikeDamageScaling,
                 Config.uniqueEffects.gloampiercer.strikeSpellScaling))
                 * (float) tuning.get(AbyssalSpectralMasteryTuning.Setting.PROJECTILE_DAMAGE_MULTIPLIER, 1);
+        float secondary = (mode & 12) != 0 ? 1.0F
+                : (float) tuning.get(AbyssalSpectralMasteryTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, 1);
         List<PassiveTarget> strikes = new ArrayList<>();
-        for (int index = 0; index < targets.size(); index++) {
-            strikes.add(new PassiveTarget(targets.get(index), index == 0 ? 1.0F
-                    : (float) tuning.get(AbyssalSpectralMasteryTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, 1)));
+        for (int index = 0; index < totalClones; index++) {
+            strikes.add(new PassiveTarget(targets.get(index % targets.size()),
+                    index == 0 ? 1.0F : secondary));
         }
-        if (stored != null) strikes.add(new PassiveTarget(targets.getFirst(), 1.0F));
         for (int index = 0; index < strikes.size(); index++) {
             LivingEntity target = strikes.get(index).target;
             int cloneSeed = seed + index * 7919;
             Vec3d clonePosition = passiveClonePosition(owner, target, cloneSeed);
             GloampiercerCloneVisualEntity clone = new GloampiercerCloneVisualEntity(world,
                     clonePosition.x, clonePosition.y, clonePosition.z, yawToward(clonePosition, target.getPos()),
-                    22, throwTick, 0, cloneSeed);
-            world.spawnEntity(clone);
+                    22, throwTick, 0, 1, cloneSeed);
+            if (!world.spawnEntity(clone)) {
+                continue;
+            }
             float damage = baseDamage * strikes.get(index).damageMultiplier;
+            retain(execution);
             PASSIVE_STRIKES.computeIfAbsent(world, ignored -> new ArrayList<>())
                     .add(new PendingPassiveStrike(owner.getUuid(), target.getUuid(), clone.getUuid(),
                             stack.copy(), cloneHandOrigin(clonePosition, target.getPos()), now + throwTick,
                             damage, execution));
             spawnCloneMaterialization(world, clonePosition);
         }
+        complete(execution, 0);
     }
 
     public static boolean isActive(LivingEntity owner) {
@@ -192,7 +219,8 @@ public final class GloampiercerAbilityManager {
         return channels != null && !channels.isEmpty()
                 || strikes != null && !strikes.isEmpty()
                 || cooldowns != null && !cooldowns.isEmpty()
-                || stored != null && !stored.isEmpty();
+                || stored != null && !stored.isEmpty()
+                || !PENDING.isEmpty();
     }
 
     public static void tick(ServerWorld world) {
@@ -203,40 +231,82 @@ public final class GloampiercerAbilityManager {
             Map<UUID, Long> cooldowns = LAST_PASSIVE.get(world);
             if (cooldowns != null) {
                 long now = world.getTime();
-                Map<UUID, Integer> procs = PASSIVE_PROCS.get(world);
-                cooldowns.entrySet().removeIf(entry -> {
-                    if (entry.getValue() > now) return false;
-                    if (procs != null) procs.remove(entry.getKey());
-                    return true;
-                });
-                if (procs != null && procs.isEmpty()) PASSIVE_PROCS.remove(world);
+                cooldowns.values().removeIf(expiry -> expiry <= now);
                 if (cooldowns.isEmpty()) {
                     LAST_PASSIVE.remove(world);
                 }
             }
+            Map<UUID, Integer> procs = PASSIVE_PROCS.get(world);
+            if (procs != null) {
+                procs.keySet().removeIf(ownerId -> world.getEntity(ownerId) == null);
+                if (procs.isEmpty()) PASSIVE_PROCS.remove(world);
+            }
+        }
+        sweepTick++;
+        if (sweepTick % 200L == 0L) {
+            sweepPending();
+        }
+    }
+
+    private static void sweepPending() {
+        Iterator<Map.Entry<UniqueAbilityExecution, PendingExecution>> iterator =
+                PENDING.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<UniqueAbilityExecution, PendingExecution> entry = iterator.next();
+            PendingExecution pending = entry.getValue();
+            if (sweepTick - pending.touchedAt < STALE_TRACKING_TICKS) continue;
+            iterator.remove();
+            UniqueAbilityApi.finish(entry.getKey(), entry.getKey().definition().id(), pending.hits);
         }
     }
 
     public static void clear(ServerWorld world) {
         Map<UUID, ActiveChannel> channels = ACTIVE.remove(world);
-        if (channels != null) channels.values().forEach(channel -> UniqueAbilityApi.cancel(channel.execution));
+        if (channels != null) channels.values().forEach(channel -> cancel(world, channel));
         List<PendingPassiveStrike> strikes = PASSIVE_STRIKES.remove(world);
-        if (strikes != null) strikes.forEach(strike -> UniqueAbilityApi.cancel(strike.execution));
+        if (strikes != null) strikes.forEach(strike -> release(strike.execution));
         LAST_PASSIVE.remove(world);
         PASSIVE_PROCS.remove(world);
         STORED_PASSIVES.remove(world);
     }
 
     public static void clearAll() {
-        ACTIVE.values().forEach(channels -> channels.values()
-                .forEach(channel -> UniqueAbilityApi.cancel(channel.execution)));
+        ACTIVE.forEach((world, channels) -> channels.values().forEach(channel -> cancel(world, channel)));
         PASSIVE_STRIKES.values().forEach(strikes -> strikes
-                .forEach(strike -> UniqueAbilityApi.cancel(strike.execution)));
+                .forEach(strike -> release(strike.execution)));
         ACTIVE.clear();
         PASSIVE_STRIKES.clear();
         LAST_PASSIVE.clear();
         PASSIVE_PROCS.clear();
         STORED_PASSIVES.clear();
+        PENDING.clear();
+    }
+
+    public static void clearActor(LivingEntity owner) {
+        if (owner == null || ACTIVE.isEmpty() && PASSIVE_STRIKES.isEmpty() && LAST_PASSIVE.isEmpty()
+                && PASSIVE_PROCS.isEmpty() && STORED_PASSIVES.isEmpty()) {
+            return;
+        }
+        UUID ownerId = owner.getUuid();
+        removeChannelRoot(owner);
+        ACTIVE.forEach((world, channels) -> {
+            ActiveChannel channel = channels.remove(ownerId);
+            if (channel != null) cancel(world, channel);
+        });
+        ACTIVE.values().removeIf(Map::isEmpty);
+        PASSIVE_STRIKES.forEach((world, strikes) -> strikes.removeIf(strike -> {
+            if (!strike.ownerId.equals(ownerId)) return false;
+            discard(world, strike.cloneId);
+            release(strike.execution);
+            return true;
+        }));
+        PASSIVE_STRIKES.values().removeIf(List::isEmpty);
+        LAST_PASSIVE.values().forEach(cooldowns -> cooldowns.remove(ownerId));
+        LAST_PASSIVE.values().removeIf(Map::isEmpty);
+        PASSIVE_PROCS.values().forEach(procs -> procs.remove(ownerId));
+        PASSIVE_PROCS.values().removeIf(Map::isEmpty);
+        STORED_PASSIVES.values().forEach(stored -> stored.remove(ownerId));
+        STORED_PASSIVES.values().removeIf(Map::isEmpty);
     }
 
     private static void tickStoredPassives(ServerWorld world) {
@@ -256,6 +326,11 @@ public final class GloampiercerAbilityManager {
     private static void commitPassiveActivation(ServerWorld world, LivingEntity owner, ItemStack stack,
                                                 AbyssalSpectralMasteryTuning tuning, int proc, long now) {
         PASSIVE_PROCS.computeIfAbsent(world, ignored -> new HashMap<>()).put(owner.getUuid(), proc);
+        commitPassiveCooldown(world, owner, stack, tuning, now);
+    }
+
+    private static void commitPassiveCooldown(ServerWorld world, LivingEntity owner, ItemStack stack,
+                                              AbyssalSpectralMasteryTuning tuning, long now) {
         int cooldown = SimplySwordsAPI.getEffectiveWeaponCooldownTicks(stack, owner,
                 tuning.integer(AbyssalSpectralMasteryTuning.Setting.PASSIVE_COOLDOWN_TICKS,
                         Config.uniqueEffects.gloampiercer.passiveCooldown));
@@ -263,13 +338,18 @@ public final class GloampiercerAbilityManager {
                 .put(owner.getUuid(), now + cooldown);
     }
 
-    private static StoredPassive takeStoredPassive(ServerWorld world, LivingEntity owner,
+    private static StoredPassive peekStoredPassive(ServerWorld world, LivingEntity owner,
                                                    ItemStack stack, long now) {
         Map<UUID, StoredPassive> stored = STORED_PASSIVES.get(world);
-        if (stored == null) return null;
-        StoredPassive value = stored.remove(owner.getUuid());
-        if (stored.isEmpty()) STORED_PASSIVES.remove(world);
+        StoredPassive value = stored == null ? null : stored.get(owner.getUuid());
         return value != null && value.stack == stack && now < value.expiresAt ? value : null;
+    }
+
+    private static void removeStoredPassive(ServerWorld world, LivingEntity owner) {
+        Map<UUID, StoredPassive> stored = STORED_PASSIVES.get(world);
+        if (stored == null) return;
+        stored.remove(owner.getUuid());
+        if (stored.isEmpty()) STORED_PASSIVES.remove(world);
     }
 
     private static void tickChannels(ServerWorld world) {
@@ -293,7 +373,8 @@ public final class GloampiercerAbilityManager {
             if (age >= channel.duration) {
                 owner.setVelocity(owner.getVelocity().x, Math.min(owner.getVelocity().y, -0.04), owner.getVelocity().z);
                 owner.velocityModified = true;
-                UniqueAbilityApi.finish(channel.execution, channel.execution.definition().id(), channel.fired);
+                if (channel.rooted) removeChannelRoot(owner);
+                complete(channel.execution, 0);
                 iterator.remove();
             }
         }
@@ -326,9 +407,9 @@ public final class GloampiercerAbilityManager {
                         SoundRegistry.DARK_SWORD_WHOOSH_02.get(), SoundCategory.PLAYERS,
                         0.56F, 1.35F + world.random.nextFloat() * 0.12F);
             } else {
-                UniqueAbilityApi.cancel(strike.execution);
                 discard(world, strike.cloneId);
             }
+            release(strike.execution);
             iterator.remove();
         }
         if (strikes.isEmpty()) {
@@ -365,22 +446,35 @@ public final class GloampiercerAbilityManager {
 
     private static void fireScheduledSpears(ServerWorld world, LivingEntity owner,
                                              ActiveChannel channel, long age) {
-        int count = Math.clamp(AbyssalSpectralMasteryAbilities.tuning(channel.execution).integer(
-                AbyssalSpectralMasteryTuning.Setting.SPEAR_COUNT, Config.uniqueEffects.gloampiercer.spearCount), 3, 36);
         AbyssalSpectralMasteryTuning tuning = AbyssalSpectralMasteryAbilities.tuning(channel.execution);
+        int count = spearCount(tuning);
+        int sources = channel.clonePositions.size() + 1;
         int startTick = tuning.integer(AbyssalSpectralMasteryTuning.Setting.FIRE_DELAY_TICKS, FIRE_START_TICK);
         int endMargin = tuning.integer(AbyssalSpectralMasteryTuning.Setting.THRESHOLD, FIRE_END_MARGIN);
-        int endTick = Math.max(startTick + 1, channel.duration - endMargin);
-        if (age < startTick) {
-            return;
-        }
-        double progress = MathHelper.clamp((double) (age - startTick + 1)
-                / Math.max(1, endTick - startTick), 0.0, 1.0);
-        int expected = Math.min(count, (int) Math.floor(progress * count));
-        while (channel.fired < expected) {
+        while (channel.fired < count && age >= scheduledFireTick(channel.fired, count, sources,
+                channel.duration, startTick, endMargin)) {
             fireSpear(world, owner, channel, channel.fired, count);
             channel.fired++;
         }
+    }
+
+    private static int spearCount(AbyssalSpectralMasteryTuning tuning) {
+        return Math.clamp(tuning.integer(AbyssalSpectralMasteryTuning.Setting.SPEAR_COUNT,
+                Config.uniqueEffects.gloampiercer.spearCount), 3, 36);
+    }
+
+    static int fireIntervalTicks(int spearCount, int sourceCount, int span) {
+        return Math.max(1, (int) Math.round((double) Math.max(1, span) * Math.max(1, sourceCount)
+                / Math.max(1, spearCount)));
+    }
+
+    static int scheduledFireTick(int index, int spearCount, int sourceCount, int duration,
+                                 int startTick, int endMargin) {
+        int endTick = Math.max(startTick + 1, duration - endMargin);
+        int sources = Math.max(1, sourceCount);
+        int interval = fireIntervalTicks(spearCount, sources, endTick - startTick);
+        return startTick + index / sources * interval
+                + (int) Math.round((double) (index % sources) * interval / sources);
     }
 
     private static void fireSpear(ServerWorld world, LivingEntity owner,
@@ -422,7 +516,9 @@ public final class GloampiercerAbilityManager {
                 origin, destination, target, damage,
                 Math.max(0.1, tuning.get(AbyssalSpectralMasteryTuning.Setting.PROJECTILE_SPEED,
                         Config.uniqueEffects.gloampiercer.projectileSpeed)), execution);
-        world.spawnEntity(spear);
+        if (!world.spawnEntity(spear)) {
+            spear.releaseTracking();
+        }
     }
 
     private static LivingEntity selectBarrageTarget(ServerWorld world, LivingEntity owner,
@@ -528,37 +624,31 @@ public final class GloampiercerAbilityManager {
             double height = index % 3 == 1 ? 0.65 : index % 3 == 2 ? 1.15 : 0.15;
             Vec3d position = channel.start.add(side.multiply(lateral)).subtract(facing.multiply(depth))
                     .add(0.0, height, 0.0);
-            channel.clonePositions.add(position);
             int seed = owner.getRandom().nextInt();
-            int spearCount = Math.clamp(AbyssalSpectralMasteryAbilities.tuning(channel.execution).integer(
-                    AbyssalSpectralMasteryTuning.Setting.SPEAR_COUNT, Config.uniqueEffects.gloampiercer.spearCount), 3, 36);
-            int sourceCount = cloneCount + 1;
             AbyssalSpectralMasteryTuning tuning = AbyssalSpectralMasteryAbilities.tuning(channel.execution);
+            int spearCount = spearCount(tuning);
+            int sourceCount = cloneCount + 1;
             int startTick = tuning.integer(AbyssalSpectralMasteryTuning.Setting.FIRE_DELAY_TICKS, FIRE_START_TICK);
             int endMargin = tuning.integer(AbyssalSpectralMasteryTuning.Setting.THRESHOLD, FIRE_END_MARGIN);
             int firstSpear = index + 1;
-            int firstThrow = firstSpear < spearCount
-                    ? scheduledFireTick(firstSpear, spearCount, channel.duration, startTick, endMargin)
+            int throwCount = firstSpear < spearCount
+                    ? (spearCount - firstSpear + sourceCount - 1) / sourceCount : 0;
+            int firstThrow = throwCount > 0
+                    ? scheduledFireTick(firstSpear, spearCount, sourceCount, channel.duration, startTick, endMargin)
                     : channel.duration + 8;
-            int nextSpear = firstSpear + sourceCount;
-            int throwInterval = nextSpear < spearCount
-                    ? scheduledFireTick(nextSpear, spearCount, channel.duration, startTick, endMargin) - firstThrow
-                    : 0;
+            int endTick = Math.max(startTick + 1, channel.duration - endMargin);
+            int throwInterval = throwCount > 1
+                    ? fireIntervalTicks(spearCount, sourceCount, endTick - startTick) : 0;
             GloampiercerCloneVisualEntity clone = new GloampiercerCloneVisualEntity(
                     world, position.x, position.y, position.z, yawToward(position, channel.center),
-                    channel.duration + 4, firstThrow, throwInterval, seed);
-            world.spawnEntity(clone);
+                    channel.duration + 4, firstThrow, throwInterval, throwCount, seed);
+            if (!world.spawnEntity(clone)) {
+                continue;
+            }
+            channel.clonePositions.add(position);
             channel.cloneIds.add(clone.getUuid());
             spawnCloneMaterialization(world, position);
         }
-    }
-
-    private static int scheduledFireTick(int spearIndex, int spearCount, int duration,
-                                         int startTick, int endMargin) {
-        int endTick = Math.max(startTick + 1, duration - endMargin);
-        int span = Math.max(1, endTick - startTick);
-        return startTick - 1
-                + (int) Math.ceil((spearIndex + 1) * span / (double) Math.max(1, spearCount));
     }
 
     private static Vec3d cloneHandOrigin(Vec3d clonePosition, Vec3d targetPosition) {
@@ -616,10 +706,26 @@ public final class GloampiercerAbilityManager {
     }
 
     private static void cancel(ServerWorld world, ActiveChannel channel) {
-        UniqueAbilityApi.cancel(channel.execution);
+        abandon(channel.execution);
+        if (channel.rooted && world.getEntity(channel.ownerId) instanceof LivingEntity owner) {
+            removeChannelRoot(owner);
+        }
         for (UUID cloneId : channel.cloneIds) {
             discard(world, cloneId);
         }
+    }
+
+    private static void applyChannelRoot(LivingEntity owner) {
+        EntityAttributeInstance movement = owner.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
+        if (movement == null) return;
+        movement.removeModifier(CHANNEL_ROOT_ID);
+        movement.addTemporaryModifier(new EntityAttributeModifier(CHANNEL_ROOT_ID, -0.99,
+                EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+    }
+
+    private static void removeChannelRoot(LivingEntity owner) {
+        EntityAttributeInstance movement = owner.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
+        if (movement != null) movement.removeModifier(CHANNEL_ROOT_ID);
     }
 
     private static void discard(ServerWorld world, UUID entityId) {
@@ -671,7 +777,64 @@ public final class GloampiercerAbilityManager {
 
     static int passiveCloneCount(int mode, int proc, int tunedCount) {
         int count = Math.clamp(tunedCount, 1, 3);
+        if ((mode & 12) != 0) return count;
         return (mode & 1) != 0 && proc != 3 ? 1 : count;
+    }
+
+    public static UUID castId(UniqueAbilityExecution execution) {
+        return execution == null ? null
+                : UUID.nameUUIDFromBytes((CAST_NAMESPACE + "/" + execution.id()).getBytes(
+                        java.nio.charset.StandardCharsets.UTF_8));
+    }
+
+    public static void retain(UniqueAbilityExecution execution) {
+        if (execution == null || execution.isTerminal()) return;
+        PendingExecution pending = PENDING.computeIfAbsent(execution, ignored -> new PendingExecution());
+        pending.outstanding++;
+        pending.touchedAt = sweepTick;
+    }
+
+    public static void reportHits(UniqueAbilityExecution execution, int hits) {
+        if (execution == null || hits <= 0) return;
+        PendingExecution pending = PENDING.get(execution);
+        if (pending != null) {
+            pending.hits += hits;
+            pending.touchedAt = sweepTick;
+        }
+    }
+
+    public static void release(UniqueAbilityExecution execution) {
+        PendingExecution pending = execution == null ? null : PENDING.get(execution);
+        if (pending == null) return;
+        pending.outstanding = Math.max(0, pending.outstanding - 1);
+        settle(execution, pending);
+    }
+
+    private static void complete(UniqueAbilityExecution execution, int reportedHits) {
+        if (execution == null) return;
+        PendingExecution pending = PENDING.computeIfAbsent(execution, ignored -> new PendingExecution());
+        pending.hits += Math.max(0, reportedHits);
+        pending.completed = true;
+        settle(execution, pending);
+    }
+
+    private static void settle(UniqueAbilityExecution execution, PendingExecution pending) {
+        if (!pending.completed || pending.outstanding > 0) return;
+        PENDING.remove(execution);
+        UniqueAbilityApi.finish(execution, execution.definition().id(), pending.hits);
+    }
+
+    private static void abandon(UniqueAbilityExecution execution) {
+        if (execution == null) return;
+        PENDING.remove(execution);
+        UniqueAbilityApi.cancel(execution);
+    }
+
+    private static final class PendingExecution {
+        private int outstanding;
+        private int hits;
+        private long touchedAt = sweepTick;
+        private boolean completed;
     }
 
     private static final class ActiveChannel {
@@ -689,6 +852,7 @@ public final class GloampiercerAbilityManager {
         private final List<UUID> cloneIds = new ArrayList<>();
         private UUID royalTargetId;
         private Vec3d royalDestination;
+        private boolean rooted;
         private int fired;
 
         private ActiveChannel(UUID ownerId, ItemStack stack, Hand hand, Vec3d start, Vec3d center,
@@ -718,6 +882,18 @@ public final class GloampiercerAbilityManager {
     private record StoredPassive(ItemStack stack, long expiresAt) {
     }
 
+    private static AbyssalSpectralMasteryTuning passiveTuning() {
+        return baseTuning(0, 0, 1, 1)
+                .with(AbyssalSpectralMasteryTuning.Setting.FIRE_DELAY_TICKS, PASSIVE_FIRE_DELAY_TICKS);
+    }
+
+    private static AbyssalSpectralMasteryTuning barrageTuning(int cooldown, int duration,
+                                                              int spears, int clones) {
+        return baseTuning(cooldown, duration, spears, clones)
+                .with(AbyssalSpectralMasteryTuning.Setting.FIRE_DELAY_TICKS, FIRE_START_TICK)
+                .with(AbyssalSpectralMasteryTuning.Setting.THRESHOLD, FIRE_END_MARGIN);
+    }
+
     private static AbyssalSpectralMasteryTuning baseTuning(int cooldown, int duration, int spears, int clones) {
         return AbyssalSpectralMasteryTuning.EMPTY
                 .with(AbyssalSpectralMasteryTuning.Setting.COOLDOWN_TICKS, cooldown)
@@ -727,7 +903,6 @@ public final class GloampiercerAbilityManager {
                 .with(AbyssalSpectralMasteryTuning.Setting.PROJECTILE_SPEED, Config.uniqueEffects.gloampiercer.projectileSpeed)
                 .with(AbyssalSpectralMasteryTuning.Setting.PROJECTILE_DAMAGE_MULTIPLIER, 1)
                 .with(AbyssalSpectralMasteryTuning.Setting.PASSIVE_COOLDOWN_TICKS, Config.uniqueEffects.gloampiercer.passiveCooldown)
-                .with(AbyssalSpectralMasteryTuning.Setting.FIRE_DELAY_TICKS, 9)
                 .with(AbyssalSpectralMasteryTuning.Setting.CONE_DEGREES, Config.uniqueEffects.gloampiercer.passiveConeDegrees)
                 .with(AbyssalSpectralMasteryTuning.Setting.RANGE, Config.uniqueEffects.gloampiercer.passiveMaxRange)
                 .with(AbyssalSpectralMasteryTuning.Setting.EXPLOSION_RADIUS, Config.uniqueEffects.gloampiercer.explosionRadius)

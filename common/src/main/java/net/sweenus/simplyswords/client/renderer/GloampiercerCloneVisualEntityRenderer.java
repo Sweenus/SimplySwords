@@ -53,7 +53,8 @@ public final class GloampiercerCloneVisualEntityRenderer
         if (opacity <= 0.01F) {
             return;
         }
-        ThrowAnimation animation = throwAnimation(age, entity.getThrowTick(), entity.getThrowInterval());
+        ThrowAnimation animation = throwAnimation(age, entity.getThrowTick(),
+                entity.getThrowInterval(), entity.getThrowCount());
         matrices.push();
         matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180.0F - entity.getVisualYaw()));
         matrices.translate(0.0, Math.sin(age * 0.2 + entity.getSeed()) * 0.045, 0.0);
@@ -169,10 +170,15 @@ public final class GloampiercerCloneVisualEntityRenderer
                 .light(LightmapTextureManager.MAX_LIGHT_COORDINATE);
     }
 
-    private static ThrowAnimation throwAnimation(float age, int firstThrowTick, int throwInterval) {
+    private static ThrowAnimation throwAnimation(float age, int firstThrowTick, int throwInterval,
+                                                 int throwCount) {
+        if (throwCount <= 0) {
+            return new ThrowAnimation(0.0F, 0.0F);
+        }
         float releaseTick = firstThrowTick;
         if (throwInterval > 0 && age > firstThrowTick) {
-            int cycle = Math.max(0, Math.round((age - firstThrowTick) / throwInterval));
+            int cycle = MathHelper.clamp(Math.round((age - firstThrowTick) / throwInterval),
+                    0, throwCount - 1);
             releaseTick += cycle * throwInterval;
         }
         float lead = throwInterval > 0

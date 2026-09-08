@@ -24,9 +24,13 @@ import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.registry.EntityRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
+import net.sweenus.simplyswords.world.SoulstalkerAbilityManager;
 import org.joml.Vector3f;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -52,12 +56,15 @@ public final class SoulstalkerCleaveEntity extends Entity {
             new DustColorTransitionParticleEffect(new Vector3f(0.025F, 0.008F, 0.07F),
                     new Vector3f(0.48F, 0.08F, 0.82F), 1.25F);
 
-    private final Set<UUID> hitTargets = new HashSet<>();
+    private final Set<UUID> attemptedTargets = new HashSet<>();
     private double maxDistance = 10.0;
     private double traveled;
     private float weaponDamage;
     private int targetCap = Integer.MAX_VALUE;
+    private int victims;
     private java.util.UUID strideId;
+    private java.util.UUID trackedOwnerId;
+    private boolean released;
 
     public SoulstalkerCleaveEntity(EntityType<? extends SoulstalkerCleaveEntity> type, World world) {
         super(type, world);
@@ -83,6 +90,8 @@ public final class SoulstalkerCleaveEntity extends Entity {
         weaponDamage = Math.max(0.0F, damage);
         this.targetCap = Math.max(1, targetCap);
         this.strideId = strideId;
+        this.trackedOwnerId = owner.getUuid();
+        SoulstalkerAbilityManager.retainStride(world, trackedOwnerId);
         setPosition(origin);
         setVelocity(normalized.multiply(Math.max(0.05, speed)));
         setYaw(owner.getYaw());
@@ -113,8 +122,15 @@ public final class SoulstalkerCleaveEntity extends Entity {
             discard();
             return;
         }
+        double remaining = maxDistance - traveled;
+        if (remaining <= 0.0) {
+            discard();
+            return;
+        }
         Vec3d current = getPos();
-        Vec3d next = current.add(velocity);
+        double stepLength = velocity.length();
+        Vec3d next = current.add(stepLength > remaining
+                ? velocity.multiply(remaining / stepLength) : velocity);
         BlockHitResult blockHit = world.raycast(new RaycastContext(current, next,
                 RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, this));
         Vec3d segmentEnd = blockHit.getType() == HitResult.Type.MISS ? next : blockHit.getPos();
@@ -139,22 +155,30 @@ public final class SoulstalkerCleaveEntity extends Entity {
 
     private void damageTargets(ServerWorld world, LivingEntity owner, Vec3d start, Vec3d end, float width) {
         double halfWidth = Math.max(0.2, width * 0.5);
-        Box search = new Box(start, end).expand(halfWidth, halfWidth * 0.72, halfWidth);
+        Box search = new Box(start, end).expand(halfWidth);
         ItemStack stack = dataTracker.get(WEAPON_STACK);
-        if (stack.isEmpty()) {
+        if (stack.isEmpty() || victims >= targetCap) {
             return;
         }
-        for (LivingEntity target : world.getEntitiesByClass(LivingEntity.class, search,
+        List<LivingEntity> candidates = new ArrayList<>(world.getEntitiesByClass(LivingEntity.class, search,
                 entity -> entity != owner && entity.isAlive() && !entity.isRemoved()
                         && EntityPredicates.VALID_LIVING_ENTITY.test(entity)
-                        && HelperMethods.checkAbilityTarget(entity, owner))) {
-            if (hitTargets.size() >= targetCap) {
+                        && HelperMethods.checkAbilityTarget(entity, owner)
+                        && !attemptedTargets.contains(entity.getUuid())
+                        && sweptDistanceSquared(start, end, entity.getBoundingBox())
+                                <= halfWidth * halfWidth));
+        candidates.sort(Comparator.comparingDouble(
+                entity -> travelOrder(start, end, entity.getBoundingBox())));
+        for (LivingEntity target : candidates) {
+            if (victims >= targetCap) {
                 break;
             }
-            if (!hitTargets.add(target.getUuid())) {
+            if (!attemptedTargets.add(target.getUuid())) {
                 continue;
             }
             if (SimplySwordsAPI.applyEntityWeaponHit(stack, target, owner, weaponDamage)) {
+                victims++;
+                SoulstalkerAbilityManager.reportStrideHit(world, owner, target, weaponDamage);
                 if (strideId != null
                         && world.getEntity(strideId) instanceof SoulstalkerStrideEntity stride) {
                     stride.addCleaveHitBonus();
@@ -168,6 +192,38 @@ public final class SoulstalkerCleaveEntity extends Entity {
             }
         }
         dataTracker.set(WEAPON_STACK, stack);
+    }
+
+    private static double travelOrder(Vec3d start, Vec3d end, Box box) {
+        Vec3d delta = end.subtract(start);
+        double lengthSquared = delta.lengthSquared();
+        if (lengthSquared < 1.0E-9) {
+            return 0.0;
+        }
+        return MathHelper.clamp(box.getCenter().subtract(start).dotProduct(delta) / lengthSquared, 0.0, 1.0);
+    }
+
+    private static double sweptDistanceSquared(Vec3d start, Vec3d end, Box box) {
+        Vec3d closest = start.add(end.subtract(start).multiply(travelOrder(start, end, box)));
+        double x = MathHelper.clamp(closest.x, box.minX, box.maxX) - closest.x;
+        double y = MathHelper.clamp(closest.y, box.minY, box.maxY) - closest.y;
+        double z = MathHelper.clamp(closest.z, box.minZ, box.maxZ) - closest.z;
+        return x * x + y * y + z * z;
+    }
+
+    public void releaseTracking() {
+        if (released || trackedOwnerId == null || getWorld().isClient()
+                || !(getWorld() instanceof ServerWorld world)) {
+            return;
+        }
+        released = true;
+        SoulstalkerAbilityManager.releaseStride(world, trackedOwnerId);
+    }
+
+    @Override
+    public void remove(RemovalReason reason) {
+        releaseTracking();
+        super.remove(reason);
     }
 
     private LivingEntity resolveOwner(ServerWorld world) {

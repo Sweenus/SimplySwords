@@ -41,10 +41,22 @@ public final class DevourerStainManager {
     }
 
     public static boolean contains(ServerWorld world, Vec3d position) {
+        return contains(world, position, null);
+    }
+
+    public static boolean containsForOwner(ServerWorld world, UUID ownerId, Vec3d position) {
+        return ownerId != null && contains(world, position, ownerId);
+    }
+
+    private static boolean contains(ServerWorld world, Vec3d position, UUID ownerId) {
         if (world == null || position == null) {
             return false;
         }
         for (ActiveField field : ACTIVE.getOrDefault(world, Map.of()).values()) {
+            if (ownerId != null && !ownerId.equals(field.ownerId)
+                    && !ownerId.equals(field.sourcePlayerId)) {
+                continue;
+            }
             DevourerMassVisualEntity mass = resolveMass(world, field.massVisualId);
             if (mass != null && Math.abs(position.y - field.center.y) <= VERTICAL_RANGE) {
                 double mainRadius = Math.max(0.4, mass.getStableRadius(0.0F) * 2.1);

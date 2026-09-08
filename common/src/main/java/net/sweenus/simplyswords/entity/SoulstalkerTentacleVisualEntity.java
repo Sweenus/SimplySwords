@@ -12,6 +12,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.registry.EntityRegistry;
+import org.joml.Vector3f;
 
 public final class SoulstalkerTentacleVisualEntity extends Entity {
     private static final TrackedData<Integer> OWNER_ID =
@@ -24,6 +25,8 @@ public final class SoulstalkerTentacleVisualEntity extends Entity {
             DataTracker.registerData(SoulstalkerTentacleVisualEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Integer> SEED =
             DataTracker.registerData(SoulstalkerTentacleVisualEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    private static final TrackedData<Vector3f> ENDPOINT =
+            DataTracker.registerData(SoulstalkerTentacleVisualEntity.class, TrackedDataHandlerRegistry.VECTOR3F);
 
     public SoulstalkerTentacleVisualEntity(EntityType<? extends SoulstalkerTentacleVisualEntity> type, World world) {
         super(type, world);
@@ -39,6 +42,7 @@ public final class SoulstalkerTentacleVisualEntity extends Entity {
         dataTracker.set(IMPACT_AGE, Math.max(1, impactAge));
         dataTracker.set(LIFETIME, Math.max(impactAge + 1, lifetime));
         dataTracker.set(SEED, world.random.nextInt());
+        dataTracker.set(ENDPOINT, endpointOf(target));
         setPosition(owner.getPos());
     }
 
@@ -49,6 +53,7 @@ public final class SoulstalkerTentacleVisualEntity extends Entity {
         builder.add(LIFETIME, 18);
         builder.add(IMPACT_AGE, 8);
         builder.add(SEED, 0);
+        builder.add(ENDPOINT, new Vector3f());
     }
 
     @Override
@@ -56,13 +61,37 @@ public final class SoulstalkerTentacleVisualEntity extends Entity {
         super.tick();
         LivingEntity owner = getOwner();
         LivingEntity target = getTarget();
-        if (!getWorld().isClient() && (age >= getLifetime() || owner == null || target == null)) {
-            discard();
-            return;
+        if (!getWorld().isClient()) {
+            if (age >= getLifetime() || owner == null) {
+                discard();
+                return;
+            }
+            if (target != null) {
+                dataTracker.set(ENDPOINT, endpointOf(target));
+            }
         }
         if (owner != null) {
             setPosition(owner.getPos());
         }
+    }
+
+    public void setTarget(LivingEntity target) {
+        if (target == null) {
+            return;
+        }
+        dataTracker.set(TARGET_ID, target.getId());
+        dataTracker.set(ENDPOINT, endpointOf(target));
+    }
+
+    private static Vector3f endpointOf(LivingEntity target) {
+        Vec3d position = target.getPos().add(0.0, target.getHeight() * 0.56, 0.0);
+        return new Vector3f((float) position.x, (float) position.y, (float) position.z);
+    }
+
+    private Vec3d storedEndpoint() {
+        Vector3f endpoint = dataTracker.get(ENDPOINT);
+        return endpoint.lengthSquared() < 1.0E-9
+                ? getLerpedPos(1.0F) : new Vec3d(endpoint.x, endpoint.y, endpoint.z);
     }
 
     public LivingEntity getOwner() {
@@ -98,7 +127,7 @@ public final class SoulstalkerTentacleVisualEntity extends Entity {
 
     public Vec3d getEndpoint(float tickDelta) {
         LivingEntity target = getTarget();
-        return target == null ? getLerpedPos(tickDelta)
+        return target == null ? storedEndpoint()
                 : target.getLerpedPos(tickDelta).add(0.0, target.getHeight() * 0.56, 0.0);
     }
 
@@ -125,11 +154,11 @@ public final class SoulstalkerTentacleVisualEntity extends Entity {
     @Override
     public Box getVisibilityBoundingBox() {
         LivingEntity owner = getOwner();
-        LivingEntity target = getTarget();
-        if (owner == null || target == null) {
+        if (owner == null) {
             return getBoundingBox().expand(8.0);
         }
-        return new Box(owner.getPos(), target.getPos()).expand(2.0);
+        LivingEntity target = getTarget();
+        return new Box(owner.getPos(), target == null ? storedEndpoint() : target.getPos()).expand(2.0);
     }
 
     @Override

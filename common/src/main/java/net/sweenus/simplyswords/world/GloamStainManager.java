@@ -6,9 +6,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.particle.DustParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
@@ -25,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.IntConsumer;
 
 public final class GloamStainManager {
     private static final int CONTACT_INTERVAL = 5;
@@ -39,22 +43,58 @@ public final class GloamStainManager {
     private GloamStainManager() {
     }
 
-    public record PatchBehavior(ItemStack weaponStack, float spearDamage, int slowDurationTicks,
-                                boolean appliesSlowness,
+    public record PatchBehavior(UUID sourceId, ItemStack weaponStack, float spearDamage,
+                                int slowAmplifier, int slowDurationTicks, boolean appliesSlowness,
                                 double moveRange, double moveSpeed, double expiryDamageMultiplier,
-                                double expiryRadius, int expiryTargetCap) {
+                                double expiryRadius, int expiryTargetCap, int growthDurationTicks,
+                                IntConsumer onResolved) {
         public static final PatchBehavior NONE = new PatchBehavior(ItemStack.EMPTY, 0, 11, true,
                 0, 0, 0, 0, 0);
 
         public PatchBehavior {
             weaponStack = weaponStack == null ? ItemStack.EMPTY : weaponStack.copy();
             spearDamage = Math.max(0, spearDamage);
+            slowAmplifier = Math.clamp(slowAmplifier, 0, 4);
             slowDurationTicks = Math.max(1, slowDurationTicks);
             moveRange = Math.max(0, moveRange);
             moveSpeed = Math.max(0, moveSpeed);
             expiryDamageMultiplier = Math.max(0, expiryDamageMultiplier);
             expiryRadius = Math.max(0, expiryRadius);
             expiryTargetCap = Math.clamp(expiryTargetCap, 0, 64);
+            growthDurationTicks = Math.max(0, growthDurationTicks);
+        }
+
+        public PatchBehavior(ItemStack weaponStack, float spearDamage, int slowDurationTicks,
+                             boolean appliesSlowness, double moveRange, double moveSpeed,
+                             double expiryDamageMultiplier, double expiryRadius, int expiryTargetCap) {
+            this(null, weaponStack, spearDamage, 0, slowDurationTicks, appliesSlowness,
+                    moveRange, moveSpeed, expiryDamageMultiplier, expiryRadius, expiryTargetCap,
+                    0, null);
+        }
+
+        public PatchBehavior withAmplifier(int amplifier) {
+            return new PatchBehavior(sourceId, weaponStack, spearDamage, amplifier, slowDurationTicks,
+                    appliesSlowness, moveRange, moveSpeed, expiryDamageMultiplier, expiryRadius,
+                    expiryTargetCap, growthDurationTicks, null);
+        }
+
+        public boolean sameSource(PatchBehavior other) {
+            return other != null
+                    && sourceId != null && sourceId.equals(other.sourceId)
+                    && appliesSlowness == other.appliesSlowness
+                    && slowDurationTicks == other.slowDurationTicks
+                    && growthDurationTicks == other.growthDurationTicks
+                    && moveRange == other.moveRange
+                    && moveSpeed == other.moveSpeed
+                    && expiryDamageMultiplier == other.expiryDamageMultiplier
+                    && expiryRadius == other.expiryRadius
+                    && expiryTargetCap == other.expiryTargetCap;
+        }
+
+        public void resolve(int hits) {
+            if (onResolved != null) {
+                onResolved.accept(Math.max(0, hits));
+            }
         }
     }
 
@@ -64,10 +104,12 @@ public final class GloamStainManager {
     }
 
     public static void clear(ServerWorld world) {
-        ACTIVE.remove(world);
+        List<ActivePatch> patches = ACTIVE.remove(world);
+        if (patches != null) patches.forEach(patch -> patch.resolve(0));
     }
 
     public static void clearAll() {
+        ACTIVE.values().forEach(patches -> patches.forEach(patch -> patch.resolve(0)));
         ACTIVE.clear();
     }
 
@@ -109,11 +151,19 @@ public final class GloamStainManager {
         return false;
     }
 
+    public static boolean isOnAnyGloam(ServerWorld world, Entity entity) {
+        if (world == null || entity == null) return false;
+        Vec3d position = entity.getPos();
+        return ACTIVE.getOrDefault(world, List.of()).stream().anyMatch(patch -> patch.contains(position))
+                || DevourerStainManager.contains(world, position);
+    }
+
     public static boolean isOnOwnerGloam(ServerWorld world, UUID ownerId, Entity entity) {
         if (world == null || ownerId == null || entity == null) return false;
         Vec3d position = entity.getPos();
         return ACTIVE.getOrDefault(world, List.of()).stream()
-                .anyMatch(patch -> patch.ownerId.equals(ownerId) && patch.contains(position));
+                .anyMatch(patch -> patch.ownerId.equals(ownerId) && patch.contains(position))
+                || DevourerStainManager.containsForOwner(world, ownerId, position);
     }
 
     private static boolean containsClientStain(
@@ -180,18 +230,27 @@ public final class GloamStainManager {
 
     public static void createGrowthPatch(ServerWorld world, UUID ownerId,
                                          Vec3d position, int slowAmplifier, boolean appliesSlowness) {
+        createGrowthPatch(world, ownerId, position,
+                new PatchBehavior(ItemStack.EMPTY, 0, 11, appliesSlowness, 0, 0, 0, 0, 0)
+                        .withAmplifier(slowAmplifier));
+    }
+
+    public static void createGrowthPatch(ServerWorld world, UUID ownerId,
+                                         Vec3d position, PatchBehavior source) {
         if (world == null || ownerId == null || position == null) {
             return;
         }
+        PatchBehavior inherited = source == null ? PatchBehavior.NONE : source;
         Vec3d center = new Vec3d(position.x,
                 LivyatanWaveManager.findGroundTopY(world, position.x, position.z, position.y),
                 position.z);
-        int duration = Math.max(20, Config.uniqueEffects.gloam.growthDuration);
+        int duration = inherited.growthDurationTicks() > 0
+                ? inherited.growthDurationTicks()
+                : Math.max(20, Config.uniqueEffects.gloam.growthDuration);
         int fade = Math.clamp(Config.uniqueEffects.gloam.growthFadeDuration, 1, duration);
         createCircle(world, ownerId, center,
                 Math.max(0.25, Config.uniqueEffects.gloam.growthRadius),
-                duration, fade, slowAmplifier, true, 8,
-                new PatchBehavior(ItemStack.EMPTY, 0, 11, appliesSlowness, 0, 0, 0, 0, 0));
+                duration, fade, inherited.slowAmplifier(), true, 8, inherited);
         world.spawnParticles(GLOAM_DUST, center.x, center.y + 0.08, center.z,
                 16, 0.55, 0.05, 0.55, 0.035);
         world.spawnParticles(ParticleTypes.REVERSE_PORTAL, center.x, center.y + 0.12, center.z,
@@ -201,7 +260,9 @@ public final class GloamStainManager {
     private static void createCircle(ServerWorld world, UUID ownerId, Vec3d center, double radius,
                                      int durationTicks, int fadeTicks, int slowAmplifier,
                                      boolean growth, int fadeInTicks, PatchBehavior behavior) {
+        PatchBehavior incoming = behavior == null ? PatchBehavior.NONE : behavior;
         if (world == null || ownerId == null || center == null || radius <= 0.0) {
+            incoming.resolve(0);
             return;
         }
         float patchRadius = (float) Math.max(0.25, radius);
@@ -214,8 +275,7 @@ public final class GloamStainManager {
             ActivePatch nearby = patches.stream()
                     .filter(patch -> patch.shape == BloodStainVisualEntity.SHAPE_CIRCLE)
                     .filter(patch -> patch.ownerId.equals(ownerId))
-                    .filter(patch -> patch.appliesSlowness
-                            == (behavior == null || behavior.appliesSlowness()))
+                    .filter(patch -> patch.compatibleWith(incoming, amplifier))
                     .filter(patch -> patch.center.squaredDistanceTo(center)
                             <= Math.pow(Math.min(patch.radius, patchRadius) * 0.45, 2.0))
                     .min(Comparator.comparingDouble(patch -> patch.center.squaredDistanceTo(center)))
@@ -224,7 +284,7 @@ public final class GloamStainManager {
                 nearby.expiryTick = expiry;
                 nearby.radius = Math.max(nearby.radius, patchRadius);
                 nearby.slowAmplifier = Math.max(nearby.slowAmplifier, amplifier);
-                nearby.mergeBehavior(behavior);
+                nearby.adopt(incoming);
                 Entity entity = world.getEntity(nearby.visualId);
                 if (entity instanceof BloodStainVisualEntity visual) {
                     visual.setRadius(nearby.radius);
@@ -246,10 +306,11 @@ public final class GloamStainManager {
         visual.setFadeInDuration(fadeInTicks);
         visual.addCommandTag(VISUAL_TAG);
         if (!world.spawnEntity(visual)) {
+            incoming.resolve(0);
             return;
         }
         patches.add(ActivePatch.circle(ownerId, visual.getUuid(), center,
-                patchRadius, expiry, duration, fade, amplifier, growth, behavior));
+                patchRadius, expiry, duration, fade, amplifier, growth, incoming));
     }
 
     public static UUID beginTrail(ServerWorld world, UUID ownerId, Vec3d origin,
@@ -288,7 +349,7 @@ public final class GloamStainManager {
         UUID trailId = UUID.randomUUID();
         ActivePatch trail = ActivePatch.trail(trailId, ownerId, visual.getUuid(), origin,
                 horizontal, radius, world.getTime() + duration, duration, fade, amplifier);
-        trail.mergeBehavior(behavior);
+        trail.adopt(behavior);
         patches.add(trail);
         return trailId;
     }
@@ -371,17 +432,20 @@ public final class GloamStainManager {
             return;
         }
         long now = world.getTime();
+        List<ActivePatch> expiring = new ArrayList<>();
         Iterator<ActivePatch> iterator = patches.iterator();
         while (iterator.hasNext()) {
             ActivePatch patch = iterator.next();
             if (now >= patch.expiryTick || world.getEntity(patch.visualId) == null) {
-                if (now >= patch.expiryTick) expirePatch(world, patch);
+                if (now >= patch.expiryTick) expiring.add(patch);
+                else patch.resolve(0);
                 discardVisual(world, patch.visualId);
                 iterator.remove();
             } else {
                 movePatch(world, patch);
             }
         }
+        expiring.forEach(patch -> expirePatch(world, patch));
         if (patches.isEmpty()) {
             ACTIVE.remove(world);
             return;
@@ -409,61 +473,86 @@ public final class GloamStainManager {
                 if (!patch.contains(target.getPos())) {
                     continue;
                 }
-                GloamMechanicsManager.recordContact(
-                        world, owner, target, patch.slowAmplifier, patch.slowDurationTicks,
-                        patch.appliesSlowness);
+                GloamMechanicsManager.recordContact(world, owner, target, patch.source());
             }
         }
     }
 
     private static void movePatch(ServerWorld world, ActivePatch patch) {
-        if (patch.shape != BloodStainVisualEntity.SHAPE_CIRCLE
-                || patch.moveRange <= 0 || patch.moveSpeed <= 0) return;
+        double moveRange = patch.behavior.moveRange();
+        double moveSpeed = patch.behavior.moveSpeed();
+        if (patch.shape != BloodStainVisualEntity.SHAPE_CIRCLE || moveRange <= 0 || moveSpeed <= 0) return;
         LivingEntity owner = resolveLiving(world, patch.ownerId);
-        if (owner == null) return;
+        Entity visual = world.getEntity(patch.visualId);
+        if (owner == null || visual == null) return;
         LivingEntity target = world.getEntitiesByClass(LivingEntity.class,
-                        Box.of(patch.center, patch.moveRange * 2, VERTICAL_RANGE * 2, patch.moveRange * 2),
+                        Box.of(patch.center, moveRange * 2, VERTICAL_RANGE * 2, moveRange * 2),
                         entity -> entity != owner && entity.isAlive() && !entity.isRemoved()
                                 && HelperMethods.checkAbilityTarget(entity, owner)
-                                && horizontalDistanceSquared(entity.getPos(), patch.center)
-                                <= patch.moveRange * patch.moveRange)
+                                && entity.squaredDistanceTo(patch.center) <= moveRange * moveRange
+                                && isVisibleFrom(world, visual, patch.center, entity))
                 .stream().min(Comparator.comparingDouble(entity ->
-                        horizontalDistanceSquared(entity.getPos(), patch.center))).orElse(null);
+                        entity.squaredDistanceTo(patch.center))).orElse(null);
         if (target == null) return;
         Vec3d direction = new Vec3d(target.getX() - patch.center.x, 0, target.getZ() - patch.center.z);
         if (direction.lengthSquared() < 1.0E-6) return;
-        double distance = Math.min(patch.moveSpeed, direction.horizontalLength());
+        double distance = Math.min(moveSpeed, direction.horizontalLength());
         Vec3d moved = patch.center.add(direction.normalize().multiply(distance));
-        patch.center = new Vec3d(moved.x,
-                LivyatanWaveManager.findGroundTopY(world, moved.x, moved.z, patch.center.y + 2), moved.z);
-        Entity visual = world.getEntity(patch.visualId);
-        if (visual != null) visual.setPosition(patch.center);
+        Vec3d stepped = steppedGround(world, visual, patch.center, moved);
+        if (stepped == null) return;
+        patch.center = stepped;
+        visual.setPosition(patch.center);
+    }
+
+    private static boolean isVisibleFrom(ServerWorld world, Entity source, Vec3d center, Entity target) {
+        return world.raycast(new RaycastContext(center.add(0.0, 0.4, 0.0),
+                target.getBoundingBox().getCenter(), RaycastContext.ShapeType.COLLIDER,
+                RaycastContext.FluidHandling.NONE, source)).getType() == HitResult.Type.MISS;
+    }
+
+    private static Vec3d steppedGround(ServerWorld world, Entity source, Vec3d from, Vec3d to) {
+        if (world.raycast(new RaycastContext(from.add(0.0, 0.6, 0.0), to.add(0.0, 0.6, 0.0),
+                RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, source))
+                .getType() != HitResult.Type.MISS) {
+            return null;
+        }
+        BlockHitResult ground = world.raycast(new RaycastContext(
+                new Vec3d(to.x, from.y + 1.0, to.z), new Vec3d(to.x, from.y - 1.0, to.z),
+                RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, source));
+        if (ground.getType() == HitResult.Type.MISS) {
+            return null;
+        }
+        double groundY = ground.getPos().y;
+        if (Math.abs(groundY - from.y) > 1.0) {
+            return null;
+        }
+        return new Vec3d(to.x, groundY, to.z);
     }
 
     private static void expirePatch(ServerWorld world, ActivePatch patch) {
-        if (patch.expiryDamageMultiplier <= 0 || patch.expiryRadius <= 0
-                || patch.expiryTargetCap <= 0 || patch.weaponStack.isEmpty()) return;
+        PatchBehavior behavior = patch.behavior;
         LivingEntity owner = resolveLiving(world, patch.ownerId);
-        if (owner == null) return;
-        double radius = patch.expiryRadius;
+        if (behavior.expiryDamageMultiplier() <= 0 || behavior.expiryRadius() <= 0
+                || behavior.expiryTargetCap() <= 0 || behavior.weaponStack().isEmpty()
+                || owner == null) {
+            patch.resolve(0);
+            return;
+        }
+        double radius = behavior.expiryRadius();
         List<LivingEntity> targets = world.getEntitiesByClass(LivingEntity.class,
                         Box.of(patch.center, radius * 2, radius * 2, radius * 2),
                         entity -> entity != owner && entity.isAlive() && !entity.isRemoved()
                                 && HelperMethods.checkAbilityTarget(entity, owner)
                                 && entity.squaredDistanceTo(patch.center) <= radius * radius)
                 .stream().sorted(Comparator.comparingDouble(entity -> entity.squaredDistanceTo(patch.center)))
-                .limit(patch.expiryTargetCap).toList();
-        ItemStack stack = patch.weaponStack.copy();
-        float damage = patch.spearDamage * (float) patch.expiryDamageMultiplier;
+                .limit(behavior.expiryTargetCap()).toList();
+        ItemStack stack = behavior.weaponStack().copy();
+        float damage = behavior.spearDamage() * (float) behavior.expiryDamageMultiplier();
+        int hits = 0;
         for (LivingEntity target : targets) {
-            SimplySwordsAPI.applyEntityWeaponHit(stack, target, owner, damage);
+            if (SimplySwordsAPI.applyEntityWeaponHit(stack, target, owner, damage)) hits++;
         }
-    }
-
-    private static double horizontalDistanceSquared(Vec3d first, Vec3d second) {
-        double x = first.x - second.x;
-        double z = first.z - second.z;
-        return x * x + z * z;
+        patch.resolve(hits);
     }
 
     private static void enforceGrowthCap(ServerWorld world, List<ActivePatch> patches, UUID ownerId) {
@@ -481,6 +570,7 @@ public final class GloamStainManager {
         if (oldest != null) {
             discardVisual(world, oldest.visualId);
             patches.remove(oldest);
+            oldest.resolve(0);
         }
     }
 
@@ -496,6 +586,7 @@ public final class GloamStainManager {
         if (oldest != null) {
             discardVisual(world, oldest.visualId);
             patches.remove(oldest);
+            oldest.resolve(0);
         }
     }
 
@@ -555,15 +646,9 @@ public final class GloamStainManager {
         private long expiryTick;
         private int grantedExtensionTicks;
         private int slowAmplifier;
-        private int slowDurationTicks;
-        private boolean appliesSlowness = true;
-        private double moveRange;
-        private double moveSpeed;
-        private ItemStack weaponStack;
-        private float spearDamage;
-        private double expiryDamageMultiplier;
-        private double expiryRadius;
-        private int expiryTargetCap;
+        private PatchBehavior behavior = PatchBehavior.NONE;
+        private final List<IntConsumer> pending = new ArrayList<>();
+        private boolean resolved;
 
         private ActivePatch(UUID id, UUID ownerId, UUID visualId, int shape,
                             Vec3d start, Vec3d direction, Vec3d center,
@@ -585,7 +670,7 @@ public final class GloamStainManager {
             this.fadeTicks = fadeTicks;
             this.slowAmplifier = slowAmplifier;
             this.growth = growth;
-            mergeBehavior(behavior);
+            adopt(behavior);
         }
 
         private static ActivePatch circle(UUID ownerId, UUID visualId, Vec3d center,
@@ -608,21 +693,51 @@ public final class GloamStainManager {
                     slowAmplifier, false, PatchBehavior.NONE);
         }
 
-        private void mergeBehavior(PatchBehavior behavior) {
-            PatchBehavior value = behavior == null ? PatchBehavior.NONE : behavior;
-            slowDurationTicks = Math.max(slowDurationTicks, value.slowDurationTicks());
-            appliesSlowness &= value.appliesSlowness();
-            moveRange = Math.max(moveRange, value.moveRange());
-            moveSpeed = Math.max(moveSpeed, value.moveSpeed());
-            double currentDamage = spearDamage * expiryDamageMultiplier;
-            double incomingDamage = value.spearDamage() * value.expiryDamageMultiplier();
-            if (incomingDamage >= currentDamage) {
-                weaponStack = value.weaponStack().copy();
-                spearDamage = value.spearDamage();
-                expiryDamageMultiplier = value.expiryDamageMultiplier();
-                expiryRadius = value.expiryRadius();
-                expiryTargetCap = value.expiryTargetCap();
+        private boolean compatibleWith(PatchBehavior incoming, int amplifier) {
+            if (behavior.sourceId() == null || incoming.sourceId() == null) {
+                return behavior.sourceId() == null && incoming.sourceId() == null
+                        && behavior.appliesSlowness() == incoming.appliesSlowness();
             }
+            return slowAmplifier == amplifier && behavior.sameSource(incoming);
+        }
+
+        private void adopt(PatchBehavior incoming) {
+            PatchBehavior value = incoming == null ? PatchBehavior.NONE : incoming;
+            if (value.onResolved() != null) {
+                pending.add(value.onResolved());
+            }
+            if (behavior.sourceId() != null || value.sourceId() != null) {
+                behavior = value;
+                return;
+            }
+            double currentDamage = behavior.spearDamage() * behavior.expiryDamageMultiplier();
+            double incomingDamage = value.spearDamage() * value.expiryDamageMultiplier();
+            PatchBehavior damage = incomingDamage >= currentDamage ? value : behavior;
+            behavior = new PatchBehavior(null, damage.weaponStack(), damage.spearDamage(),
+                    Math.max(behavior.slowAmplifier(), value.slowAmplifier()),
+                    Math.max(behavior.slowDurationTicks(), value.slowDurationTicks()),
+                    behavior.appliesSlowness() && value.appliesSlowness(),
+                    Math.max(behavior.moveRange(), value.moveRange()),
+                    Math.max(behavior.moveSpeed(), value.moveSpeed()),
+                    damage.expiryDamageMultiplier(), damage.expiryRadius(), damage.expiryTargetCap(),
+                    Math.max(behavior.growthDurationTicks(), value.growthDurationTicks()), null);
+        }
+
+        private PatchBehavior source() {
+            return behavior.withAmplifier(slowAmplifier);
+        }
+
+        private void resolve(int hits) {
+            if (resolved) {
+                return;
+            }
+            resolved = true;
+            int reported = Math.max(0, hits);
+            for (IntConsumer callback : pending) {
+                callback.accept(reported);
+                reported = 0;
+            }
+            pending.clear();
         }
 
         private void updateCenter() {
