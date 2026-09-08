@@ -166,6 +166,27 @@ public final class GloamStainManager {
                 || DevourerStainManager.containsForOwner(world, ownerId, position);
     }
 
+    public static boolean isOnSourceGloam(ServerWorld world, UUID sourceId, Entity entity) {
+        if (world == null || sourceId == null || entity == null) return false;
+        Vec3d position = entity.getPos();
+        return ACTIVE.getOrDefault(world, List.of()).stream()
+                .anyMatch(patch -> sourceId.equals(patch.behavior.sourceId()) && patch.contains(position));
+    }
+
+    public static void removeSourcePatches(ServerWorld world, UUID sourceId) {
+        List<ActivePatch> patches = world == null || sourceId == null ? null : ACTIVE.get(world);
+        if (patches == null) return;
+        Iterator<ActivePatch> iterator = patches.iterator();
+        while (iterator.hasNext()) {
+            ActivePatch patch = iterator.next();
+            if (!sourceId.equals(patch.behavior.sourceId())) continue;
+            patch.resolve(0);
+            discardVisual(world, patch.visualId);
+            iterator.remove();
+        }
+        if (patches.isEmpty()) ACTIVE.remove(world);
+    }
+
     private static boolean containsClientStain(
             BloodStainVisualEntity visual, Vec3d position) {
         if (Math.abs(position.y - visual.getY()) > visual.getVerticalRange()) {

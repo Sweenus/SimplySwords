@@ -16,6 +16,7 @@ import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.network.packet.s2c.play.VehicleMoveS2CPacket;
 import net.minecraft.particle.DustColorTransitionParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
@@ -80,6 +81,9 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
     private static final double WALL_ENTRY_REACH = 1.25;
     private static final double WALL_HOLD_REACH = 1.7;
     private static final double GROUND_CLING_DISTANCE = 3.0;
+    private static final double RIFT_STEP = 0.25;
+    private static final double MOMENTUM_MOVE_EPSILON = 0.01;
+    private static final int MOMENTUM_STILL_TICKS = 5;
     private static final TrackedData<Integer> OWNER_ID =
             DataTracker.registerData(SoulstalkerStrideEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Optional<UUID>> OWNER_UUID =
@@ -120,6 +124,7 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
     private boolean meteorPenaltyActive;
     private boolean momentumActive;
     private double momentumDistance;
+    private int momentumStillTicks;
     private Vec3d lastMomentumPoint;
     private long riftReadyTick = Long.MIN_VALUE;
     private final List<PendingFootfall> pendingFootfalls = new ArrayList<>();
@@ -248,11 +253,12 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
         return meteorPenaltyActive;
     }
 
-    private void trackMomentum() {
+    private void trackMomentum(ServerWorld world) {
         double required = tuning.get(StormSoulMasteryTuning.Setting.MOMENTUM_DISTANCE, 0);
         if (required <= 0) {
             momentumActive = false;
             momentumDistance = 0.0;
+            momentumStillTicks = 0;
             lastMomentumPoint = getPos();
             return;
         }
@@ -263,12 +269,25 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
         }
         double moved = position.distanceTo(lastMomentumPoint);
         lastMomentumPoint = position;
-        momentumDistance = moved < 0.02 ? 0.0 : momentumDistance + moved;
-        momentumActive = momentumDistance >= required;
+        if (moved >= MOMENTUM_MOVE_EPSILON) {
+            momentumStillTicks = 0;
+            momentumDistance += moved;
+        } else if (++momentumStillTicks >= MOMENTUM_STILL_TICKS) {
+            momentumDistance = 0.0;
+        }
+        boolean active = momentumDistance >= required;
+        if (active && !momentumActive) {
+            world.spawnParticles(GLOAM_DUST, getX(), getBodyY(0.35), getZ(),
+                    24, 0.7, 0.4, 0.7, 0.05);
+            world.playSound(null, getBlockPos(), SoundRegistry.DARK_ACTIVATION_DISTORTED.get(),
+                    SoundCategory.PLAYERS, 0.32F, 1.65F);
+        }
+        momentumActive = active;
     }
 
     private void resetMotionObservation() {
         lastMomentumPoint = getPos();
+        momentumStillTicks = 0;
         leapOrigin = getPos();
         leapLastObservedPosition = getPos();
         leapLastObservedMotion = Vec3d.ZERO;
@@ -373,7 +392,7 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
             return;
         }
         if (!getWorld().isClient() && getWorld() instanceof ServerWorld world) {
-            trackMomentum();
+            trackMomentum(world);
             resolveLeapContact(world, controller, leapObservationStart,
                     getPos().subtract(leapObservationStart));
             if (isLeapInProgress()) {
@@ -1139,13 +1158,21 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
             jumpScale = 0.6F;
             return;
         }
+        if (!getWorld().isClient() && getWorld() instanceof ServerWorld riftWorld
+                && tryRiftRelocation(riftWorld, controller, look)) {
+            jumpScale = 0.6F;
+            leapCharged = false;
+            pendingFootfalls.clear();
+            forcedStepsRemaining = 0;
+            clearMantle();
+            clearStandoff();
+            overhangBlocked = false;
+            return;
+        }
         leapCharged = charged;
         BlockHitResult sourceContact = mode == SURFACE_WALL
                 ? findWall(getPos(), sourceNormal.multiply(-1.0), wallHoldReach())
                 : mode == SURFACE_CEILING ? findCeiling() : null;
-        if (!getWorld().isClient() && getWorld() instanceof ServerWorld riftWorld) {
-            tryRiftRelocation(riftWorld, controller, look, charged);
-        }
         Vec3d horizontal = new Vec3d(look.x, 0.0, look.z);
         if (horizontal.lengthSquared() < 1.0E-6) {
             horizontal = horizontalFacing(controller.getYaw());
@@ -1218,10 +1245,9 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
         }
     }
 
-    private boolean tryRiftRelocation(ServerWorld world, LivingEntity controller,
-                                      Vec3d look, boolean charged) {
+    private boolean tryRiftRelocation(ServerWorld world, LivingEntity controller, Vec3d look) {
         double range = tuning.get(StormSoulMasteryTuning.Setting.RIFT_RANGE, 0);
-        if (range <= 0 || !charged || world.getTime() < riftReadyTick) {
+        if (range <= 0 || world.getTime() < riftReadyTick) {
             return false;
         }
         Vec3d aim = look.lengthSquared() < 1.0E-6 ? controller.getRotationVec(1.0F) : look;
@@ -1230,14 +1256,7 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
         }
         aim = aim.normalize();
         Vec3d from = getPos();
-        Vec3d destination = null;
-        for (double step = 0.5; step <= range + 1.0E-6; step += 0.5) {
-            Vec3d candidate = from.add(aim.multiply(step));
-            if (!isRiftDestinationClear(world, candidate)) {
-                break;
-            }
-            destination = candidate;
-        }
+        Vec3d destination = walkRiftRoute(world, from, aim, range);
         if (destination == null || destination.squaredDistanceTo(from) < 1.0) {
             return false;
         }
@@ -1247,6 +1266,12 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
             createStrideStain(world, destination, stainRadius);
         }
         refreshPositionAfterTeleport(destination.x, destination.y, destination.z);
+        if (controller instanceof ServerPlayerEntity player) {
+            player.networkHandler.sendPacket(new VehicleMoveS2CPacket(this));
+            Vec3d ridingPos = getPassengerRidingPos(player);
+            player.networkHandler.requestTeleport(ridingPos.x, ridingPos.y, ridingPos.z,
+                    player.getYaw(), player.getPitch());
+        }
         riftReadyTick = world.getTime() + Math.max(1,
                 tuning.integer(StormSoulMasteryTuning.Setting.RIFT_LOCKOUT_TICKS, 60));
         resetMotionObservation();
@@ -1255,6 +1280,35 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
         world.playSound(null, getBlockPos(), SoundRegistry.DARK_ACTIVATION_DISTORTED.get(),
                 SoundCategory.PLAYERS, 0.6F, 1.1F);
         return true;
+    }
+
+    private Vec3d walkRiftRoute(ServerWorld world, Vec3d from, Vec3d aim, double range) {
+        Vec3d base = from;
+        Vec3d destination = null;
+        double rangeSquared = range * range;
+        for (double travelled = RIFT_STEP; travelled <= range + 1.0E-6; travelled += RIFT_STEP) {
+            Vec3d candidate = resolveRiftStep(world, base.add(aim.multiply(RIFT_STEP)));
+            if (candidate == null || candidate.squaredDistanceTo(from) > rangeSquared) {
+                break;
+            }
+            base = candidate;
+            destination = candidate;
+        }
+        return destination;
+    }
+
+    private Vec3d resolveRiftStep(ServerWorld world, Vec3d candidate) {
+        if (isRiftDestinationClear(world, candidate)) {
+            return candidate;
+        }
+        double stepHeight = Math.max(0.5, getStepHeight());
+        for (double lift = 0.25; lift <= stepHeight + 1.0E-6; lift += 0.25) {
+            Vec3d raised = candidate.add(0.0, lift, 0.0);
+            if (isRiftDestinationClear(world, raised)) {
+                return raised;
+            }
+        }
+        return null;
     }
 
     private boolean isRiftDestinationClear(ServerWorld world, Vec3d candidate) {

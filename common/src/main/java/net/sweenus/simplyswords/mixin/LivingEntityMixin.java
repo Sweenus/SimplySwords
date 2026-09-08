@@ -124,6 +124,7 @@ public abstract class LivingEntityMixin {
         ObserverStatusEffectSyncManager.syncRemoved((LivingEntity) (Object) this, effect);
         LongPathFinalFormsMasteryCombatManager.onStatusEffectRemoved((LivingEntity) (Object) this, effect);
         net.sweenus.simplyswords.world.HarbingerMasteryState.weaknessRemoved((LivingEntity) (Object) this, effect);
+        DreadwhisperAbilityManager.onStatusEffectRemoved((LivingEntity) (Object) this, effect);
     }
 
     @Inject(at = @At("HEAD"), method = "tryUseTotem", cancellable = true)
@@ -334,6 +335,7 @@ public abstract class LivingEntityMixin {
         GloamMechanicsManager.onTargetDeath(livingEntity);
         net.sweenus.simplyswords.world.GloampiercerAbilityManager.clearActor(livingEntity);
         net.sweenus.simplyswords.world.SoulstalkerAbilityManager.clearActor(livingEntity);
+        DreadwhisperAbilityManager.clearActor(livingEntity);
         WraithfangAbilityManager.onTargetDeath(livingEntity, damageSource);
         StormbringerAbilityManager.clearActor(livingEntity);
         StormbringerParryManager.clearActor(livingEntity);

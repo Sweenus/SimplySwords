@@ -30,6 +30,7 @@ public final class DevourerMassVisualEntity extends Entity {
     private static final TrackedData<Integer> VOICE_INDEX = DataTracker.registerData(DevourerMassVisualEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Integer> VOICE_SEQUENCE = DataTracker.registerData(DevourerMassVisualEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Boolean> SPREADS_GLOAM = DataTracker.registerData(DevourerMassVisualEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+    private static final TrackedData<Boolean> SETTLED = DataTracker.registerData(DevourerMassVisualEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
 
     public DevourerMassVisualEntity(EntityType<? extends DevourerMassVisualEntity> type, World world) {
         super(type, world);
@@ -73,6 +74,7 @@ public final class DevourerMassVisualEntity extends Entity {
         builder.add(VOICE_INDEX, -1);
         builder.add(VOICE_SEQUENCE, 0);
         builder.add(SPREADS_GLOAM, true);
+        builder.add(SETTLED, true);
     }
 
     @Override
@@ -157,6 +159,8 @@ public final class DevourerMassVisualEntity extends Entity {
     public float getMaximumRadius() { return dataTracker.get(MAX_RADIUS); }
     public boolean spreadsGloam() { return dataTracker.get(SPREADS_GLOAM); }
     public void setSpreadsGloam(boolean spreads) { dataTracker.set(SPREADS_GLOAM, spreads); }
+    public boolean isSettled() { return dataTracker.get(SETTLED); }
+    public void setSettled(boolean settled) { dataTracker.set(SETTLED, settled); }
     public int getFeedCount() { return dataTracker.get(FEED_COUNT); }
     public int getLastFeedAge() { return dataTracker.get(LAST_FEED_AGE); }
     public int getSeed() { return dataTracker.get(SEED); }
@@ -204,6 +208,7 @@ public final class DevourerMassVisualEntity extends Entity {
         dataTracker.set(VOICE_INDEX, nbt.getInt("voice_index"));
         dataTracker.set(VOICE_SEQUENCE, nbt.getInt("voice_sequence"));
         dataTracker.set(SPREADS_GLOAM, !nbt.contains("spreads_gloam") || nbt.getBoolean("spreads_gloam"));
+        dataTracker.set(SETTLED, !nbt.contains("settled") || nbt.getBoolean("settled"));
     }
 
     @Override
@@ -224,6 +229,7 @@ public final class DevourerMassVisualEntity extends Entity {
         nbt.putInt("voice_index", getVoiceIndex());
         nbt.putInt("voice_sequence", getVoiceSequence());
         nbt.putBoolean("spreads_gloam", spreadsGloam());
+        nbt.putBoolean("settled", isSettled());
     }
 
     private static float ease(float value) {

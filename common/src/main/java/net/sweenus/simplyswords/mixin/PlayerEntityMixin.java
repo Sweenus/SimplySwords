@@ -37,8 +37,10 @@ public abstract class PlayerEntityMixin {
     private void simplyswords$wraithfangAttack(Entity target, com.llamalad7.mixinextras.injector.wrapoperation.Operation<Void> original) {
         net.sweenus.simplyswords.world.WraithfangAbilityManager.beginAttack((PlayerEntity) (Object) this);
         net.sweenus.simplyswords.world.LongPathFinalFormsMasteryCombatManager.beginAttack((PlayerEntity) (Object) this);
+        net.sweenus.simplyswords.world.DreadwhisperAbilityManager.beginAttack((PlayerEntity) (Object) this);
         try { original.call(target); }
         finally {
+            net.sweenus.simplyswords.world.DreadwhisperAbilityManager.endAttack();
             net.sweenus.simplyswords.world.LongPathFinalFormsMasteryCombatManager.endAttack();
             net.sweenus.simplyswords.world.WraithfangAbilityManager.endAttack();
         }

@@ -52,6 +52,9 @@ public final class SoulstalkerCleaveEntity extends Entity {
             DataTracker.registerData(SoulstalkerCleaveEntity.class, TrackedDataHandlerRegistry.FLOAT);
     private static final TrackedData<Integer> SEED =
             DataTracker.registerData(SoulstalkerCleaveEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    private static final double CRESCENT_LATERAL_SCALE = 0.71;
+    private static final double CRESCENT_VERTICAL_SCALE = 0.22;
+    private static final double CRESCENT_MINIMUM_VERTICAL = 0.75;
     private static final DustColorTransitionParticleEffect GLOAM_DUST =
             new DustColorTransitionParticleEffect(new Vector3f(0.025F, 0.008F, 0.07F),
                     new Vector3f(0.48F, 0.08F, 0.82F), 1.25F);
@@ -154,8 +157,9 @@ public final class SoulstalkerCleaveEntity extends Entity {
     }
 
     private void damageTargets(ServerWorld world, LivingEntity owner, Vec3d start, Vec3d end, float width) {
-        double halfWidth = Math.max(0.2, width * 0.5);
-        Box search = new Box(start, end).expand(halfWidth);
+        double lateral = Math.max(0.2, width * CRESCENT_LATERAL_SCALE);
+        double vertical = Math.max(CRESCENT_MINIMUM_VERTICAL, width * CRESCENT_VERTICAL_SCALE);
+        Box search = new Box(start, end).expand(Math.max(lateral, vertical));
         ItemStack stack = dataTracker.get(WEAPON_STACK);
         if (stack.isEmpty() || victims >= targetCap) {
             return;
@@ -165,8 +169,7 @@ public final class SoulstalkerCleaveEntity extends Entity {
                         && EntityPredicates.VALID_LIVING_ENTITY.test(entity)
                         && HelperMethods.checkAbilityTarget(entity, owner)
                         && !attemptedTargets.contains(entity.getUuid())
-                        && sweptDistanceSquared(start, end, entity.getBoundingBox())
-                                <= halfWidth * halfWidth));
+                        && withinSweep(start, end, entity.getBoundingBox(), lateral, vertical)));
         candidates.sort(Comparator.comparingDouble(
                 entity -> travelOrder(start, end, entity.getBoundingBox())));
         for (LivingEntity target : candidates) {
@@ -203,12 +206,13 @@ public final class SoulstalkerCleaveEntity extends Entity {
         return MathHelper.clamp(box.getCenter().subtract(start).dotProduct(delta) / lengthSquared, 0.0, 1.0);
     }
 
-    private static double sweptDistanceSquared(Vec3d start, Vec3d end, Box box) {
+    private static boolean withinSweep(Vec3d start, Vec3d end, Box box,
+                                       double lateral, double vertical) {
         Vec3d closest = start.add(end.subtract(start).multiply(travelOrder(start, end, box)));
         double x = MathHelper.clamp(closest.x, box.minX, box.maxX) - closest.x;
         double y = MathHelper.clamp(closest.y, box.minY, box.maxY) - closest.y;
         double z = MathHelper.clamp(closest.z, box.minZ, box.maxZ) - closest.z;
-        return x * x + y * y + z * z;
+        return (x * x + z * z) / (lateral * lateral) + y * y / (vertical * vertical) <= 1.0;
     }
 
     public void releaseTracking() {

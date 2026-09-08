@@ -287,6 +287,7 @@ public final class DevourerAbilityManager {
             }
             if (!mass.collapsing) {
                 mass.collapsing = true;
+                visual.setSettled(true);
                 releaseLooseTargets(world, mass, true);
                 collapseDamage(world, actor, mass);
                 spawnCollapseEffects(world, mass.center);
@@ -792,32 +793,61 @@ public final class DevourerAbilityManager {
 
     private static void tickFollow(ServerWorld world, LivingEntity actor, ActiveMass mass,
                                    DevourerMassVisualEntity visual) {
+        visual.setSettled(!moveTowardPrey(world, actor, mass, visual));
+    }
+
+    private static boolean moveTowardPrey(ServerWorld world, LivingEntity actor, ActiveMass mass,
+                                          DevourerMassVisualEntity visual) {
         AbyssalSpectralMasteryTuning tuning = AbyssalSpectralMasteryAbilities.tuning(mass.execution);
-        if ((tuning.integer(AbyssalSpectralMasteryTuning.Setting.MODE, 0) & 2) == 0) return;
+        if ((tuning.integer(AbyssalSpectralMasteryTuning.Setting.MODE, 0) & 2) == 0) return false;
         double range = tuning.get(AbyssalSpectralMasteryTuning.Setting.FOLLOW_RANGE, 0);
         double speed = tuning.get(AbyssalSpectralMasteryTuning.Setting.MOVEMENT_SPEED, 0);
-        if (range <= 0.0 || speed <= 0.0) return;
-        Box search = new Box(mass.center, mass.center).expand(range);
-        LivingEntity nearest = world.getEntitiesByClass(LivingEntity.class, search,
-                        candidate -> isValidTarget(world, actor, mass.sourcePlayerId, candidate)
-                                && !mass.targets.containsKey(candidate.getUuid())
-                                && hasLineOfSight(world, mass.center, candidate)
-                                && candidate.squaredDistanceTo(mass.center) <= range * range).stream()
-                .min(Comparator.comparingDouble(candidate -> candidate.squaredDistanceTo(mass.center)))
-                .orElse(null);
-        if (nearest == null) return;
-        Vec3d desired = nearest.getPos().add(0.0, Math.max(0.6, nearest.getHeight() * 0.5), 0.0);
+        double minRange = tuning.get(AbyssalSpectralMasteryTuning.Setting.FOLLOW_MIN_RANGE, 0);
+        int lockout = tuning.integer(AbyssalSpectralMasteryTuning.Setting.FOLLOW_SWITCH_LOCKOUT_TICKS, 0);
+        if (range <= 0.0 || speed <= 0.0) return false;
+        long now = world.getTime();
+        LivingEntity current = resolveLiving(world, mass.chaseTargetId);
+        if (current != null && !isChaseCandidate(world, actor, mass, current, minRange, range)) {
+            current = null;
+        }
+        if (now >= mass.nextChaseSwitchTick) {
+            Box search = new Box(mass.center, mass.center).expand(range);
+            LivingEntity nearest = world.getEntitiesByClass(LivingEntity.class, search,
+                            candidate -> isChaseCandidate(world, actor, mass, candidate, minRange, range)).stream()
+                    .min(Comparator.comparingDouble(candidate -> candidate.squaredDistanceTo(mass.center)))
+                    .orElse(null);
+            if (nearest != null && nearest != current) {
+                mass.chaseTargetId = nearest.getUuid();
+                mass.nextChaseSwitchTick = now + lockout;
+                current = nearest;
+            }
+        }
+        if (current == null) return false;
+        Vec3d desired = current.getPos().add(0.0, Math.max(0.6, current.getHeight() * 0.5), 0.0);
         Vec3d offset = desired.subtract(mass.center);
         double distance = offset.length();
-        if (distance < 0.05) return;
+        if (distance < 0.05) return false;
+        double travel = Math.min(speed, Math.max(0.0, distance - minRange));
+        if (travel <= 0.0) return false;
         visual.noClip = false;
         try {
-            visual.move(MovementType.SELF, offset.normalize().multiply(Math.min(speed, distance)));
+            visual.move(MovementType.SELF, offset.normalize().multiply(travel));
         } finally {
             visual.noClip = true;
         }
         mass.center = visual.getPos();
         DevourerStainManager.moveField(world, mass.visualId, mass.center);
+        return true;
+    }
+
+    private static boolean isChaseCandidate(ServerWorld world, LivingEntity actor, ActiveMass mass,
+                                            LivingEntity candidate, double minRange, double range) {
+        double distance = candidate.squaredDistanceTo(mass.center);
+        return isValidTarget(world, actor, mass.sourcePlayerId, candidate)
+                && !mass.targets.containsKey(candidate.getUuid())
+                && distance > minRange * minRange
+                && distance <= range * range
+                && hasLineOfSight(world, mass.center, candidate);
     }
 
     public static void markRouted(ServerWorld world, UUID actorId, UUID targetId, int windowTicks) {
@@ -1218,6 +1248,8 @@ public final class DevourerAbilityManager {
         private int heldCount;
         private int cooldownRefund;
         private long nextLooseLaunchTick;
+        private UUID chaseTargetId;
+        private long nextChaseSwitchTick;
         private long nextVoiceTick;
         private int lastVoiceIndex = -1;
         private boolean bloomed;

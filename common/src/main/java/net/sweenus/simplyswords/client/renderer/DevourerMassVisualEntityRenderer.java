@@ -96,7 +96,8 @@ public final class DevourerMassVisualEntityRenderer extends EntityRenderer<Devou
     private void renderTerrainStain(DevourerMassVisualEntity entity,
                                     float age, float tickDelta,
                                     MatrixStack matrices, VertexConsumerProvider consumers) {
-        if (!Config.general.enableModernFieldEffects || age < entity.getTravelTicks()) {
+        if (!Config.general.enableModernFieldEffects || age < entity.getTravelTicks()
+                || !entity.isSettled()) {
             terrainOverlay.clear(entity.getUuid());
             return;
         }
