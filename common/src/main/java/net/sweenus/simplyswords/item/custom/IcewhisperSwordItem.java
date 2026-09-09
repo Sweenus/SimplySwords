@@ -94,6 +94,10 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
         IcewhisperCometManager.startStorm(serverWorld, actor, stack, radius, abilityDamage * Config.uniqueEffects.icewhisper.cometDamageMultiplier, Config.uniqueEffects.icewhisper.duration);
     }
 
+    public static int slowAmplifier(int current, boolean present, int cap) {
+        return present ? Math.min(cap, current + 1) : 0;
+    }
+
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
         if (!world.isClient && world instanceof ServerWorld serverWorld && entity instanceof LivingEntity user
@@ -117,12 +121,9 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
         for (Entity otherEntity : world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
             if ((otherEntity instanceof LivingEntity le) && HelperMethods.checkAbilityTarget(le, user)) {
                 StatusEffectInstance slowness = le.getStatusEffect(StatusEffects.SLOWNESS);
-                if (slowness != null) {
-                    int a = (slowness.getAmplifier() + 1);
-                    le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, Math.max(a, 3)), user);
-                } else {
-                    le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, 0), user);
-                }
+                int amplifier = slowAmplifier(slowness != null ? slowness.getAmplifier() : 0, slowness != null,
+                        Math.max(0, Config.uniqueEffects.icewhisper.maxSlowAmplifier));
+                le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, amplifier), user);
                 float choose = (float) (Math.random() * 1);
                 world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_03.get(), le.getSoundCategory(), 0.1f, choose);
                 float abilityDamage = HelperMethods.abilityScaledDamage("frost", user, stack,
@@ -195,5 +196,7 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
         public float cometSplashRadius = 2.5f;
         @ValidatedFloat.Restrict(min = 0f)
         public float cometDamageMultiplier = 16.0f;
+        @ValidatedInt.Restrict(min = 0)
+        public int maxSlowAmplifier = 2;
     }
 }

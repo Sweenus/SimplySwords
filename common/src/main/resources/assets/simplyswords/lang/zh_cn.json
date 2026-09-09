@@ -1580,6 +1580,7 @@
   "simplyswords.unique_effects.icewhisper.cometFallTicks": "冰彗星 坠落时间",
   "simplyswords.unique_effects.icewhisper.cometSplashRadius": "冰彗星 溅射半径",
   "simplyswords.unique_effects.icewhisper.cometDamageMultiplier": "冰彗星 伤害倍率",
+  "simplyswords.unique_effects.icewhisper.maxSlowAmplifier": "永冻 最大缓慢效果增幅",
   "simplyswords.unique_effects.arcanethyst": "§6[奥术紫晶戟]§7",
   "simplyswords.unique_effects.arcanethyst.chance": "奥术冲击 飘浮概率",
   "simplyswords.unique_effects.arcanethyst.cooldown": "奥术冲击 冷却时间",
