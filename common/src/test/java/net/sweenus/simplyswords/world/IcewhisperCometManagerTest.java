@@ -33,6 +33,17 @@ final class IcewhisperCometManagerTest {
     }
 
     @Test
+    void permafrostNeverAmplifiesAnExternalSlowPastTheCap() {
+        assertEquals(2, IcewhisperSwordItem.slowAmplifier(9, true, 2));
+    }
+
+    @Test
+    void aZeroCapStillLeavesTheLowestSlowLevel() {
+        assertEquals(0, IcewhisperSwordItem.slowAmplifier(0, true, 0));
+        assertEquals(0, IcewhisperSwordItem.slowAmplifier(3, true, 0));
+    }
+
+    @Test
     void twinWakeAddsItsCometOnlyOnEveryThirdWave() {
         StormFrostWaterMasteryTuning twinWake = StormFrostWaterMasteryTuning.EMPTY
                 .with(s("MODE"), IcewhisperAbilityManager.MODE_TWIN_WAKE)

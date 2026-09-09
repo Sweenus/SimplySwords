@@ -1589,6 +1589,7 @@
   "simplyswords.unique_effects.icewhisper.cometFallTicks": "Permafrost comet fall duration",
   "simplyswords.unique_effects.icewhisper.cometSplashRadius": "Permafrost comet splash radius",
   "simplyswords.unique_effects.icewhisper.cometDamageMultiplier": "Permafrost comet damage multiplier",
+  "simplyswords.unique_effects.icewhisper.maxSlowAmplifier": "Permafrost maximum slow amplifier",
   "simplyswords.unique_effects.arcanethyst": "§6[Arcanethyst]§7",
   "simplyswords.unique_effects.arcanethyst.chance": "Arcane Assault chance",
   "simplyswords.unique_effects.arcanethyst.cooldown": "Arcane Assault cooldown",

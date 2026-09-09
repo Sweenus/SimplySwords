@@ -164,7 +164,8 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
         MasteryAbsorptionTracker.tick(user);
         int slowDuration = Math.max(1, BASE_SLOW_TICKS
                 + tuning.integer(s("ICEWHISPER_AURA_SLOW_BONUS_TICKS"), 0));
-        int amplifierCap = tuning.integer(s("ICEWHISPER_AURA_AMPLIFIER_CAP"), 2);
+        int amplifierCap = Math.max(0, tuning.integer(s("ICEWHISPER_AURA_AMPLIFIER_CAP"),
+                Config.uniqueEffects.icewhisper.maxSlowAmplifier));
         double innerRadius = tuning.get(s("ICEWHISPER_INNER_RADIUS"), 0);
         int innerAmplifier = tuning.integer(s("ICEWHISPER_INNER_AMPLIFIER"), 0);
         double slowRadius = tuning.flag(IcewhisperAbilityManager.MODE_KILLING_COLD)
@@ -286,6 +287,8 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
         public float cometSplashRadius = 2.5f;
         @ValidatedFloat.Restrict(min = 0f)
         public float cometDamageMultiplier = 16.0f;
+        @ValidatedInt.Restrict(min = 0)
+        public int maxSlowAmplifier = 2;
     }
 
     private static StormFrostWaterMasteryTuning.Setting s(String name) {
