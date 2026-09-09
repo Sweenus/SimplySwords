@@ -45,6 +45,8 @@ public class TransformationRegistry {
         SimplySwordsAPI.registerTransformation(Blocks.COPPER_BULB, Identifier.of("simplyswords", "storms_edge"));
         SimplySwordsAPI.registerTransformation(Blocks.LIGHTNING_ROD, Identifier.of("simplyswords", "stormscale"));
         SimplySwordsAPI.registerTransformation(Blocks.NETHER_WART_BLOCK, Identifier.of("simplyswords", "bloodwake"));
+        SimplySwordsAPI.registerTransformation(Blocks.HAY_BLOCK, Identifier.of("simplyswords", "riftmane"));
+        SimplySwordsAPI.registerTransformation(Blocks.TARGET, Identifier.of("simplyswords", "dawnquiver"));
     }
 
 }
