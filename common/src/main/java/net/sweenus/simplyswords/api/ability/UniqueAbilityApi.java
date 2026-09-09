@@ -111,6 +111,29 @@ public final class UniqueAbilityApi {
         emit(execution, UniqueAbilityPhase.START, execution.definition().id(), null, 0, 0.0);
     }
 
+    public static UniqueAbilityExecution preparePassive(UniqueAbilityDefinition definition, UniqueAbilityContext context,
+                                                        Consumer<UniqueAbilityTuning.Builder> baseTuning) {
+        UniqueAbilityExecution outer = takeStartedExecution();
+        try {
+            return begin(definition, context, baseTuning);
+        } finally {
+            publishStartedExecution(outer);
+        }
+    }
+
+    public static UniqueAbilityExecution beginPassive(UniqueAbilityDefinition definition, UniqueAbilityContext context,
+                                                      Consumer<UniqueAbilityTuning.Builder> baseTuning) {
+        UniqueAbilityExecution outer = takeStartedExecution();
+        try {
+            UniqueAbilityExecution execution = begin(definition, context, baseTuning);
+            takeStartedExecution();
+            start(execution);
+            return execution;
+        } finally {
+            publishStartedExecution(outer);
+        }
+    }
+
     public static void reportRoll(UniqueAbilityExecution execution, UniqueAbilityKey<?> key,
                                   double chance, double roll, boolean passed) {
         if (execution == null || key == null) {
@@ -160,12 +183,19 @@ public final class UniqueAbilityApi {
         }
         UniqueAbilityEvent event = new UniqueAbilityEvent(execution, phase, eventId, target,
                 Math.max(0, affectedTargets), magnitude);
-        for (UniqueAbilityObserver observer : execution.observers()) {
-            try {
-                observer.onEvent(event);
-            } catch (RuntimeException exception) {
-                SimplySwords.LOGGER.error("Unique ability observer failed for {}", execution.definition().id(), exception);
+        UniqueAbilityExecution outer = STARTED_EXECUTION.get();
+        try {
+            for (UniqueAbilityObserver observer : execution.observers()) {
+                try {
+                    observer.onEvent(event);
+                } catch (RuntimeException exception) {
+                    SimplySwords.LOGGER.error("Unique ability observer failed for {}", execution.definition().id(), exception);
+                } finally {
+                    publishStartedExecution(outer);
+                }
             }
+        } finally {
+            publishStartedExecution(outer);
         }
     }
 

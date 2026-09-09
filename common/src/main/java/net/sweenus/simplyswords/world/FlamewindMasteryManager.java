@@ -52,10 +52,14 @@ public final class FlamewindMasteryManager {
             owner.recastReadyAt = now + tuning.integer(s("FLAMEWIND_RECAST_LOCKOUT_TICKS"), 0);
             owner.releaseKills = 0;
             owner.manualRelease = true;
-            int affected = FlameSeedEffect.detonateOwned(context.world(), context.actor(),
-                    tuning.flag(1 << 25) ? 3 : 64);
-            owner.manualRelease = false;
-            applyReleaseReset(context, tuning, owner);
+            int affected;
+            try {
+                affected = FlameSeedEffect.detonateOwned(context.world(), context.actor(),
+                        tuning.flag(1 << 25) ? 3 : 64);
+            } finally {
+                owner.manualRelease = false;
+            }
+            applyReleaseReset(execution, tuning, owner);
             UniqueAbilityApi.finish(execution, FireForgeMasteryAbilities.FINISH, affected);
             return affected > 0;
         }
@@ -90,7 +94,10 @@ public final class FlamewindMasteryManager {
     }
 
     public static void inherit(LivingEntity source, LivingEntity target) {
-        SeedSnapshot snapshot = snapshot(source);
+        inherit(snapshot(source), target);
+    }
+
+    public static void inherit(SeedSnapshot snapshot, LivingEntity target) {
         if (snapshot != null && target.getWorld() instanceof ServerWorld world) {
             seeds(world).put(target.getUuid(), snapshot.nextGeneration());
         }
@@ -98,16 +105,39 @@ public final class FlamewindMasteryManager {
 
     public static void remove(UUID targetId) {
         if (targetId == null) return;
-        SEEDS.values().forEach(seeds -> seeds.remove(targetId));
-        SEEDS.entrySet().removeIf(entry -> entry.getValue().isEmpty());
+        for (ServerWorld world : List.copyOf(SEEDS.keySet())) remove(world, targetId);
     }
 
     public static void remove(ServerWorld world, UUID targetId) {
         if (world == null || targetId == null) return;
         Map<UUID, SeedSnapshot> seeds = SEEDS.get(world);
         if (seeds == null) return;
-        seeds.remove(targetId);
+        SeedSnapshot removed = seeds.remove(targetId);
         if (seeds.isEmpty()) SEEDS.remove(world);
+        if (removed != null && world.getEntity(removed.ownerId()) instanceof LivingEntity owner) {
+            refreshDraft(world, owner, FireForgeMasteryTuning.EMPTY);
+        }
+    }
+
+    public static void tick(ServerWorld world) {
+        if (world.getTime() % 20 != 0) return;
+        Map<UUID, OwnerState> owners = OWNERS.get(world);
+        if (owners == null) return;
+        for (UUID id : List.copyOf(owners.keySet())) {
+            if (world.getEntity(id) instanceof LivingEntity owner) {
+                refreshDraft(world, owner, FireForgeMasteryTuning.EMPTY);
+            } else {
+                owners.remove(id);
+            }
+        }
+        if (owners.isEmpty()) OWNERS.remove(world);
+    }
+
+    public static void clearActor(LivingEntity actor) {
+        if (actor == null) return;
+        removeDraft(actor);
+        OWNERS.values().forEach(owners -> owners.remove(actor.getUuid()));
+        OWNERS.entrySet().removeIf(entry -> entry.getValue().isEmpty());
     }
 
     public static boolean hasOwned(LivingEntity actor) {
@@ -207,7 +237,7 @@ public final class FlamewindMasteryManager {
         if (state.manualRelease) {
             float absorption = (float) tuning.get(s("FLAMEWIND_RESERVE_ABSORPTION"), 0);
             if (absorption > 0) {
-                MasteryAbsorptionTracker.grant(owner, absorption,
+                MasteryAbsorptionTracker.grant(owner, "flamewind/reserve", absorption,
                         tuning.integer(s("FLAMEWIND_RESERVE_ABSORPTION_TICKS"), 80),
                         (float) tuning.get(s("FLAMEWIND_RESERVE_ABSORPTION_CAP"), absorption));
             }
@@ -230,34 +260,41 @@ public final class FlamewindMasteryManager {
     }
 
     // Ashen Reset: enough kills in one release refunds a share of what is left.
-    private static void applyReleaseReset(WeaponAbilityContext context, FireForgeMasteryTuning tuning,
+    private static void applyReleaseReset(UniqueAbilityExecution execution, FireForgeMasteryTuning tuning,
                                           OwnerState owner) {
         int required = tuning.integer(s("FLAMEWIND_RESET_KILL_COUNT"), 0);
         double fraction = tuning.get(s("FLAMEWIND_RESET_REFUND_FRACTION"), 0);
         if (required <= 0 || fraction <= 0 || owner.releaseKills < required) return;
-        int total = tuning.integer(s("COOLDOWN_TICKS"), Config.uniqueEffects.flamewind.cooldown);
-        SimplySwordsAPI.reduceWeaponCooldown(context.actor(), context.stack(), total,
-                (int) Math.round(total * fraction));
+        execution.requestCooldownRefundFraction(fraction);
     }
 
     // Furnace Draft: attack speed scaling with the seeds this wielder currently holds.
     public static void refreshDraft(ServerWorld world, LivingEntity owner, FireForgeMasteryTuning tuning) {
         EntityAttributeInstance attackSpeed = owner.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_SPEED);
         if (attackSpeed == null) return;
-        double perSeed = tuning.get(s("FLAMEWIND_DRAFT_PER_SEED"), 0);
-        if (perSeed <= 0) {
-            attackSpeed.removeModifier(DRAFT_ID);
+        if (!owner.isAlive() || owner.isRemoved() || owner.getWorld() != world) {
+            removeDraft(owner);
             return;
         }
-        double range = tuning.get(s("FLAMEWIND_DRAFT_RANGE"), 8);
-        long nearby = ownedSeeds(world, owner, 64).stream()
-                .filter(seed -> owner.squaredDistanceTo(seed) <= range * range).count();
-        double bonus = draftBonus((int) nearby, perSeed, tuning.get(s("FLAMEWIND_DRAFT_CAP"), 0));
+        double bonus = 0;
+        double cap = 0;
+        for (LivingEntity seed : ownedSeeds(world, owner, 64)) {
+            SeedSnapshot snapshot = snapshot(seed);
+            if (snapshot == null) continue;
+            FireForgeMasteryTuning source = snapshot.tuning();
+            double range = source.get(s("FLAMEWIND_DRAFT_RANGE"), 8);
+            double perSeed = source.get(s("FLAMEWIND_DRAFT_PER_SEED"), 0);
+            if (perSeed <= 0 || owner.squaredDistanceTo(seed) > range * range) continue;
+            bonus += perSeed;
+            cap = Math.max(cap, source.get(s("FLAMEWIND_DRAFT_CAP"), 0));
+        }
+        if (cap > 0) bonus = Math.min(cap, bonus);
         EntityAttributeModifier current = attackSpeed.getModifier(DRAFT_ID);
         if (bonus <= 0) {
             if (current != null) attackSpeed.removeModifier(DRAFT_ID);
             return;
         }
+        owner(world, owner);
         if (current != null && current.value() == bonus) return;
         attackSpeed.removeModifier(DRAFT_ID);
         attackSpeed.addTemporaryModifier(new EntityAttributeModifier(DRAFT_ID, bonus,

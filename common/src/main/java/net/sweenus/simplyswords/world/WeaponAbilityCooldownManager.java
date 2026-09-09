@@ -24,6 +24,12 @@ public final class WeaponAbilityCooldownManager {
         return COOLDOWNS.getOrDefault(new CooldownKey(actor.getUuid(), stack.getItem()), 0L) > world.getTime();
     }
 
+    public static int remainingTicks(ServerWorld world, LivingEntity actor, ItemStack stack) {
+        if (actor == null || stack == null || stack.isEmpty()) return 0;
+        long end = COOLDOWNS.getOrDefault(new CooldownKey(actor.getUuid(), stack.getItem()), 0L);
+        return (int) Math.clamp(end - world.getTime(), 0L, Integer.MAX_VALUE);
+    }
+
     public static void setCooldown(ServerWorld world, LivingEntity actor, ItemStack stack, int cooldownTicks) {
         if (actor == null || stack == null || stack.isEmpty() || cooldownTicks <= 0) {
             return;

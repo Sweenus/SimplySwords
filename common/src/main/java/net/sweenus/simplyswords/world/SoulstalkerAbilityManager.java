@@ -247,10 +247,9 @@ public final class SoulstalkerAbilityManager {
         if (previousCheck != null && previousCheck == now) {
             return;
         }
-        UniqueAbilityExecution execution = UniqueAbilityApi.begin(StormSoulMasteryAbilities.SOULSTALKER_TENDRIL,
+        UniqueAbilityExecution execution = UniqueAbilityApi.preparePassive(StormSoulMasteryAbilities.SOULSTALKER_TENDRIL,
                 UniqueAbilityContext.passive(world, stack, owner, null, heldHand(owner, stack)), builder -> builder
                         .set(StormSoulMasteryAbilities.TUNING, StormSoulMasteryTuning.EMPTY));
-        UniqueAbilityApi.takeStartedExecution();
         UniqueAbilityApi.start(execution);
         StormSoulMasteryTuning tuning = StormSoulMasteryAbilities.tuning(execution);
         int interval = Math.max(1, tuning.integer(StormSoulMasteryTuning.Setting.INTERVAL_TICKS,

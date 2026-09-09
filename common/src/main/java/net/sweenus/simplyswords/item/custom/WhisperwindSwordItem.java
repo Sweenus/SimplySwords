@@ -55,21 +55,19 @@ public class WhisperwindSwordItem extends UniqueSwordItem implements TwoHandedWe
         }
         HelperMethods.playHitSounds(attacker, target);
         if (attacker.getWorld() instanceof ServerWorld world) {
-            UniqueAbilityExecution execution = UniqueAbilityApi.begin(StormSoulMasteryAbilities.WHISPERWIND_RESET,
+            UniqueAbilityExecution execution = UniqueAbilityApi.preparePassive(StormSoulMasteryAbilities.WHISPERWIND_RESET,
                     UniqueAbilityContext.passive(world, stack, attacker, target, null), builder -> builder
                             .set(StormSoulMasteryAbilities.TUNING, StormSoulMasteryTuning.EMPTY));
-            UniqueAbilityApi.takeStartedExecution();
             UniqueAbilityApi.start(execution);
             StormSoulMasteryTuning tuning = StormSoulMasteryAbilities.tuning(execution);
             boolean stillWind = tuning.integer(StormSoulMasteryTuning.Setting.STILL_WIND_THRESHOLD, 0) > 0;
             if (stillWind) {
                 if (WhisperwindRhythmManager.recordStillWindAttack(world, attacker, tuning)
                         && target.isAlive() && HelperMethods.checkAbilityTarget(target, attacker)) {
-                    UniqueAbilityExecution stillWindExecution = UniqueAbilityApi.begin(
+                    UniqueAbilityExecution stillWindExecution = UniqueAbilityApi.preparePassive(
                             StormSoulMasteryAbilities.WHISPERWIND_STILL_WIND,
                             UniqueAbilityContext.passive(world, stack, attacker, target, null), builder -> builder
                                     .set(StormSoulMasteryAbilities.TUNING, StormSoulMasteryTuning.EMPTY));
-                    UniqueAbilityApi.takeStartedExecution();
                     UniqueAbilityApi.start(stillWindExecution);
                     WhisperwindVisualManager.scheduleStillWindStrike(world, attacker, target, stack,
                             stillWindExecution, StormSoulMasteryAbilities.tuning(stillWindExecution));
@@ -113,11 +111,10 @@ public class WhisperwindSwordItem extends UniqueSwordItem implements TwoHandedWe
                 user.getSoundCategory(), 0.6f, 1.0f);
         StormSoulMasteryTuning playerTuning = StormSoulMasteryTuning.EMPTY;
         if (!world.isClient() && world instanceof ServerWorld serverWorld) {
-            UniqueAbilityExecution execution = UniqueAbilityApi.begin(StormSoulMasteryAbilities.WHISPERWIND_DASH,
+            UniqueAbilityExecution execution = UniqueAbilityApi.preparePassive(StormSoulMasteryAbilities.WHISPERWIND_DASH,
                     UniqueAbilityContext.passive(serverWorld, stack, user, null, hand), builder -> builder
                             .set(StormSoulMasteryAbilities.TUNING, StormSoulMasteryTuning.EMPTY)
                             .set(StormSoulMasteryAbilities.COOLDOWN_TICKS, Config.uniqueEffects.whisperwind.cooldown));
-            UniqueAbilityApi.takeStartedExecution();
             UniqueAbilityApi.start(execution);
             StormSoulMasteryTuning tuning = StormSoulMasteryAbilities.tuning(execution);
             playerTuning = tuning;
@@ -167,10 +164,9 @@ public class WhisperwindSwordItem extends UniqueSwordItem implements TwoHandedWe
                 ParticleTypes.MYCELIUM, true);
         if (world instanceof ServerWorld serverWorld && entity instanceof LivingEntity holder && selected
                 && world.getTime() % 20L == 0L && net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(stack)) {
-            UniqueAbilityExecution held = UniqueAbilityApi.begin(StormSoulMasteryAbilities.WHISPERWIND_RESET,
+            UniqueAbilityExecution held = UniqueAbilityApi.preparePassive(StormSoulMasteryAbilities.WHISPERWIND_RESET,
                     UniqueAbilityContext.passive(serverWorld, stack, holder, null, null), builder -> builder
                             .set(StormSoulMasteryAbilities.TUNING, StormSoulMasteryTuning.EMPTY));
-            UniqueAbilityApi.takeStartedExecution();
             UniqueAbilityApi.start(held);
             WhisperwindRhythmManager.tickHolder(serverWorld, holder, stack,
                     StormSoulMasteryAbilities.tuning(held));

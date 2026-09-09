@@ -173,7 +173,7 @@ public final class TempestAbilityManager {
         int shellThreshold = integer(tuning, "TEMPEST_SHELL_STACK_THRESHOLD", "COUNT", 0);
         if (shellThreshold > 0 && fire + frost >= shellThreshold) {
             float absorption = (float) value(tuning, "TEMPEST_SHELL_ABSORPTION", "ABSORPTION", 0);
-            MasteryAbsorptionTracker.grant(owner, absorption,
+            MasteryAbsorptionTracker.grant(owner, "tempest/shell", absorption,
                     integer(tuning, "TEMPEST_SHELL_DURATION_TICKS", "STATUS_DURATION_TICKS", 80), absorption);
         }
         if (tuning.has(s("TEMPEST_SPEED_AMPLIFIER"))) {

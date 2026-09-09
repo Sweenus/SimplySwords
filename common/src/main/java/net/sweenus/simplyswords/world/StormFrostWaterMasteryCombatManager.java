@@ -29,15 +29,14 @@ public final class StormFrostWaterMasteryCombatManager {
 
     public static UniqueAbilityExecution beginPassive(UniqueAbilityDefinition definition, ServerWorld world,
                                                       ItemStack stack, LivingEntity actor, LivingEntity target) {
-        UniqueAbilityExecution execution = preparePassive(definition, world, stack, actor, target);
-        UniqueAbilityApi.takeStartedExecution();
-        UniqueAbilityApi.start(execution);
-        return execution;
+        return UniqueAbilityApi.beginPassive(definition,
+                UniqueAbilityContext.passive(world, stack, actor, target, null),
+                tuning -> tuning.set(StormFrostWaterMasteryAbilities.TUNING, StormFrostWaterMasteryTuning.EMPTY));
     }
 
     public static UniqueAbilityExecution preparePassive(UniqueAbilityDefinition definition, ServerWorld world,
                                                          ItemStack stack, LivingEntity actor, LivingEntity target) {
-        return UniqueAbilityApi.begin(definition,
+        return UniqueAbilityApi.preparePassive(definition,
                 UniqueAbilityContext.passive(world, stack, actor, target, null),
                 tuning -> tuning.set(StormFrostWaterMasteryAbilities.TUNING, StormFrostWaterMasteryTuning.EMPTY));
     }

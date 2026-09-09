@@ -45,12 +45,9 @@ public final class DeathShadowBloodMasteryCombatManager {
 
     public static UniqueAbilityExecution beginPassive(UniqueAbilityDefinition definition, ServerWorld world,
                                                       ItemStack stack, LivingEntity actor, LivingEntity target) {
-        UniqueAbilityExecution execution = UniqueAbilityApi.begin(definition,
+        return UniqueAbilityApi.beginPassive(definition,
                 UniqueAbilityContext.passive(world, stack, actor, target, null),
                 tuning -> tuning.set(DeathShadowBloodMasteryAbilities.TUNING, DeathShadowBloodMasteryTuning.EMPTY));
-        UniqueAbilityApi.takeStartedExecution();
-        UniqueAbilityApi.start(execution);
-        return execution;
     }
 
     public static float modifyIncomingDamage(LivingEntity target, DamageSource source, float amount) {

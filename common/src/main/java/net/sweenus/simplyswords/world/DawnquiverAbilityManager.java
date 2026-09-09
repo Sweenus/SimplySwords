@@ -477,7 +477,7 @@ public final class DawnquiverAbilityManager {
         if (tuning.has(MartialCommandEldritchMasteryTuning.Setting.ABSORPTION)
                 && now >= GUARD_READY.getOrDefault(owner.getUuid(), Long.MIN_VALUE)) {
             float amount = (float) tuning.get(MartialCommandEldritchMasteryTuning.Setting.ABSORPTION, 4);
-            MasteryAbsorptionTracker.grant(owner, amount,
+            MasteryAbsorptionTracker.grant(owner, "dawnquiver/guard", amount,
                     Math.max(1, tuning.integer(MartialCommandEldritchMasteryTuning.Setting.STATUS_DURATION_TICKS, 40)), amount);
             GUARD_READY.put(owner.getUuid(),
                     now + Math.max(1, tuning.integer(MartialCommandEldritchMasteryTuning.Setting.LOCKOUT_TICKS, 40)));

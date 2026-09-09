@@ -372,7 +372,7 @@ public final class RibboncleaverDreadtideMasteryManager {
                 }
                 if (tuning.flag(1 << 6)
                         && ++state.absorbedHits % Math.max(1, tuning.integer(MartialCommandEldritchMasteryTuning.Setting.COUNT, 3)) == 0)
-                    MasteryAbsorptionTracker.grant(actor,
+                    MasteryAbsorptionTracker.grant(actor, "ribboncleaver/guard",
                             (float) tuning.get(MartialCommandEldritchMasteryTuning.Setting.ABSORPTION, 4),
                             Math.max(1, tuning.integer(MartialCommandEldritchMasteryTuning.Setting.SECONDARY_DURATION_TICKS, 60)),
                             (float) tuning.get(MartialCommandEldritchMasteryTuning.Setting.ABSORPTION, 4));
@@ -655,7 +655,7 @@ public final class RibboncleaverDreadtideMasteryManager {
         if (purge > 0) setCorruption(stack, Math.max(floor, corruption - purge));
         int perGrant = Math.max(1, pact.integer(MartialCommandEldritchMasteryTuning.Setting.FLAT_DAMAGE, 20));
         if (purge >= perGrant && pact.flag(1 << 23))
-            MasteryAbsorptionTracker.grant(actor,
+            MasteryAbsorptionTracker.grant(actor, "dreadtide/pact",
                     purge / (float) perGrant * (float) pact.get(MartialCommandEldritchMasteryTuning.Setting.ABSORPTION, 4),
                     Math.max(1, pact.integer(MartialCommandEldritchMasteryTuning.Setting.STATUS_DURATION_TICKS, 200)),
                     (float) pact.get(MartialCommandEldritchMasteryTuning.Setting.SEARCH_RADIUS, 12));

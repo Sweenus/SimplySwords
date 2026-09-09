@@ -176,6 +176,11 @@ public abstract class UniqueWeaponItem extends SwordItem {
     }
 
     protected static void appendAbilityCooldownTooltip(List<Text> tooltip, ItemStack stack, int cooldownTicks) {
+        Text formatted = TooltipUtils.formatAbilityCooldown(stack, cooldownTicks);
+        if (formatted != null) {
+            tooltip.add(formatted.copy().setStyle(Styles.COOLDOWN));
+            return;
+        }
         int effectiveCooldown = TooltipUtils.getEffectiveWeaponCooldownTicks(stack, cooldownTicks);
         tooltip.add(Text.translatable("tooltip.simplyswords.ability_cooldown", formatCooldown(effectiveCooldown))
                 .setStyle(Styles.COOLDOWN));

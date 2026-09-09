@@ -8,6 +8,7 @@ import net.minecraft.entity.effect.StatusEffectCategory;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
@@ -35,7 +36,8 @@ public class FlameSeedEffect extends OrbitingEffect {
     private static final Set<UUID> DETONATING_TARGETS = new HashSet<>();
     private static final Map<ServerWorld, List<PendingDeathDetonation>> PENDING_DEATH_DETONATIONS = new HashMap<>();
 
-    private record PendingDeathDetonation(UUID targetId, Vec3d position, LivingEntity sourceEntity, int spreadRemaining) {
+    private record PendingDeathDetonation(UUID targetId, Vec3d position, LivingEntity sourceEntity, int spreadRemaining,
+                                          FlamewindMasteryManager.SeedSnapshot snapshot) {
     }
 
     public LivingEntity sourceEntity; // The player who applied the effect
@@ -63,28 +65,31 @@ public class FlameSeedEffect extends OrbitingEffect {
             }
             FlamewindMasteryManager.SeedSnapshot snapshot = FlamewindMasteryManager.snapshot(livingEntity);
             FireForgeMasteryTuning tuning = snapshot == null ? FireForgeMasteryTuning.EMPTY : snapshot.tuning();
+            ItemStack castingStack = snapshot == null ? ItemStack.EMPTY : snapshot.stack();
+            LivingEntity caster = this.sourceEntity;
+            int spreadRemaining = this.additionalData;
             FlamewindVisualManager.refreshSeed(serverWorld, livingEntity);
-            if (this.sourceEntity != null && livingEntity.age % 20 == 0) {
-                FlamewindMasteryManager.refreshDraft(serverWorld, this.sourceEntity, tuning);
+            if (caster != null && livingEntity.age % 20 == 0) {
+                FlamewindMasteryManager.refreshDraft(serverWorld, caster, tuning);
             }
 
-            if (this.sourceEntity != null && duration <= 1) {
-                triggerDetonation(serverWorld, livingEntity, this.sourceEntity, this.additionalData);
+            if (caster != null && duration <= 1) {
+                triggerDetonation(serverWorld, livingEntity, caster, spreadRemaining);
                 livingEntity.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.FLAMESEED));
-                float damage = baseDetonationDamage(this.sourceEntity)
+                float damage = baseDetonationDamage(caster, castingStack)
                         * (float) tuning.get(FireForgeMasteryTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1)
                         * (float) tuning.get(FireForgeMasteryTuning.Setting.FLAMEWIND_DEATH_DAMAGE_MULTIPLIER, 1);
-                damageSeedHost(serverWorld, livingEntity, this.sourceEntity, damage, true);
+                damageSeedHost(serverWorld, livingEntity, caster, castingStack, damage, true);
             } else {
                 int frequency = tuning.integer(FireForgeMasteryTuning.Setting.INTERVAL_TICKS, 20);
                 double periodicMultiplier = tuning.get(FireForgeMasteryTuning.Setting.PERIODIC_DAMAGE_MULTIPLIER, 1);
-                if (this.sourceEntity != null && periodicMultiplier > 0 && livingEntity.age % frequency == 0) {
+                if (caster != null && periodicMultiplier > 0 && livingEntity.age % frequency == 0) {
                     double detonationMultiplier = tuning.get(
                             FireForgeMasteryTuning.Setting.FLAMEWIND_PERIODIC_DETONATION_MULTIPLIER, 0);
                     float damage = detonationMultiplier > 0
-                            ? baseDetonationDamage(this.sourceEntity) * (float) detonationMultiplier
-                            : basePeriodicDamage(this.sourceEntity);
-                    damageSeedHost(serverWorld, livingEntity, this.sourceEntity,
+                            ? baseDetonationDamage(caster, castingStack) * (float) detonationMultiplier
+                            : basePeriodicDamage(caster, castingStack);
+                    damageSeedHost(serverWorld, livingEntity, caster, castingStack,
                             damage * (float) periodicMultiplier, false);
                 }
             }
@@ -93,20 +98,20 @@ public class FlameSeedEffect extends OrbitingEffect {
         return true;
     }
 
-    private static float basePeriodicDamage(LivingEntity sourceEntity) {
+    private static float basePeriodicDamage(LivingEntity sourceEntity, ItemStack castingStack) {
         return HelperMethods.abilityScaledDamage(SpellScalingComponents.id("flamewind"), sourceEntity,
-                sourceEntity.getMainHandStack(), Config.uniqueEffects.flamewind.damageScaling,
+                castingStack, Config.uniqueEffects.flamewind.damageScaling,
                 Config.uniqueEffects.flamewind.spellScaling);
     }
 
-    private static float baseDetonationDamage(LivingEntity sourceEntity) {
+    private static float baseDetonationDamage(LivingEntity sourceEntity, ItemStack castingStack) {
         return HelperMethods.abilityScaledDamage(SpellScalingComponents.id("flamewind"), sourceEntity,
-                sourceEntity.getMainHandStack(), Config.uniqueEffects.flamewind.detonationDamageScaling,
+                castingStack, Config.uniqueEffects.flamewind.detonationDamageScaling,
                 Config.uniqueEffects.flamewind.detonationSpellScaling);
     }
 
     private static void damageSeedHost(ServerWorld world, LivingEntity target, LivingEntity sourceEntity,
-                                       float damage, boolean detonation) {
+                                       ItemStack castingStack, float damage, boolean detonation) {
         if (damage <= 0) return;
         DamageSource damageSource = target.getDamageSources().indirectMagic(target, sourceEntity);
         if (target instanceof PlayerEntity && sourceEntity instanceof PlayerEntity playerSourceEntity) {
@@ -114,7 +119,7 @@ public class FlameSeedEffect extends OrbitingEffect {
         }
         target.timeUntilRegen = 0;
         if (detonation) DETONATING_TARGETS.add(target.getUuid());
-        damage = HelperMethods.applyAbilityDamageEnchantments(world, sourceEntity.getMainHandStack(), target,
+        damage = HelperMethods.applyAbilityDamageEnchantments(world, castingStack, target,
                 damageSource, damage);
         target.damage(damageSource, damage);
         if (detonation) DETONATING_TARGETS.remove(target.getUuid());
@@ -144,8 +149,13 @@ public class FlameSeedEffect extends OrbitingEffect {
                 continue;
             }
 
-            triggerDetonation(world, detonation.position(), detonation.targetId(), detonation.sourceEntity(), detonation.spreadRemaining());
-            DETONATING_TARGETS.remove(detonation.targetId());
+            try {
+                triggerDetonation(world, detonation.position(), detonation.targetId(), detonation.sourceEntity(),
+                        detonation.spreadRemaining(), detonation.snapshot());
+            } finally {
+                FlamewindMasteryManager.remove(world, detonation.targetId());
+                DETONATING_TARGETS.remove(detonation.targetId());
+            }
         }
     }
 
@@ -173,7 +183,8 @@ public class FlameSeedEffect extends OrbitingEffect {
             return;
         }
         PENDING_DEATH_DETONATIONS.computeIfAbsent(serverWorld, ignored -> new ArrayList<>())
-                .add(new PendingDeathDetonation(targetId, livingEntity.getPos(), sourceEntity, additionalData));
+                .add(new PendingDeathDetonation(targetId, livingEntity.getPos(), sourceEntity, additionalData,
+                        FlamewindMasteryManager.snapshot(livingEntity)));
     }
 
     public static void triggerDeathDetonation(LivingEntity livingEntity) {
@@ -207,12 +218,14 @@ public class FlameSeedEffect extends OrbitingEffect {
     }
 
     private static void triggerDetonation(ServerWorld serverWorld, LivingEntity livingEntity, LivingEntity sourceEntity, int spreadRemaining) {
-        triggerDetonation(serverWorld, livingEntity.getPos(), livingEntity.getUuid(), sourceEntity, spreadRemaining);
+        triggerDetonation(serverWorld, livingEntity.getPos(), livingEntity.getUuid(), sourceEntity, spreadRemaining,
+                FlamewindMasteryManager.snapshot(livingEntity));
         FlamewindVisualManager.removeSeed(serverWorld, livingEntity);
         FlamewindMasteryManager.remove(serverWorld, livingEntity.getUuid());
     }
 
-    private static void triggerDetonation(ServerWorld serverWorld, Vec3d center, UUID excludedTargetId, LivingEntity sourceEntity, int spreadRemaining) {
+    private static void triggerDetonation(ServerWorld serverWorld, Vec3d center, UUID excludedTargetId, LivingEntity sourceEntity,
+                                          int spreadRemaining, FlamewindMasteryManager.SeedSnapshot snapshot) {
         FlamewindVisualManager.spawnDetonation(serverWorld, center);
         serverWorld.spawnParticles(ParticleTypes.LAVA, center.x, center.y + 0.4, center.z, 8, 0.75, 0.35, 0.75, 0.02);
         serverWorld.spawnParticles(ParticleTypes.CAMPFIRE_SIGNAL_SMOKE, center.x, center.y + 0.4, center.z, 6, 0.8, 0.45, 0.8, 0.03);
@@ -220,12 +233,11 @@ public class FlameSeedEffect extends OrbitingEffect {
         serverWorld.spawnParticles(ParticleTypes.EXPLOSION, center.x, center.y + 0.35, center.z, 2, 0.35, 0.2, 0.35, 0.01);
         serverWorld.spawnParticles(ParticleTypes.WARPED_SPORE, center.x, center.y + 0.35, center.z, 10, 0.8, 0.35, 0.8, 0.02);
 
+        ItemStack castingStack = snapshot == null ? ItemStack.EMPTY : snapshot.stack();
         float abilityDamage = HelperMethods.abilityScaledDamage(SpellScalingComponents.id("flamewind"), sourceEntity,
-                sourceEntity == null ? null : sourceEntity.getMainHandStack(),
+                castingStack,
                 Config.uniqueEffects.flamewind.detonationDamageScaling,
                 Config.uniqueEffects.flamewind.detonationSpellScaling);
-        FlamewindMasteryManager.SeedSnapshot snapshot = excludedTargetId == null ? null
-                : FlamewindMasteryManager.snapshot(serverWorld.getEntity(excludedTargetId) instanceof LivingEntity living ? living : null);
         FireForgeMasteryTuning tuning = snapshot == null ? FireForgeMasteryTuning.EMPTY : snapshot.tuning();
         abilityDamage *= (float) tuning.get(FireForgeMasteryTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1);
         if (center.distanceTo(sourceEntity.getPos()) < 30) {
@@ -265,7 +277,7 @@ public class FlameSeedEffect extends OrbitingEffect {
             }
 
             float damage = sourceEntity == null ? abilityDamage
-                    : HelperMethods.applyAbilityDamageEnchantments(serverWorld, sourceEntity.getMainHandStack(), le, damageSource, abilityDamage);
+                    : HelperMethods.applyAbilityDamageEnchantments(serverWorld, castingStack, le, damageSource, abilityDamage);
             boolean lethal = le.damage(damageSource, damage) && !le.isAlive();
             if (lethal) FlamewindMasteryManager.onReleaseKill(serverWorld, sourceEntity);
             affected++;
@@ -282,9 +294,7 @@ public class FlameSeedEffect extends OrbitingEffect {
                 flameSeedEffect.setSourceEntity(sourceEntity);
                 flameSeedEffect.setAdditionalData(remaining);
                 le.addStatusEffect(flameSeedEffect);
-                if (excludedTargetId != null && serverWorld.getEntity(excludedTargetId) instanceof LivingEntity seeded) {
-                    FlamewindMasteryManager.inherit(seeded, le);
-                }
+                FlamewindMasteryManager.inherit(snapshot, le);
                 FlamewindVisualManager.refreshSeed(serverWorld, le);
                 FlamewindVisualManager.spawnSpreadArc(serverWorld, center, le);
             }

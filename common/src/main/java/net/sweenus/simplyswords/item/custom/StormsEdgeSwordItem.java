@@ -55,17 +55,16 @@ public class StormsEdgeSwordItem extends UniqueSwordItem implements UniqueWeapon
         }
 
         ServerWorld serverWorld = (ServerWorld) attacker.getWorld();
-        UniqueAbilityExecution melee = UniqueAbilityApi.begin(
+        UniqueAbilityExecution melee = UniqueAbilityApi.preparePassive(
                 BuiltinUniqueAbilities.STORMS_EDGE_MELEE,
                 UniqueAbilityContext.passive(serverWorld, stack, attacker, target, null),
                 StormsEdgeSwordItem::setDamageReferences);
-        UniqueAbilityApi.takeStartedExecution();
         UniqueAbilityApi.start(melee);
         UniqueAbilityApi.emit(melee, UniqueAbilityPhase.HIT,
                 BuiltinUniqueAbilities.MELEE_HIT, target, 1, 0.0);
         UniqueAbilityApi.finish(melee, melee.definition().id(), 1);
 
-        UniqueAbilityExecution execution = UniqueAbilityApi.begin(
+        UniqueAbilityExecution execution = UniqueAbilityApi.preparePassive(
                 BuiltinUniqueAbilities.STORMS_EDGE_REFRESH,
                 UniqueAbilityContext.passive(serverWorld, stack, attacker, target, null),
                 tuning -> {
@@ -73,7 +72,6 @@ public class StormsEdgeSwordItem extends UniqueSwordItem implements UniqueWeapon
                     tuning.set(BuiltinUniqueAbilities.REFRESH_CHANCE,
                             Math.clamp(Config.uniqueEffects.storms_edge.chance, 0, 100));
                 });
-        UniqueAbilityApi.takeStartedExecution();
         int refreshChance = execution.tuning().get(BuiltinUniqueAbilities.REFRESH_CHANCE);
         int refreshRoll = attacker.getRandom().nextInt(100);
         boolean refreshPassed = refreshChance > 0 && refreshRoll < refreshChance;

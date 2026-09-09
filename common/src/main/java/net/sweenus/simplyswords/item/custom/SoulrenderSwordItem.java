@@ -59,10 +59,9 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
         }
         if (!attacker.getWorld().isClient()) {
             ServerWorld world = (ServerWorld) attacker.getWorld();
-            UniqueAbilityExecution execution = UniqueAbilityApi.begin(StormSoulMasteryAbilities.SOULRENDER_MARK,
+            UniqueAbilityExecution execution = UniqueAbilityApi.preparePassive(StormSoulMasteryAbilities.SOULRENDER_MARK,
                     UniqueAbilityContext.passive(world, stack, attacker, target, null), builder -> builder
                             .set(StormSoulMasteryAbilities.TUNING, StormSoulMasteryTuning.EMPTY));
-            UniqueAbilityApi.takeStartedExecution();
             UniqueAbilityApi.start(execution);
             StormSoulMasteryTuning tuning = StormSoulMasteryAbilities.tuning(execution);
             int duration = tuning.integer(StormSoulMasteryTuning.Setting.MARK_DURATION_TICKS, Config.uniqueEffects.soulrender.duration);

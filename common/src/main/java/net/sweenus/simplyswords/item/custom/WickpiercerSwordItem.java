@@ -276,7 +276,7 @@ public class WickpiercerSwordItem extends UniqueSwordItem implements RevivalWeap
 
     private static UniqueAbilityExecution beginRevive(ServerWorld world, LivingEntity entity,
                                                        ItemStack stack, int cooldown) {
-        UniqueAbilityExecution execution = UniqueAbilityApi.begin(AbyssalSpectralMasteryAbilities.WICKPIERCER_REVIVE,
+        UniqueAbilityExecution execution = UniqueAbilityApi.preparePassive(AbyssalSpectralMasteryAbilities.WICKPIERCER_REVIVE,
                 UniqueAbilityContext.passive(world, stack, entity, null, null), builder -> builder
                         .set(AbyssalSpectralMasteryAbilities.TUNING, AbyssalSpectralMasteryTuning.EMPTY
                                 .with(AbyssalSpectralMasteryTuning.Setting.COOLDOWN_TICKS, cooldown)
@@ -284,7 +284,6 @@ public class WickpiercerSwordItem extends UniqueSwordItem implements RevivalWeap
                                 .with(AbyssalSpectralMasteryTuning.Setting.STATUS_AMPLIFIER, 2)
                                 .with(AbyssalSpectralMasteryTuning.Setting.REVIVE_HEALTH_MULTIPLIER, 1)
                                 .with(AbyssalSpectralMasteryTuning.Setting.REVIVE_COOLDOWN_MULTIPLIER, 1)));
-        UniqueAbilityApi.takeStartedExecution();
         UniqueAbilityApi.start(execution);
         return execution;
     }

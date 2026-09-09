@@ -28,6 +28,7 @@
     "ItemEntityMixin",
     "ItemStackMixin",
     "LivingEntityMixin",
+    "LivingEntityAbsorptionMixin",
     "StatusEffectInstanceAccessor",
     "ServerPlayerEntityMixin",
     "ServerPlayerPityMixin",

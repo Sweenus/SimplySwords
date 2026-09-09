@@ -53,14 +53,9 @@ public final class MartialCommandEldritchMasteryCombatManager {
     public static UniqueAbilityExecution beginPassive(UniqueAbilityDefinition definition, ServerWorld world,
                                                       ItemStack stack, LivingEntity actor, LivingEntity target,
                                                       MartialCommandEldritchMasteryTuning base) {
-        UniqueAbilityExecution outer = UniqueAbilityApi.takeStartedExecution();
-        UniqueAbilityExecution execution = UniqueAbilityApi.begin(definition,
+        return UniqueAbilityApi.beginPassive(definition,
                 UniqueAbilityContext.passive(world, stack, actor, target, null),
                 tuning -> tuning.set(MartialCommandEldritchMasteryAbilities.TUNING, base));
-        UniqueAbilityApi.takeStartedExecution();
-        UniqueAbilityApi.start(execution);
-        if (outer != null) UniqueAbilityApi.publishStartedExecution(outer);
-        return execution;
     }
 
     public static void finish(UniqueAbilityExecution execution, int affectedTargets) {

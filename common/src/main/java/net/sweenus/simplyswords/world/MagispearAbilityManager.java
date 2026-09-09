@@ -575,7 +575,7 @@ public final class MagispearAbilityManager {
                         && !HelperMethods.checkAbilityTarget(entity, owner)
                         && horizontalSquaredDistance(entity.getPos(), impact)
                         <= allyRadius * allyRadius)) {
-            MasteryAbsorptionTracker.grant(ally, absorption, duration, absorption);
+            MasteryAbsorptionTracker.grant(ally, "magispear/support", absorption, duration, absorption);
         }
     }
 

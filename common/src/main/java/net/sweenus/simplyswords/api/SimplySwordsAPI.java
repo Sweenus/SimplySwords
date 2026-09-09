@@ -304,6 +304,14 @@ public class SimplySwordsAPI {
             cooldown = execution.cooldownTicks(cooldown);
         }
         setWeaponCooldown(context.actor(), context.stack(), cooldown);
+        if (execution != null) {
+            double fraction = execution.takeCooldownRefundFraction();
+            if (fraction > 0) {
+                int remaining = getRemainingWeaponCooldownTicks(context.actor(), context.stack());
+                reduceWeaponCooldown(context.actor(), context.stack(), remaining,
+                        (int) Math.round(remaining * fraction));
+            }
+        }
         return true;
     }
 
@@ -334,6 +342,17 @@ public class SimplySwordsAPI {
         } else if (actor.getWorld() instanceof ServerWorld world) {
             WeaponAbilityCooldownManager.reduceCooldown(world, actor, stack, reductionTicks);
         }
+    }
+
+    private static int getRemainingWeaponCooldownTicks(LivingEntity actor, ItemStack stack) {
+        if (actor instanceof PlayerEntity player) {
+            ItemCooldownManagerAccessor manager = (ItemCooldownManagerAccessor) player.getItemCooldownManager();
+            Object entry = manager.simplyswords$getEntries().get(stack.getItem());
+            return entry instanceof ItemCooldownEntryAccessor cooldown
+                    ? Math.max(0, cooldown.simplyswords$getEndTick() - manager.simplyswords$getTick()) : 0;
+        }
+        return actor.getWorld() instanceof ServerWorld world
+                ? WeaponAbilityCooldownManager.remainingTicks(world, actor, stack) : 0;
     }
 
     public static int getEffectiveWeaponCooldownTicks(ItemStack stack, LivingEntity actor, int baseCooldownTicks) {

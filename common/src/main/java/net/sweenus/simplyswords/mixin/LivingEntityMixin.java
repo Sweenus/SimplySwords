@@ -353,6 +353,7 @@ public abstract class LivingEntityMixin {
         DeathShadowBloodMasteryCombatManager.clearActor(livingEntity);
         net.sweenus.simplyswords.world.SoulrenderAbilityManager.onTargetDeath(livingEntity, damageSource);
         net.sweenus.simplyswords.world.SoulrenderAbilityManager.removeActor(livingEntity);
+        net.sweenus.simplyswords.world.FlamewindMasteryManager.clearActor(livingEntity);
     }
 
     @Inject(method = "jump", at = @At("HEAD"), cancellable = true)

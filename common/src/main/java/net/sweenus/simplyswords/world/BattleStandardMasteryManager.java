@@ -322,7 +322,7 @@ public final class BattleStandardMasteryManager {
                     && lowHealth
                     && guardianLocks.getOrDefault(ally.getUuid(), 0L) <= world.getTime()) {
                 float before = ally.getAbsorptionAmount();
-                MasteryAbsorptionTracker.grant(ally, (float) tuning.get(s("GUARDIAN_ABSORPTION"), 4),
+                MasteryAbsorptionTracker.grant(ally, "warglaive/guardian", (float) tuning.get(s("GUARDIAN_ABSORPTION"), 4),
                         tuning.integer(s("GUARDIAN_ABSORPTION_TICKS"), 100),
                         (float) tuning.get(s("GUARDIAN_ABSORPTION"), 4));
                 if (ally.getAbsorptionAmount() > before) guardianLocks.put(ally.getUuid(),

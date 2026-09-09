@@ -89,7 +89,7 @@ public class BrimstoneClaymoreItem extends UniqueSwordItem implements TwoHandedW
         if (!attacker.getWorld().isClient()) {
             ServerWorld world = (ServerWorld) attacker.getWorld();
             HelperMethods.playHitSounds(attacker, target);
-            UniqueAbilityExecution execution = UniqueAbilityApi.begin(
+            UniqueAbilityExecution execution = UniqueAbilityApi.preparePassive(
                     BuiltinUniqueAbilities.BRIMSTONE_ERUPTION,
                     UniqueAbilityContext.passive(world, stack, attacker, target, null),
                     tuning -> tuning
@@ -99,7 +99,6 @@ public class BrimstoneClaymoreItem extends UniqueSwordItem implements TwoHandedW
                                     (double) Config.uniqueEffects.brimstone_claymore.hitDamageScaling)
                             .set(BuiltinUniqueAbilities.BRIMSTONE_ERUPTION_SPELL_SCALING,
                                     (double) Config.uniqueEffects.brimstone_claymore.hitSpellScaling));
-            UniqueAbilityApi.takeStartedExecution();
             int chance = execution.tuning().get(BuiltinUniqueAbilities.BRIMSTONE_PROC_CHANCE);
             int roll = attacker.getRandom().nextInt(100);
             boolean passed = passesEruptionRoll(chance, roll);

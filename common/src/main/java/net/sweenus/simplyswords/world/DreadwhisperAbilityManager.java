@@ -197,10 +197,9 @@ public final class DreadwhisperAbilityManager {
         }
 
         ServerWorld world = (ServerWorld) target.getWorld();
-        UniqueAbilityExecution execution = UniqueAbilityApi.begin(StormSoulMasteryAbilities.DREADWHISPER_WOUND,
+        UniqueAbilityExecution execution = UniqueAbilityApi.preparePassive(StormSoulMasteryAbilities.DREADWHISPER_WOUND,
                 UniqueAbilityContext.passive(world, stack, attacker, target, null), builder -> builder
                         .set(StormSoulMasteryAbilities.TUNING, StormSoulMasteryTuning.EMPTY));
-        UniqueAbilityApi.takeStartedExecution();
         UniqueAbilityApi.start(execution);
         StormSoulMasteryTuning tuning = StormSoulMasteryAbilities.tuning(execution);
 

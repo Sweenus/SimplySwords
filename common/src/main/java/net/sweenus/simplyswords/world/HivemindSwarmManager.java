@@ -80,7 +80,7 @@ public final class HivemindSwarmManager {
         boolean spawned = activate(context.world(), context.actor(), getStingDamage(context.actor()), tuning, execution);
         if (spawned && tuning.flag(1 << 18) && !tuning.flag(1 << 26)) {
             int absorption = tuning.integer(NatureSwarmMasteryTuning.Setting.HIVE_WARD_ABSORPTION, 4);
-            MasteryAbsorptionTracker.grant(context.actor(), absorption,
+            MasteryAbsorptionTracker.grant(context.actor(), "hiveheart/ward", absorption,
                     tuning.integer(NatureSwarmMasteryTuning.Setting.HIVE_WARD_DURATION_TICKS, 80), absorption);
         }
         if (!spawned) UniqueAbilityApi.cancel(execution);

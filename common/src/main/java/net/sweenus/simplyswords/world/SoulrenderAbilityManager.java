@@ -304,20 +304,41 @@ public final class SoulrenderAbilityManager {
 
     // Gravebound: Deathly Patience and Grave Reserve are evaluated while the sword is held.
     public static void tickHolder(ServerWorld world, LivingEntity holder, ItemStack stack) {
-        if (world == null || holder == null || stack.isEmpty() || !AwakeningApi.isAbilityUnlocked(stack)) return;
+        if (world == null || holder == null || stack.isEmpty()) return;
+        owner(world, holder.getUuid());
+        tickHolder(world, holder);
+    }
+
+    public static void tick(ServerWorld world) {
         if (world.getTime() % PATIENCE_INTERVAL_TICKS != 0) return;
-        StormSoulMasteryTuning tuning = graveTuning(world, holder, stack, null);
-
-        double range = tuning.get(StormSoulMasteryTuning.Setting.PATIENCE_RANGE, 0);
-        double resistance = tuning.get(StormSoulMasteryTuning.Setting.KNOCKBACK_RESISTANCE_BONUS, 0);
-        if (range > 0 && resistance > 0 && anyMarkedWithin(world, holder, range)) {
-            applyPatience(holder, resistance);
-        } else {
-            removePatience(holder);
+        Map<UUID, OwnerState> states = OWNERS.get(world);
+        if (states == null) return;
+        for (UUID id : new ArrayList<>(states.keySet())) {
+            if (world.getEntity(id) instanceof LivingEntity holder && holder.isAlive()) tickHolder(world, holder);
+            else states.remove(id);
         }
+        if (states.isEmpty()) OWNERS.remove(world);
+    }
 
+    private static void tickHolder(ServerWorld world, LivingEntity holder) {
+        long now = world.getTime();
+        if (now % PATIENCE_INTERVAL_TICKS != 0) return;
         OwnerState state = owner(world, holder.getUuid());
-        if (state.reserveStored > 0 && state.reserveThreshold > 0
+        if (state.lastHeldTick == now) return;
+        state.lastHeldTick = now;
+        double resistance = 0;
+        boolean held = false;
+        for (ItemStack stack : List.of(holder.getMainHandStack(), holder.getOffHandStack())) {
+            if (!stack.isOf(ItemsRegistry.SOULRENDER.get()) || !AwakeningApi.isAbilityUnlocked(stack)) continue;
+            held = true;
+            StormSoulMasteryTuning tuning = graveTuning(world, holder, stack, null);
+            double range = tuning.get(StormSoulMasteryTuning.Setting.PATIENCE_RANGE, 0);
+            double bonus = tuning.get(StormSoulMasteryTuning.Setting.KNOCKBACK_RESISTANCE_BONUS, 0);
+            if (range > 0 && bonus > resistance && anyMarkedWithin(world, holder, range)) resistance = bonus;
+        }
+        if (resistance > 0) applyPatience(holder, resistance);
+        else removePatience(holder);
+        if (held && state.reserveStored > 0 && state.reserveThreshold > 0
                 && holder.getHealth() <= holder.getMaxHealth() * state.reserveThreshold) {
             grantAbsorption(holder, Math.round(state.reserveStored), state.reserveDuration);
             state.reserveStored = 0;
@@ -409,10 +430,9 @@ public final class SoulrenderAbilityManager {
 
     private static StormSoulMasteryTuning graveTuning(ServerWorld world, LivingEntity owner, ItemStack stack,
                                                    LivingEntity other) {
-        UniqueAbilityExecution execution = UniqueAbilityApi.begin(StormSoulMasteryAbilities.SOULRENDER_GRAVE,
+        UniqueAbilityExecution execution = UniqueAbilityApi.preparePassive(StormSoulMasteryAbilities.SOULRENDER_GRAVE,
                 UniqueAbilityContext.passive(world, stack, owner, other, null), builder -> builder
                         .set(StormSoulMasteryAbilities.TUNING, StormSoulMasteryTuning.EMPTY));
-        UniqueAbilityApi.takeStartedExecution();
         UniqueAbilityApi.start(execution);
         StormSoulMasteryTuning tuning = StormSoulMasteryAbilities.tuning(execution);
         UniqueAbilityApi.finish(execution, StormSoulMasteryAbilities.FINISH, 0);
@@ -437,6 +457,7 @@ public final class SoulrenderAbilityManager {
     }
 
     private static final class OwnerState {
+        private long lastHeldTick = Long.MIN_VALUE;
         private long echoReady = Long.MIN_VALUE;
         private long coldGripReady = Long.MIN_VALUE;
         private long borrowedTimeReady = Long.MIN_VALUE;

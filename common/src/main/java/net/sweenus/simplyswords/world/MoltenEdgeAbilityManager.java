@@ -256,7 +256,7 @@ public final class MoltenEdgeAbilityManager {
         if (!tuning.flag(1 << 4) || currentHeat <= previousHeat) return;
         int step = tuning.integer(FireForgeMasteryTuning.Setting.MOLTEN_HEAT_SINK_STEP, 20);
         if (!crossedHeatThreshold(previousHeat, currentHeat, step)) return;
-        MasteryAbsorptionTracker.grant(actor,
+        MasteryAbsorptionTracker.grant(actor, "molten_edge/heat_sink",
                 (float) tuning.get(FireForgeMasteryTuning.Setting.MOLTEN_HEAT_SINK_ABSORPTION, 2),
                 tuning.integer(FireForgeMasteryTuning.Setting.MOLTEN_HEAT_SINK_DURATION_TICKS, 60),
                 (float) tuning.get(FireForgeMasteryTuning.Setting.MOLTEN_HEAT_SINK_CAP, 6));

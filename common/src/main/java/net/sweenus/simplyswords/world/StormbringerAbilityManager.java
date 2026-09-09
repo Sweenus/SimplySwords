@@ -218,7 +218,7 @@ public final class StormbringerAbilityManager {
                     s("ABSORPTION"), 2);
             int duration = integer(tuning, s("STORMBRINGER_OVERFLOW_DURATION_TICKS"),
                     s("STATUS_DURATION_TICKS"), 60);
-            MasteryAbsorptionTracker.grant(player, absorption, duration, absorption);
+            MasteryAbsorptionTracker.grant(player, "stormbringer/overflow", absorption, duration, absorption);
             state.nextOverflowTick = now + integer(tuning,
                     s("STORMBRINGER_OVERFLOW_LOCKOUT_TICKS"), s("LOCKOUT_TICKS"), 40);
         }

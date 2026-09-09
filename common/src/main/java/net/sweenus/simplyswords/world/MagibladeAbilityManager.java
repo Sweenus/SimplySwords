@@ -565,7 +565,7 @@ public final class MagibladeAbilityManager {
         if (!head.tuning.flag(1 << 15)) return;
         if (now < head.nextGuardAt) return;
         head.nextGuardAt = now + Math.max(1, head.tuning.integer(ArcaneCosmicMasteryTuning.Setting.INTERVAL_TICKS, 80));
-        MasteryAbsorptionTracker.grant(actor, (float) head.tuning.get(ArcaneCosmicMasteryTuning.Setting.ABSORPTION, 4),
+        MasteryAbsorptionTracker.grant(actor, "magiblade/guard", (float) head.tuning.get(ArcaneCosmicMasteryTuning.Setting.ABSORPTION, 4),
                 Math.max(1, head.tuning.integer(ArcaneCosmicMasteryTuning.Setting.INTERVAL_TICKS, 80)),
                 (float) head.tuning.get(ArcaneCosmicMasteryTuning.Setting.ABSORPTION, 4));
         actor.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(

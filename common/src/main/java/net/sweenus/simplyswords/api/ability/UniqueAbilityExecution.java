@@ -10,6 +10,7 @@ public final class UniqueAbilityExecution {
     private final List<UniqueAbilityObserver> observers;
     private boolean started;
     private boolean terminal;
+    private double pendingCooldownRefundFraction;
 
     UniqueAbilityExecution(long id, UniqueAbilityDefinition definition, UniqueAbilityContext context,
                            UniqueAbilityTuning tuning, List<UniqueAbilityObserver> observers) {
@@ -46,6 +47,17 @@ public final class UniqueAbilityExecution {
 
     public int cooldownTicks(int fallback) {
         return definition.cooldownKey().map(tuning::get).orElse(fallback);
+    }
+
+    public void requestCooldownRefundFraction(double fraction) {
+        if (!Double.isFinite(fraction) || fraction <= 0) return;
+        pendingCooldownRefundFraction = Math.max(pendingCooldownRefundFraction, Math.min(1, fraction));
+    }
+
+    public double takeCooldownRefundFraction() {
+        double fraction = pendingCooldownRefundFraction;
+        pendingCooldownRefundFraction = 0;
+        return fraction;
     }
 
     List<UniqueAbilityObserver> observers() {

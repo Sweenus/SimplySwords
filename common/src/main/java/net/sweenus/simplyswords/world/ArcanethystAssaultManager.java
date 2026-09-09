@@ -83,6 +83,17 @@ public final class ArcanethystAssaultManager {
 
     public static void start(ServerWorld world, LivingEntity owner, ItemStack stack, double radius, float damage,
                              ArcaneCosmicMasteryTuning suspension, UniqueAbilityExecution execution) {
+        if (owner == null || !owner.isAlive()) return;
+        UniqueAbilityExecution impactExecution = ArcaneCosmicMasteryCombatManager.beginPassive(
+                ArcaneCosmicMasteryAbilities.ARCANETHYST_IMPACT, world, stack, owner, null, impactBase());
+        ArcaneCosmicMasteryTuning impact = ArcaneCosmicMasteryAbilities.tuning(impactExecution);
+        ArcaneCosmicMasteryCombatManager.finish(impactExecution, 0);
+        start(world, owner, stack, radius, damage, suspension, impact, execution);
+    }
+
+    public static void start(ServerWorld world, LivingEntity owner, ItemStack stack, double radius, float damage,
+                             ArcaneCosmicMasteryTuning suspension, ArcaneCosmicMasteryTuning impact,
+                             UniqueAbilityExecution execution) {
         if (owner == null || !owner.isAlive()) {
             return;
         }
@@ -97,10 +108,6 @@ public final class ArcanethystAssaultManager {
             ArcaneCosmicMasteryCombatManager.finish(assault.execution, assault.processedTargets.size());
             return true;
         });
-        UniqueAbilityExecution impactExecution = ArcaneCosmicMasteryCombatManager.beginPassive(
-                ArcaneCosmicMasteryAbilities.ARCANETHYST_IMPACT, world, stack, owner, null, impactBase());
-        ArcaneCosmicMasteryTuning impact = ArcaneCosmicMasteryAbilities.tuning(impactExecution);
-        ArcaneCosmicMasteryCombatManager.finish(impactExecution, 0);
         ActiveAssault assault = new ActiveAssault(owner.getUuid(), stack.copy(), now,
                 now + Math.max(1, suspension.integer(ArcaneCosmicMasteryTuning.Setting.SECONDARY_DURATION_TICKS,
                         Config.uniqueEffects.arcanethyst.duration)), now,
@@ -332,7 +339,7 @@ public final class ArcanethystAssaultManager {
                         ArcaneCosmicMasteryTuning.Setting.SECONDARY_STATUS_DURATION_TICKS, 40), 0), owner);
         if (tuning.flag(1 << 6) && owner.getHealth() >= owner.getMaxHealth()
                 && OVERFLOW_LOCKOUTS.getOrDefault(owner.getUuid(), 0L) <= world.getTime()) {
-            MasteryAbsorptionTracker.grant(owner, (float) tuning.get(ArcaneCosmicMasteryTuning.Setting.ABSORPTION, 4),
+            MasteryAbsorptionTracker.grant(owner, "arcanethyst/overflow", (float) tuning.get(ArcaneCosmicMasteryTuning.Setting.ABSORPTION, 4),
                     Math.max(1, tuning.integer(ArcaneCosmicMasteryTuning.Setting.WINDUP_TICKS, 60)),
                     (float) tuning.get(ArcaneCosmicMasteryTuning.Setting.ABSORPTION, 4));
             OVERFLOW_LOCKOUTS.put(owner.getUuid(), world.getTime()
@@ -433,7 +440,8 @@ public final class ArcanethystAssaultManager {
 
     public static ArcaneCosmicMasteryTuning impactBase() {
         return impactBase(Config.uniqueEffects.arcanethyst.slamDamageMultiplier,
-                Config.uniqueEffects.arcanethyst.slamTicks);
+                Config.uniqueEffects.arcanethyst.slamTicks)
+                .with(ArcaneCosmicMasteryTuning.Setting.COOLDOWN_TICKS, Config.uniqueEffects.arcanethyst.cooldown);
     }
 
     public static ArcaneCosmicMasteryTuning suspensionBase() {

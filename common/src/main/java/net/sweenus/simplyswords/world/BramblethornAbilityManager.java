@@ -150,7 +150,7 @@ public final class BramblethornAbilityManager {
                 && !has(tuning, NatureSwarmMasteryTuning.Setting.BRAMBLE_BRIAR_DAMAGE_MULTIPLIER)) {
             float absorption = (float) tuning.get(
                     NatureSwarmMasteryTuning.Setting.BRAMBLE_BARKSKIN_ABSORPTION, 4);
-            MasteryAbsorptionTracker.grant(actor, absorption, tuning.integer(
+            MasteryAbsorptionTracker.grant(actor, "bramblethorn/barkskin", absorption, tuning.integer(
                     NatureSwarmMasteryTuning.Setting.BRAMBLE_BARKSKIN_DURATION_TICKS, 80), absorption);
         }
         actor.swingHand(context.hand() == null ? net.minecraft.util.Hand.MAIN_HAND : context.hand(), true);

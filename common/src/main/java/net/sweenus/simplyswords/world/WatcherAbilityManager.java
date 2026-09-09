@@ -103,7 +103,7 @@ public final class WatcherAbilityManager {
         UniqueAbilityExecution wargExecution = null;
         MartialCommandEldritchMasteryTuning warg = MartialCommandEldritchMasteryTuning.EMPTY;
         if (type == WatcherWeaponType.CLAYMORE && stack != null && !stack.isEmpty()) {
-            execution = UniqueAbilityApi.begin(AbyssalSpectralMasteryAbilities.WATCHER_DREAD,
+            execution = UniqueAbilityApi.preparePassive(AbyssalSpectralMasteryAbilities.WATCHER_DREAD,
                     UniqueAbilityContext.passive(world, stack, actor, target, null), builder -> builder
                             .set(AbyssalSpectralMasteryAbilities.TUNING, AbyssalSpectralMasteryTuning.EMPTY
                                     .with(AbyssalSpectralMasteryTuning.Setting.STACK_DURATION_TICKS,
@@ -112,7 +112,6 @@ public final class WatcherAbilityManager {
                                             Config.uniqueEffects.watcher.maxDread)
                                     .with(AbyssalSpectralMasteryTuning.Setting.MARKED_TARGET_CAP,
                                             Config.uniqueEffects.watcher.maxMarkedTargets)));
-            UniqueAbilityApi.takeStartedExecution();
             UniqueAbilityApi.start(execution);
             tuning = AbyssalSpectralMasteryAbilities.tuning(execution);
         } else if (type == WatcherWeaponType.WARGLAIVE && stack != null && !stack.isEmpty()) {
@@ -712,7 +711,7 @@ public final class WatcherAbilityManager {
                 hunt.healed += heal;
             }
             if (hunt.sanguine.flag(1 << 22) && heal > 0 && actor.getHealth() >= actor.getMaxHealth())
-                MasteryAbsorptionTracker.grant(actor, heal, 200,
+                MasteryAbsorptionTracker.grant(actor, "watcher/sanguine", heal, 200,
                         (float) hunt.sanguine.get(MartialCommandEldritchMasteryTuning.Setting.ABSORPTION, 8));
             if (hunt.sanguine.flag(1 << 23)
                     && hunt.struckTargets.size() >= Math.max(1, hunt.sanguine.integer(MartialCommandEldritchMasteryTuning.Setting.COUNT, 3)))

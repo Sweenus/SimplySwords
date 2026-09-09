@@ -80,14 +80,13 @@ public final class DevourerReprisalManager {
             return;
         }
 
-        UniqueAbilityExecution execution = UniqueAbilityApi.begin(AbyssalSpectralMasteryAbilities.DEVOURER_REPRISAL,
+        UniqueAbilityExecution execution = UniqueAbilityApi.preparePassive(AbyssalSpectralMasteryAbilities.DEVOURER_REPRISAL,
                 UniqueAbilityContext.passive(world, stack, bearer, attacker, null), builder -> builder
                         .set(AbyssalSpectralMasteryAbilities.TUNING, AbyssalSpectralMasteryTuning.EMPTY
                                 .with(AbyssalSpectralMasteryTuning.Setting.REPRISAL_RADIUS, Config.uniqueEffects.devourer.reprisalRadius)
                                 .with(AbyssalSpectralMasteryTuning.Setting.REPRISAL_TARGET_CAP, Config.uniqueEffects.devourer.reprisalTargetCap)
                                 .with(AbyssalSpectralMasteryTuning.Setting.REPRISAL_PULL, Config.uniqueEffects.devourer.reprisalPullStrength)
                                 .with(AbyssalSpectralMasteryTuning.Setting.REPRISAL_DAMAGE_MULTIPLIER, 1)));
-        UniqueAbilityApi.takeStartedExecution();
         UniqueAbilityApi.start(execution);
         AbyssalSpectralMasteryTuning tuning = AbyssalSpectralMasteryAbilities.tuning(execution);
 
@@ -303,8 +302,8 @@ public final class DevourerReprisalManager {
         float points = (float) tuning.get(AbyssalSpectralMasteryTuning.Setting.REVIVE_ABSORPTION, 0);
         int duration = tuning.integer(AbyssalSpectralMasteryTuning.Setting.ABSORPTION_DURATION_TICKS, 0);
         if (points <= 0.0F || duration <= 0) return;
-        MasteryAbsorptionTracker.clear(bearer);
-        MasteryAbsorptionTracker.grant(bearer, points, duration, points);
+        MasteryAbsorptionTracker.clear(bearer, "devourer/reprisal");
+        MasteryAbsorptionTracker.grant(bearer, "devourer/reprisal", points, duration, points);
     }
 
     private static void applyGuardianBoon(LivingEntity bearer, AbyssalSpectralMasteryTuning tuning) {

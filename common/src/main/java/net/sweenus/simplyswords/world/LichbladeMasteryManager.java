@@ -55,11 +55,10 @@ public final class LichbladeMasteryManager {
     }
 
     public static LivingEntity beginChannel(ServerWorld world, PlayerEntity owner, ItemStack stack) {
-        UniqueAbilityExecution execution = UniqueAbilityApi.begin(LongPathFinalFormsMasteryAbilities.LICHBLADE_CHANNEL,
+        UniqueAbilityExecution execution = UniqueAbilityApi.preparePassive(LongPathFinalFormsMasteryAbilities.LICHBLADE_CHANNEL,
                 UniqueAbilityContext.passive(world, stack, owner, null, null), tuning -> tuning
                         .set(LongPathFinalFormsMasteryAbilities.TUNING, LongPathFinalFormsMasteryTuning.EMPTY)
                         .set(LongPathFinalFormsMasteryAbilities.COOLDOWN_TICKS, Config.uniqueEffects.lichblade.cooldown));
-        UniqueAbilityApi.takeStartedExecution();
         LongPathFinalFormsMasteryTuning tuning = LongPathFinalFormsMasteryAbilities.tuning(execution);
         LivingEntity target = StealSwordItem.findLenientTarget(owner,
                 tuning.get(s("ACQUISITION_RANGE"), Config.uniqueEffects.lichblade.range));
@@ -190,10 +189,9 @@ public final class LichbladeMasteryManager {
 
     public static boolean tickPassive(ServerWorld world, LivingEntity owner, ItemStack stack) {
         if (owner.age % AURA_RESOLVE_INTERVAL != 0) return auraHandled(owner);
-        UniqueAbilityExecution execution = UniqueAbilityApi.begin(LongPathFinalFormsMasteryAbilities.LICHBLADE_AURA,
+        UniqueAbilityExecution execution = UniqueAbilityApi.preparePassive(LongPathFinalFormsMasteryAbilities.LICHBLADE_AURA,
                 UniqueAbilityContext.passive(world, stack, owner, null, null), tuning ->
                         tuning.set(LongPathFinalFormsMasteryAbilities.TUNING, LongPathFinalFormsMasteryTuning.EMPTY));
-        UniqueAbilityApi.takeStartedExecution();
         LongPathFinalFormsMasteryTuning tuning = LongPathFinalFormsMasteryAbilities.tuning(execution);
         if (tuning.isEmpty()) {
             UniqueAbilityApi.cancel(execution);
@@ -408,7 +406,7 @@ public final class LichbladeMasteryManager {
                     (float) tuning.get(s("TEMP_ABSORPTION_CAP"), 4), state.overhealAbsorption);
             if (granted > 0) {
                 state.overhealAbsorption += granted;
-                grantTemporaryAbsorption(owner, granted,
+                grantTemporaryAbsorption(owner, "lichblade/overheal", granted,
                         tuning.integer(s("OVERHEAL_ABSORPTION_TICKS"), 80));
             }
         }
@@ -430,7 +428,7 @@ public final class LichbladeMasteryManager {
                 : 2F;
         float granted = Math.min(state.charge / perAbsorption * (float) interest, cap);
         if (tuning.flag(1024)) {
-            grantTemporaryAbsorption(owner, granted, tuning.integer(s("BASTION_ABSORPTION_TICKS"), 160));
+            grantTemporaryAbsorption(owner, "lichblade/bastion", granted, tuning.integer(s("BASTION_ABSORPTION_TICKS"), 160));
         } else {
             owner.setAbsorptionAmount(Math.min(Config.uniqueEffects.abilityAbsorptionCap,
                     owner.getAbsorptionAmount() + granted));
@@ -480,8 +478,8 @@ public final class LichbladeMasteryManager {
         return returning && fromDeath && returningShade ? speed : 1;
     }
 
-    private static void grantTemporaryAbsorption(LivingEntity owner, float amount, int ticks) {
-        MasteryAbsorptionTracker.grant(owner, Math.min(amount,
+    private static void grantTemporaryAbsorption(LivingEntity owner, String source, float amount, int ticks) {
+        MasteryAbsorptionTracker.grant(owner, source, Math.min(amount,
                 Config.uniqueEffects.abilityAbsorptionCap - owner.getAbsorptionAmount()), ticks, 0);
     }
 

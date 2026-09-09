@@ -189,7 +189,7 @@ public final class HearthflameAbilityManager {
 
         ACTIVE.computeIfAbsent(world, ignored -> new HashMap<>()).put(actor.getUuid(), ability);
         if (tuning.has(FireForgeMasteryTuning.Setting.HEARTH_CAST_ABSORPTION)) {
-            grantTimedAbsorption(world, actor,
+            grantTimedAbsorption(world, actor, "hearthflame/cast",
                     (float) tuning.get(FireForgeMasteryTuning.Setting.HEARTH_CAST_ABSORPTION, 4),
                     tuning.integer(FireForgeMasteryTuning.Setting.HEARTH_CAST_ABSORPTION_DURATION_TICKS, 80),
                     (float) tuning.get(FireForgeMasteryTuning.Setting.HEARTH_BRAND_ABSORPTION_CAP, 8));
@@ -287,7 +287,7 @@ public final class HearthflameAbilityManager {
                 && claimLockout(BRAND_SHELTER_LOCKOUTS, world,
                 new BrandKey(actor.getUuid(), target.getUuid()),
                 brandTuning.integer(FireForgeMasteryTuning.Setting.HEARTH_BRAND_ABSORPTION_LOCKOUT_TICKS, 40))) {
-            grantTimedAbsorption(world, actor,
+            grantTimedAbsorption(world, actor, "hearthflame/brand",
                     (float) brandTuning.get(FireForgeMasteryTuning.Setting.HEARTH_BRAND_ABSORPTION, 2),
                     brandTuning.integer(
                             FireForgeMasteryTuning.Setting.HEARTH_BRAND_ABSORPTION_DURATION_TICKS, 200),
@@ -1086,11 +1086,10 @@ public final class HearthflameAbilityManager {
         return Math.max(0, amount) * (1.0F - (float) MathHelper.clamp(reduction, 0.0, 1.0));
     }
 
-    // Every Hearthflame grant tops up one tracked, bounded pool so no source can stack without limit.
-    private static void grantTimedAbsorption(ServerWorld world, LivingEntity actor, float amount, int ticks,
+    private static void grantTimedAbsorption(ServerWorld world, LivingEntity actor, String source, float amount, int ticks,
                                              float cap) {
         if (amount <= 0 || ticks <= 0) return;
-        MasteryAbsorptionTracker.grant(actor, amount, ticks, Math.max(amount, cap));
+        MasteryAbsorptionTracker.grant(actor, source, amount, ticks, Math.max(amount, cap));
         ABSORPTION_SWEEP_UNTIL.merge(world, world.getTime() + ticks, Math::max);
     }
 
@@ -1099,7 +1098,7 @@ public final class HearthflameAbilityManager {
                 FireForgeMasteryTuning.Setting.HEARTH_COMPLETION_MIN_CHAINS, Integer.MAX_VALUE);
         if (ability.completedChains < completionMinimum
                 || !ability.tuning.has(FireForgeMasteryTuning.Setting.HEARTH_COMPLETION_ABSORPTION)) return;
-        grantTimedAbsorption(world, actor,
+        grantTimedAbsorption(world, actor, "hearthflame/completion",
                 (float) ability.tuning.get(FireForgeMasteryTuning.Setting.HEARTH_COMPLETION_ABSORPTION, 4),
                 ability.tuning.integer(
                         FireForgeMasteryTuning.Setting.HEARTH_COMPLETION_ABSORPTION_DURATION_TICKS, 60),

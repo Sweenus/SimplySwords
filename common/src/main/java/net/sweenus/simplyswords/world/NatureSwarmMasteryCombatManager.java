@@ -50,12 +50,9 @@ public final class NatureSwarmMasteryCombatManager {
 
     public static UniqueAbilityExecution beginPassive(UniqueAbilityDefinition definition, ServerWorld world,
                                                       ItemStack stack, LivingEntity actor, LivingEntity target) {
-        UniqueAbilityExecution execution = UniqueAbilityApi.begin(definition,
+        return UniqueAbilityApi.beginPassive(definition,
                 UniqueAbilityContext.passive(world, stack, actor, target, null),
                 tuning -> tuning.set(NatureSwarmMasteryAbilities.TUNING, NatureSwarmMasteryTuning.EMPTY));
-        UniqueAbilityApi.takeStartedExecution();
-        UniqueAbilityApi.start(execution);
-        return execution;
     }
 
     public static float modifyIncomingDamage(LivingEntity target, DamageSource source, float amount) {
@@ -148,7 +145,7 @@ public final class NatureSwarmMasteryCombatManager {
             lockout = Math.max(lockout, shoulder.getInt("MasteryHelpfulLockout"));
         }
         if (absorption <= 0 || duration <= 0) return;
-        MasteryAbsorptionTracker.grant(player, absorption, duration, absorption);
+        MasteryAbsorptionTracker.grant(player, "chompolotl/helpful_friend", absorption, duration, absorption);
         CHOMP_HELPFUL_LOCKOUTS.put(player.getUuid(), world.getTime() + Math.max(0, lockout));
     }
 
@@ -252,7 +249,7 @@ public final class NatureSwarmMasteryCombatManager {
                 if (world.getTime() < skin.at) return false;
                 net.minecraft.entity.Entity entity = world.getEntity(skin.ownerId);
                 if (entity instanceof LivingEntity living && living.isAlive()) {
-                    MasteryAbsorptionTracker.grant(living, skin.absorption, skin.duration, skin.absorption);
+                    MasteryAbsorptionTracker.grant(living, "waxweaver/second_skin", skin.absorption, skin.duration, skin.absorption);
                 }
                 return true;
             });

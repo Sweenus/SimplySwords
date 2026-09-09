@@ -814,7 +814,7 @@ public final class SoulPyreAbilityManager {
         }
         if (pyre.tuning.flag(1 << 6) && pyre.totalSoulsHarvested <= pyre.tuning.integer(
                 FireForgeMasteryTuning.Setting.SOULPYRE_FEAST_KILL_COUNT, 3)) {
-            MasteryAbsorptionTracker.grant(actor,
+            MasteryAbsorptionTracker.grant(actor, "soulpyre/feast",
                     (float) pyre.tuning.get(
                             FireForgeMasteryTuning.Setting.SOULPYRE_FEAST_ABSORPTION, 2),
                     pyre.tuning.integer(

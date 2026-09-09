@@ -89,8 +89,14 @@ public class ArcanethystSwordItem extends UniqueSwordItem implements TwoHandedWe
         if (!canActivate(context)) {
             return false;
         }
+        UniqueAbilityExecution impactExecution = ArcaneCosmicMasteryCombatManager.beginPassive(
+                ArcaneCosmicMasteryAbilities.ARCANETHYST_IMPACT, context.world(), context.stack(),
+                context.actor(), context.target(), ArcanethystAssaultManager.impactBase());
+        ArcaneCosmicMasteryTuning impact = ArcaneCosmicMasteryAbilities.tuning(impactExecution);
+        ArcaneCosmicMasteryCombatManager.finish(impactExecution, 0);
         UniqueAbilityExecution execution = ArcaneCosmicMasteryCombatManager.beginActive(
-                ArcaneCosmicMasteryAbilities.ARCANETHYST_SUSPENSION, context, Config.uniqueEffects.arcanethyst.cooldown,
+                ArcaneCosmicMasteryAbilities.ARCANETHYST_SUSPENSION, context,
+                impact.integer(ArcaneCosmicMasteryTuning.Setting.COOLDOWN_TICKS, Config.uniqueEffects.arcanethyst.cooldown),
                 ArcanethystAssaultManager.suspensionBase());
         UniqueAbilityExecution sparkExecution = ArcaneCosmicMasteryCombatManager.beginPassive(
                 ArcaneCosmicMasteryAbilities.ARCANETHYST_SPARK, context.world(), context.stack(),
@@ -98,7 +104,7 @@ public class ArcanethystSwordItem extends UniqueSwordItem implements TwoHandedWe
         ArcaneCosmicMasteryTuning spark = ArcaneCosmicMasteryAbilities.tuning(sparkExecution);
         ArcaneCosmicMasteryCombatManager.finish(sparkExecution, 0);
         activateArcanethyst(context.world(), context.actor(), context.stack(),
-                ArcaneCosmicMasteryAbilities.tuning(execution), spark, execution);
+                ArcaneCosmicMasteryAbilities.tuning(execution), spark, impact, execution);
         return true;
     }
 
@@ -109,7 +115,7 @@ public class ArcanethystSwordItem extends UniqueSwordItem implements TwoHandedWe
 
     private static void activateArcanethyst(ServerWorld serverWorld, LivingEntity actor, ItemStack stack,
                                             ArcaneCosmicMasteryTuning suspension, ArcaneCosmicMasteryTuning spark,
-                                            UniqueAbilityExecution execution) {
+                                            ArcaneCosmicMasteryTuning impact, UniqueAbilityExecution execution) {
         double radius = suspension.get(ArcaneCosmicMasteryTuning.Setting.RADIUS,
                 Config.uniqueEffects.arcanethyst.radius);
         float abilityDamage = HelperMethods.abilityScaledDamage("arcane", actor, stack,
@@ -117,7 +123,7 @@ public class ArcanethystSwordItem extends UniqueSwordItem implements TwoHandedWe
                         * (float) spark.get(ArcaneCosmicMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1),
                 Config.uniqueEffects.arcanethyst.spellScaling
                         * (float) spark.get(ArcaneCosmicMasteryTuning.Setting.SPELL_MULTIPLIER, 1));
-        ArcanethystAssaultManager.start(serverWorld, actor, stack, radius, abilityDamage, suspension, execution);
+        ArcanethystAssaultManager.start(serverWorld, actor, stack, radius, abilityDamage, suspension, impact, execution);
     }
 
     @Override

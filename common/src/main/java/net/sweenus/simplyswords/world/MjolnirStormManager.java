@@ -165,7 +165,7 @@ public final class MjolnirStormManager {
         if (grantsDefensiveBuffs(tuning)) {
             float shell = (float) tuning.get(s("MJOLNIR_SHELL_ABSORPTION"), 0);
             if (tuning.flag(MODE_STATIC_SHELL) && shell > 0) {
-                MasteryAbsorptionTracker.grant(actor, shell,
+                MasteryAbsorptionTracker.grant(actor, "mjolnir/shell", shell,
                         tuning.integer(s("MJOLNIR_SHELL_DURATION_TICKS"), 80), shell);
             }
         }
@@ -796,7 +796,7 @@ public final class MjolnirStormManager {
         int duration = tuning.integer(s("MJOLNIR_AEGIS_DURATION_TICKS"), 120);
         float absorption = (float) tuning.get(s("MJOLNIR_AEGIS_ABSORPTION"), 8);
         if (absorption > 0 && duration > 0) {
-            MasteryAbsorptionTracker.grant(actor, absorption, duration, absorption);
+            MasteryAbsorptionTracker.grant(actor, "mjolnir/aegis", absorption, duration, absorption);
         }
         if (duration > 0) {
             actor.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, duration,

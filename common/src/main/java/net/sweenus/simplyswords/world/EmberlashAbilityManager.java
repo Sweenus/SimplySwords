@@ -163,7 +163,7 @@ public final class EmberlashAbilityManager {
             phoenixStep(world, actor, context.stack(), direction, distance, tuning);
         }
         if (tuning.flag(SEALED_WOUNDS)) {
-            MasteryAbsorptionTracker.grant(actor,
+            MasteryAbsorptionTracker.grant(actor, "emberlash/cautery",
                     (float) tuning.get(s("EMBERLASH_CAUTERY_ABSORPTION"), 4),
                     tuning.integer(s("EMBERLASH_CAUTERY_ABSORPTION_TICKS"), 60),
                     (float) tuning.get(s("EMBERLASH_CAUTERY_ABSORPTION"), 4));

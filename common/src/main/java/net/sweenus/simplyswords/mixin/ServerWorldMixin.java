@@ -22,6 +22,8 @@ public abstract class ServerWorldMixin {
     @Inject(method = "tick(Ljava/util/function/BooleanSupplier;)V", at = @At("HEAD"))
     private void simplyswords$tickFieldManagers(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
         ServerWorld world = (ServerWorld) (Object) this;
+        SoulrenderAbilityManager.tick(world);
+        FlamewindMasteryManager.tick(world);
         if (MasteryAbsorptionTracker.hasActive(world)) {
             MasteryAbsorptionTracker.sweep(world);
         }

@@ -43,18 +43,16 @@ public final class EmberWeaponsMasteryManager {
     public static UniqueAbilityExecution beginActive(UniqueAbilityDefinition definition,
                                                      WeaponAbilityContext context, int cooldown) {
         return UniqueAbilityApi.begin(definition, UniqueAbilityContext.active(context), tuning -> tuning
-                .set(FireForgeMasteryAbilities.TUNING, FireForgeMasteryTuning.EMPTY)
+                .set(FireForgeMasteryAbilities.TUNING, FireForgeMasteryTuning.EMPTY
+                        .with(FireForgeMasteryTuning.Setting.COOLDOWN_TICKS, cooldown))
                 .set(FireForgeMasteryAbilities.COOLDOWN_TICKS, cooldown));
     }
 
     public static UniqueAbilityExecution beginPassive(UniqueAbilityDefinition definition, ServerWorld world,
                                                       ItemStack stack, LivingEntity actor, LivingEntity target) {
-        UniqueAbilityExecution execution = UniqueAbilityApi.begin(definition,
+        return UniqueAbilityApi.beginPassive(definition,
                 UniqueAbilityContext.passive(world, stack, actor, target, null),
                 tuning -> tuning.set(FireForgeMasteryAbilities.TUNING, FireForgeMasteryTuning.EMPTY));
-        UniqueAbilityApi.takeStartedExecution();
-        UniqueAbilityApi.start(execution);
-        return execution;
     }
 
     public static boolean releaseEmberblade(WeaponAbilityContext context) {

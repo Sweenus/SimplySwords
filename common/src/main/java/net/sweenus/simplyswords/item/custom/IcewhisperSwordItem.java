@@ -114,7 +114,7 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
         int absorption = tuning.integer(s("ICEWHISPER_WARD_ABSORPTION"), 0);
         if (tuning.flag(IcewhisperAbilityManager.MODE_FROST_WARD) && absorption > 0
                 && !tuning.flag(IcewhisperAbilityManager.MODE_BLACK_ICE)) {
-            MasteryAbsorptionTracker.grant(actor, absorption,
+            MasteryAbsorptionTracker.grant(actor, "icewhisper/ward", absorption,
                     tuning.integer(s("ICEWHISPER_WARD_DURATION_TICKS"), 80), absorption);
         }
         IcewhisperCometManager.startStorm(serverWorld, actor, stack, radius,

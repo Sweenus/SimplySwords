@@ -26,10 +26,26 @@ import net.sweenus.simplyswords.util.Styles;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.function.BiFunction;
 
 public class TooltipUtils {
     public static final Identifier runic_tags = Identifier.of(SimplySwords.MOD_ID, "runic_weapons");
     private static long ctrlKeyPressTimestamp = 0;
+    private static final Map<Identifier, BiFunction<ItemStack, Integer, Text>> COOLDOWN_FORMATTERS = new LinkedHashMap<>();
+
+    public static void registerCooldownFormatter(Identifier id, BiFunction<ItemStack, Integer, Text> formatter) {
+        COOLDOWN_FORMATTERS.put(java.util.Objects.requireNonNull(id), java.util.Objects.requireNonNull(formatter));
+    }
+
+    public static Text formatAbilityCooldown(ItemStack stack, int baseTicks) {
+        for (BiFunction<ItemStack, Integer, Text> formatter : COOLDOWN_FORMATTERS.values()) {
+            Text result = formatter.apply(stack, baseTicks);
+            if (result != null) return result;
+        }
+        return null;
+    }
 
 
     public static void centerAlignTooltip(List<Text> tooltip, Text text) {

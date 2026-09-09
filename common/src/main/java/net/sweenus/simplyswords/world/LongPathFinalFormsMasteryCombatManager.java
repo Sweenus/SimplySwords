@@ -251,7 +251,7 @@ public final class LongPathFinalFormsMasteryCombatManager {
         if (tuning.flag(4096) && !tuning.flag(131072) && state.reserve > 0
                 && owner.getHealth() / owner.getMaxHealth() < tuning.get(s("RESERVE_THRESHOLD"), .5)) {
             float before = owner.getAbsorptionAmount();
-            MasteryAbsorptionTracker.grant(owner, state.reserve,
+            MasteryAbsorptionTracker.grant(owner, "sunfire/reserve", state.reserve,
                     tuning.integer(s("RESERVE_ABSORPTION_TICKS"), 100), state.reserve);
             if (owner.getAbsorptionAmount() > before) {
                 state.reserve = 0;
@@ -264,7 +264,7 @@ public final class LongPathFinalFormsMasteryCombatManager {
             state.rekindleReadyAt = world.getTime() + tuning.integer(s("REKINDLE_LOCKOUT_TICKS"), 600);
             int duration = tuning.integer(s("REKINDLE_DURATION_TICKS"), 100);
             grantSunfireRegeneration(owner, duration, 1);
-            MasteryAbsorptionTracker.grant(owner, (float) tuning.get(s("REKINDLE_ABSORPTION"), 4), duration,
+            MasteryAbsorptionTracker.grant(owner, "sunfire/rekindle", (float) tuning.get(s("REKINDLE_ABSORPTION"), 4), duration,
                     (float) tuning.get(s("REKINDLE_ABSORPTION"), 4));
             UniqueAbilityApi.start(execution);
         }
@@ -356,17 +356,13 @@ public final class LongPathFinalFormsMasteryCombatManager {
 
     private static UniqueAbilityExecution begin(UniqueAbilityDefinition definition, ServerWorld world,
                                                 ItemStack stack, LivingEntity actor, LivingEntity target) {
-        UniqueAbilityExecution previous = UniqueAbilityApi.takeStartedExecution();
-        UniqueAbilityExecution execution = UniqueAbilityApi.begin(definition,
+        return UniqueAbilityApi.preparePassive(definition,
                 UniqueAbilityContext.passive(world, stack, actor, target, null), tuning -> {
                     tuning.set(LongPathFinalFormsMasteryAbilities.TUNING, LongPathFinalFormsMasteryTuning.EMPTY);
                     if (definition.cooldownKey().isPresent()) tuning.set(LongPathFinalFormsMasteryAbilities.COOLDOWN_TICKS,
                             definition == LongPathFinalFormsMasteryAbilities.SUNFIRE_STANDARD
                                     ? Config.uniqueEffects.sunfire.cooldown : Config.uniqueEffects.harbinger.cooldown);
                 });
-        UniqueAbilityApi.takeStartedExecution();
-        if (previous != null) UniqueAbilityApi.publishStartedExecution(previous);
-        return execution;
     }
 
     private static void flare(ServerWorld world, ItemStack stack, LivingEntity owner,

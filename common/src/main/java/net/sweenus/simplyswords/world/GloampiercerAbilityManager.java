@@ -138,10 +138,9 @@ public final class GloampiercerAbilityManager {
         if (nextEligible != null && now < nextEligible) {
             return;
         }
-        UniqueAbilityExecution execution = UniqueAbilityApi.begin(AbyssalSpectralMasteryAbilities.GLOAMPIERCER_AMBUSH,
+        UniqueAbilityExecution execution = UniqueAbilityApi.preparePassive(AbyssalSpectralMasteryAbilities.GLOAMPIERCER_AMBUSH,
                 UniqueAbilityContext.passive(world, stack, owner, null, null), builder -> builder
                         .set(AbyssalSpectralMasteryAbilities.TUNING, passiveTuning()));
-        UniqueAbilityApi.takeStartedExecution();
         UniqueAbilityApi.start(execution);
         AbyssalSpectralMasteryTuning tuning = AbyssalSpectralMasteryAbilities.tuning(execution);
         int mode = tuning.integer(AbyssalSpectralMasteryTuning.Setting.MODE, 0);

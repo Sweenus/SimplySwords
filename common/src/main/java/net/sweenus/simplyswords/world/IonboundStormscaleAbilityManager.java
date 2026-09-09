@@ -176,11 +176,10 @@ public final class IonboundStormscaleAbilityManager {
             return false;
         }
 
-        UniqueAbilityExecution execution = UniqueAbilityApi.begin(StormSoulMasteryAbilities.IONBOUND_SHIELD,
+        UniqueAbilityExecution execution = UniqueAbilityApi.preparePassive(StormSoulMasteryAbilities.IONBOUND_SHIELD,
                 UniqueAbilityContext.passive(world, stack, actor, source.getAttacker() instanceof LivingEntity target
                         ? target : null, heldHand(actor, stack)), builder -> builder
                         .set(StormSoulMasteryAbilities.TUNING, StormSoulMasteryTuning.EMPTY));
-        UniqueAbilityApi.takeStartedExecution();
         UniqueAbilityApi.start(execution);
         StormSoulMasteryTuning tuning = StormSoulMasteryAbilities.tuning(execution);
         int mode = tuning.integer(StormSoulMasteryTuning.Setting.MODE, 0);
@@ -809,10 +808,9 @@ public final class IonboundStormscaleAbilityManager {
         if (current == null || current.stackReference != stack) {
             checkpointRecharge(current);
             IonCubeComponent cubes = getCubes(stack);
-            UniqueAbilityExecution execution = UniqueAbilityApi.begin(StormSoulMasteryAbilities.IONBOUND_SHIELD,
+            UniqueAbilityExecution execution = UniqueAbilityApi.preparePassive(StormSoulMasteryAbilities.IONBOUND_SHIELD,
                     UniqueAbilityContext.passive(world, stack, actor, null, hand), builder -> builder
                             .set(StormSoulMasteryAbilities.TUNING, StormSoulMasteryTuning.EMPTY));
-            UniqueAbilityApi.takeStartedExecution();
             UniqueAbilityApi.start(execution);
             StormSoulMasteryTuning tuning = StormSoulMasteryAbilities.tuning(execution);
             UniqueAbilityApi.finish(execution, StormSoulMasteryAbilities.FINISH, 0);

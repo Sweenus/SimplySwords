@@ -277,11 +277,15 @@ public class SimplySwords {
             RibboncleaverDreadtideMasteryManager.clearAll();
         });
         PlayerEvent.CHANGE_DIMENSION.register((player, oldLevel, newLevel) -> {
+            SoulrenderAbilityManager.removeActor(player);
+            FlamewindMasteryManager.clearActor(player);
             GloampiercerAbilityManager.clearActor(player);
             SoulstalkerAbilityManager.clearActor(player);
             DreadwhisperAbilityManager.clearActor(player);
         });
         PlayerEvent.PLAYER_QUIT.register(player -> {
+            SoulrenderAbilityManager.removeActor(player);
+            FlamewindMasteryManager.clearActor(player);
             GloampiercerAbilityManager.clearActor(player);
             SoulstalkerAbilityManager.clearActor(player);
             DreadwhisperAbilityManager.clearActor(player);
