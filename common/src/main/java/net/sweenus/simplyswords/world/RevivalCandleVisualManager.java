@@ -11,6 +11,7 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.RevivalCandleVisualEntity;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
@@ -91,6 +92,7 @@ public final class RevivalCandleVisualManager {
     }
 
     public static void activate(ServerPlayerEntity player, ItemStack stack) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (!Config.general.enableModernFieldEffects || player == null || stack == null || stack.isEmpty()) {
             return;
         }
@@ -127,6 +129,7 @@ public final class RevivalCandleVisualManager {
         Vec3d pos = player.getCameraPosVec(1.0F);
         world.spawnParticles(ParticleTypes.FLAME, pos.x, pos.y, pos.z, 6, 0.14, 0.1, 0.14, 0.01);
         world.playSound(null, player.getBlockPos(), SoundEvents.BLOCK_CANDLE_EXTINGUISH, SoundCategory.PLAYERS, 0.65F, 0.85F + player.getRandom().nextFloat() * 0.15F);
+        }
     }
 
     public static void tickWorld(ServerWorld world) {

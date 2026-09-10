@@ -31,6 +31,8 @@ import net.sweenus.simplyswords.api.ability.FireForgeMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
+import net.sweenus.simplyswords.api.combat.CombatProvenance;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.SoulPyreVisualEntity;
 import net.sweenus.simplyswords.entity.SoulPyreWispEntity;
@@ -129,7 +131,7 @@ public final class SoulPyreAbilityManager {
         );
         boolean[] damaged = {false};
         WeaponImplicitRegistry.runSuppressed(
-                () -> damaged[0] = target.damage(source, 4.0F)
+                () -> damaged[0] = CombatProvenanceApi.damage(contact.provenance == null ? null : contact.provenance.deliveredBy(CombatProvenance.DAMAGE_OVER_TIME), target, source, 4.0F)
         );
         if (damaged[0]) {
             target.playSound(
@@ -608,6 +610,7 @@ public final class SoulPyreAbilityManager {
 
     private static void beginCollapse(ServerWorld world, LivingEntity actor,
                                       ActivePyre pyre, long now) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(pyre == null ? null : CombatProvenanceApi.from(pyre.stack, null))) {
         if (pyre.collapsing) {
             return;
         }
@@ -693,6 +696,7 @@ public final class SoulPyreAbilityManager {
                 1.15F,
                 0.55F
         );
+        }
     }
 
     private static boolean tickCollapse(ServerWorld world, LivingEntity actor,
@@ -896,6 +900,7 @@ public final class SoulPyreAbilityManager {
     private static void launchWispVolley(ServerWorld world, LivingEntity actor,
                                          ActivePyre pyre, int soulCount,
                                          float fieldRadius, WispPlan plan) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(pyre == null ? null : CombatProvenanceApi.from(pyre.stack, null))) {
         if (soulCount <= 0) {
             return;
         }
@@ -975,11 +980,13 @@ public final class SoulPyreAbilityManager {
                     )
             );
         }
+        }
     }
 
     private static void launchSoulLance(ServerWorld world, LivingEntity actor,
                                         ActivePyre pyre, int soulCount, float fieldRadius,
                                         WispPlan plan) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(pyre == null ? null : CombatProvenanceApi.from(pyre.stack, null))) {
         if (soulCount <= 0) return;
         UniqueAbilityExecution execution = plan.execution;
         FireForgeMasteryTuning tuning = plan.tuning;
@@ -1012,6 +1019,7 @@ public final class SoulPyreAbilityManager {
                 visual.getUuid(), assigned == null ? null : assigned.getUuid(), pyre.stack.copy(), damage,
                 searchRadius, world.getTime() + WISP_LIFETIME, volley, false,
                 Integer.MAX_VALUE, true, Math.max(1, targetCap)));
+        }
     }
 
     private static void tickWisps(ServerWorld world) {
@@ -1232,6 +1240,7 @@ public final class SoulPyreAbilityManager {
 
     private static void recordBindingPulse(ServerWorld world, LivingEntity actor,
                                            ActivePyre pyre, LivingEntity target) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(pyre == null ? null : CombatProvenanceApi.from(pyre.stack, null))) {
         if (!pyre.tuning.flag(1 << 4)) return;
         int count = pyre.tuning.integer(FireForgeMasteryTuning.Setting.SOULPYRE_BINDING_HIT_COUNT, 3);
         int window = pyre.tuning.integer(FireForgeMasteryTuning.Setting.SOULPYRE_BINDING_WINDOW_TICKS, 80);
@@ -1244,6 +1253,7 @@ public final class SoulPyreAbilityManager {
                 pyre.tuning.integer(FireForgeMasteryTuning.Setting.SOULPYRE_BINDING_SLOW_TICKS, 40),
                 pyre.tuning.integer(FireForgeMasteryTuning.Setting.SOULPYRE_BINDING_SLOW_AMPLIFIER, 1),
                 false, true, true), actor);
+        }
     }
 
     private static void markWispTarget(ServerWorld world, UUID ownerId, UUID targetId, int duration) {
@@ -1288,6 +1298,7 @@ public final class SoulPyreAbilityManager {
     private static boolean applyAbilityDamage(
             ServerWorld world, LivingEntity actor, LivingEntity sourceOwner,
             ItemStack stack, LivingEntity target, float damage) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         LivingEntity attributedOwner = sourceOwner == null ? actor : sourceOwner;
         DamageSource source = world.getDamageSources().indirectMagic(
                 actor,
@@ -1301,6 +1312,7 @@ public final class SoulPyreAbilityManager {
                 Math.max(0.0F, damage)
         );
         return HelperMethods.damageThroughIframes(target, source, finalDamage);
+        }
     }
 
     private static boolean isValidTarget(
@@ -1370,7 +1382,7 @@ public final class SoulPyreAbilityManager {
                         world,
                         target,
                         actor,
-                        sourceOwner
+                        sourceOwner, pyre.execution.provenance()
                 );
                 bestDistance = distance;
                 bestActorId = actor.getUuid();
@@ -1687,6 +1699,7 @@ public final class SoulPyreAbilityManager {
 
     private static void finishTetherDefense(ServerWorld world, LivingEntity actor,
                                             ActivePyre pyre, boolean allowLinger) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(pyre == null ? null : CombatProvenanceApi.from(pyre.stack, null))) {
         int knockbackLinger = allowLinger && pyre.tuning.flag(1 << 19)
                 ? pyre.tuning.integer(FireForgeMasteryTuning.Setting.SOULPYRE_KNOCKBACK_LINGER_TICKS, 60) : 0;
         if (knockbackLinger > 0) {
@@ -1718,9 +1731,11 @@ public final class SoulPyreAbilityManager {
                     StatusEffects.FIRE_RESISTANCE, linger, 0, false, true, true), actor);
         }
         pyre.managedFireResistance = false;
+        }
     }
 
     private static void maintainNetherWard(ServerWorld world, LivingEntity actor, ActivePyre pyre) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(pyre == null ? null : CombatProvenanceApi.from(pyre.stack, null))) {
         if (!pyre.tuning.flag(1 << 20)) return;
         int linger = pyre.tuning.integer(
                 FireForgeMasteryTuning.Setting.SOULPYRE_FIRE_RESISTANCE_LINGER_TICKS, 40);
@@ -1730,6 +1745,7 @@ public final class SoulPyreAbilityManager {
         pyre.managedFireResistance = true;
         actor.addStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE,
                 required, 0, false, true, true), actor);
+        }
     }
 
     private static void cancelExecution(UniqueAbilityExecution execution) {
@@ -1897,6 +1913,6 @@ public final class SoulPyreAbilityManager {
             ServerWorld world,
             LivingEntity target,
             LivingEntity actor,
-            LivingEntity sourceOwner) {
+            LivingEntity sourceOwner, CombatProvenance provenance) {
     }
 }

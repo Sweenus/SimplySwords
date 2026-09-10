@@ -19,6 +19,8 @@ import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryTuning;
 import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
+import net.sweenus.simplyswords.api.combat.CombatProvenance;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -73,6 +75,7 @@ public final class TempestAbilityManager {
         MarkKey key = new MarkKey(owner.getUuid(), target.getUuid());
         Marks marks = state.marks.computeIfAbsent(key, ignored -> new Marks());
         marks.tuning = tuning;
+        marks.provenance = CombatProvenanceApi.current();
         marks.fireDamage = fireDamage;
         marks.frostDamage = frostDamage;
         int fireApplied = add(marks, primary, cap, duration, potency, now);
@@ -120,6 +123,7 @@ public final class TempestAbilityManager {
     public static boolean startVortex(WeaponAbilityContext context, StormFrostWaterMasteryTuning tuning,
                                       UniqueAbilityExecution execution, int configuredDuration,
                                       int configuredMaximumSize) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(execution == null ? null : execution.provenance())) {
         ServerWorld world = context.world();
         LivingEntity owner = context.actor();
         WorldState worldState = STATES.computeIfAbsent(world, ignored -> new WorldState());
@@ -189,6 +193,7 @@ public final class TempestAbilityManager {
         thermalShock(world, owner, vortex);
         createWaves(owner, vortex);
         return true;
+        }
     }
 
     public static boolean hasManagedMark(LivingEntity target, Element element) {
@@ -318,13 +323,13 @@ public final class TempestAbilityManager {
             Marks marks = entry.getValue();
             targets.add(target.getUuid());
             if (marks.fire > 0 && now >= marks.nextFirePulse) {
-                damageMark(target, owner, (float) (marks.fireDamage
+                damageMark(marks.provenance, target, owner, (float) (marks.fireDamage
                         * marks.tuning.get(s("DAMAGE_MULTIPLIER"), 1)
                         * marks.tuning.get(s("TEMPEST_FIRE_DAMAGE_MULTIPLIER"), 1)), marks.fire, marks.firePotency);
                 marks.nextFirePulse = now + Math.max(1, 16 - marks.fire);
             }
             if (marks.frost > 0 && now >= marks.nextFrostPulse) {
-                damageMark(target, owner, (float) (marks.frostDamage
+                damageMark(marks.provenance, target, owner, (float) (marks.frostDamage
                         * marks.tuning.get(s("DAMAGE_MULTIPLIER"), 1)), marks.frost, marks.frostPotency);
                 marks.nextFrostPulse = now + Math.max(1, 16 - marks.frost);
             }
@@ -371,7 +376,7 @@ public final class TempestAbilityManager {
             vortex.pulses++;
             int steamEvery = vortex.tuning.integer(s("TEMPEST_STEAM_PULSE_COUNT"), 0);
             if (steamEvery > 0 && vortex.consumedBoth() && vortex.pulses % steamEvery == 0) {
-                secondaryBurst(world, owner, center,
+                secondaryBurst(vortex, world, owner, center,
                         vortex.tuning.get(s("TEMPEST_STEAM_RADIUS"), 3),
                         vortex.pulseDamage() * vortex.tuning.get(s("TEMPEST_STEAM_DAMAGE_MULTIPLIER"), .3),
                         vortex.tuning.integer(s("TEMPEST_STEAM_TARGET_CAP"), 8));
@@ -382,10 +387,11 @@ public final class TempestAbilityManager {
 
     private static void pulse(ServerWorld world, LivingEntity owner, Vortex vortex, Vec3d center,
                               double radius, double damage, int cap, boolean countRime) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(vortex == null || vortex.execution == null ? null : vortex.execution.provenance())) {
         List<LivingEntity> targets = targets(world, owner, center, radius, cap);
         int affected = 0;
         for (LivingEntity target : targets) {
-            boolean damaged = damage(target, owner, damage);
+            boolean damaged = damage(vortex, target, owner, damage);
             if (damaged) affected++;
             double pull = value(vortex.tuning, "TEMPEST_VORTEX_PULL_STRENGTH", "PULL_STRENGTH", 0)
                     * vortex.tuning.get(s("TEMPEST_SINGULARITY_PULL_MULTIPLIER"), 1);
@@ -406,11 +412,12 @@ public final class TempestAbilityManager {
         }
         UniqueAbilityApi.emit(vortex.execution, net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
                 StormFrostWaterMasteryAbilities.PULSE, null, affected, damage);
+        }
     }
 
     private static void thermalShock(ServerWorld world, LivingEntity owner, Vortex vortex) {
         if (!vortex.consumedBoth() || !vortex.tuning.has(s("TEMPEST_THERMAL_DAMAGE_MULTIPLIER"))) return;
-        secondaryBurst(world, owner, owner.getPos(), vortex.tuning.get(s("TEMPEST_THERMAL_RADIUS"), 3),
+        secondaryBurst(vortex, world, owner, owner.getPos(), vortex.tuning.get(s("TEMPEST_THERMAL_RADIUS"), 3),
                 vortex.pulseDamage() * vortex.tuning.get(s("TEMPEST_THERMAL_DAMAGE_MULTIPLIER"), .4),
                 vortex.tuning.integer(s("TEMPEST_THERMAL_TARGET_CAP"), 10));
     }
@@ -420,14 +427,14 @@ public final class TempestAbilityManager {
         if (perStack <= 0) return;
         int capped = Math.min(vortex.fire + vortex.frost,
                 vortex.tuning.integer(s("TEMPEST_FINAL_STACK_CAP"), 20));
-        secondaryBurst(world, owner, vortex.center(owner), vortex.tuning.get(s("TEMPEST_FINAL_RADIUS"), 4),
+        secondaryBurst(vortex, world, owner, vortex.center(owner), vortex.tuning.get(s("TEMPEST_FINAL_RADIUS"), 4),
                 vortex.pulseDamage() * perStack * capped,
                 vortex.tuning.integer(s("TEMPEST_FINAL_TARGET_CAP"), 16));
     }
 
-    private static void secondaryBurst(ServerWorld world, LivingEntity owner, Vec3d center,
+    private static void secondaryBurst(Vortex vortex, ServerWorld world, LivingEntity owner, Vec3d center,
                                        double radius, double damage, int cap) {
-        for (LivingEntity target : targets(world, owner, center, radius, cap)) damage(target, owner, damage);
+        for (LivingEntity target : targets(world, owner, center, radius, cap)) damage(vortex, target, owner, damage);
         world.spawnParticles(ParticleTypes.CLOUD, center.x, center.y + .5, center.z,
                 16, radius / 2, .4, radius / 2, .04);
     }
@@ -447,6 +454,7 @@ public final class TempestAbilityManager {
     }
 
     private static void tickWaves(ServerWorld world, LivingEntity owner, Vortex vortex) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(vortex == null || vortex.execution == null ? null : vortex.execution.provenance())) {
         Iterator<Wave> iterator = vortex.waves.iterator();
         while (iterator.hasNext()) {
             Wave wave = iterator.next();
@@ -456,7 +464,7 @@ public final class TempestAbilityManager {
             int cap = vortex.tuning.integer(s("TEMPEST_WAVE_TARGET_CAP"), 16);
             for (LivingEntity target : targets(world, owner, wave.center, width, cap)) {
                 if (!wave.hit.add(target.getUuid())) continue;
-                damage(target, owner, vortex.pulseDamage()
+                damage(vortex, target, owner, vortex.pulseDamage()
                         * vortex.tuning.get(s("TEMPEST_WAVE_DAMAGE_MULTIPLIER"), .75));
                 if (wave.fire) target.setOnFireForTicks(40);
                 else target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 40, 0), owner);
@@ -467,6 +475,7 @@ public final class TempestAbilityManager {
                 spawnWaveDissipation(world, wave, width);
                 iterator.remove();
             }
+        }
         }
     }
 
@@ -537,17 +546,19 @@ public final class TempestAbilityManager {
                 .toList();
     }
 
-    private static void damageMark(LivingEntity target, LivingEntity owner, float base, int stacks, double potency) {
+    private static void damageMark(CombatProvenance provenance, LivingEntity target, LivingEntity owner, float base, int stacks, double potency) {
         float amount = HelperMethods.applyNonPlayerAbilityDamageModifier(owner,
                 (float) (base * potency + Math.max(0, stacks - 1) / 4.0));
         target.timeUntilRegen = 0;
-        target.damage(target.getDamageSources().indirectMagic(target, owner), amount);
+        CombatProvenanceApi.damage(provenance == null ? null : provenance.deliveredBy(CombatProvenance.DAMAGE_OVER_TIME), target, target.getDamageSources().indirectMagic(target, owner), amount);
     }
 
-    private static boolean damage(LivingEntity target, LivingEntity owner, double amount) {
+    private static boolean damage(Vortex vortex, LivingEntity target, LivingEntity owner, double amount) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(vortex == null || vortex.execution == null ? null : vortex.execution.provenance())) {
         target.timeUntilRegen = 0;
-        return target.damage(target.getDamageSources().indirectMagic(target, owner),
+        return CombatProvenanceApi.damage(vortex.execution.provenance(), target, target.getDamageSources().indirectMagic(target, owner),
                 HelperMethods.applyNonPlayerAbilityDamageModifier(owner, (float) Math.max(0, amount)));
+        }
     }
 
     private static void pruneMarks(ServerWorld world, WorldState state, long now) {
@@ -749,6 +760,7 @@ public final class TempestAbilityManager {
     }
 
     private static final class Marks {
+        private CombatProvenance provenance;
         private int fire;
         private int frost;
         private long fireExpires;

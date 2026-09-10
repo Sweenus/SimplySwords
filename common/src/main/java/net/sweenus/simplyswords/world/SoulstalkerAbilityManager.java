@@ -21,6 +21,7 @@ import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.WeaponAbilityActivationSource;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.SoulstalkerCleaveEntity;
 import net.sweenus.simplyswords.entity.SoulstalkerStrideEntity;
@@ -132,6 +133,7 @@ public final class SoulstalkerAbilityManager {
     }
 
     public static void onSwing(ItemStack stack, ServerWorld world, LivingEntity owner, Hand hand) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (stack == null || !stack.isOf(ItemsRegistry.SOULSTALKER.get()) || owner == null || !owner.isAlive()) {
             return;
         }
@@ -186,6 +188,7 @@ public final class SoulstalkerAbilityManager {
                 SoundCategory.PLAYERS, 0.8F, 0.68F + world.random.nextFloat() * 0.12F);
         world.playSound(null, owner.getBlockPos(), SoundEvents.ENTITY_WARDEN_SONIC_CHARGE,
                 SoundCategory.PLAYERS, 0.28F, 1.45F + world.random.nextFloat() * 0.1F);
+        }
     }
 
     private static boolean isCleaveReady(ServerWorld world, LivingEntity user, ItemStack stack,
@@ -235,6 +238,7 @@ public final class SoulstalkerAbilityManager {
     }
 
     public static void tickHeldPassive(LivingEntity owner, ItemStack stack) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (owner == null || stack == null || !stack.isOf(ItemsRegistry.SOULSTALKER.get())
                 || !owner.isAlive() || !AwakeningApi.isAbilityUnlocked(stack)
                 || !(owner.getWorld() instanceof ServerWorld world)
@@ -313,6 +317,7 @@ public final class SoulstalkerAbilityManager {
                 10, 0.18, 0.22, 0.18, 0.02);
         world.playSound(null, owner.getBlockPos(), SoundRegistry.DARK_SWORD_UNFOLD.get(),
                 SoundCategory.PLAYERS, 0.46F, 0.72F + world.random.nextFloat() * 0.1F);
+        }
     }
 
     public static boolean hasActive(ServerWorld world) {
@@ -440,6 +445,8 @@ public final class SoulstalkerAbilityManager {
         Iterator<PendingStrike> iterator = pending.iterator();
         while (iterator.hasNext()) {
             PendingStrike strike = iterator.next();
+            try (var ignored = CombatProvenanceApi.scope(
+                    strike.volley.execution.provenance())) {
             observeTarget(world, strike);
             if (now < strike.impactTick) {
                 continue;
@@ -491,6 +498,7 @@ public final class SoulstalkerAbilityManager {
             }
             settleVolley(strike.volley);
             iterator.remove();
+            }
         }
         if (pending.isEmpty()) {
             PENDING_STRIKES.remove(world);
@@ -630,6 +638,7 @@ public final class SoulstalkerAbilityManager {
 
     private static void finishStride(ServerWorld world, LivingEntity owner, SoulstalkerStrideEntity stride,
                                      ActiveStride state) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(state == null || state.execution == null ? null : state.execution.provenance())) {
         Vec3d release = stride == null ? null : stride.getPos().add(0.0, 0.1, 0.0);
         if (owner != null && stride != null && owner.getVehicle() == stride) {
             owner.stopRiding();
@@ -659,6 +668,7 @@ public final class SoulstalkerAbilityManager {
         tracking.completed = true;
         tracking.touchedAt = world.getTime();
         settleStride(world, state.ownerId, tracking);
+        }
     }
 
     private static void spawnActivation(ServerWorld world, LivingEntity owner) {

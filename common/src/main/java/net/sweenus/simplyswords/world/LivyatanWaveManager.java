@@ -19,6 +19,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.LivyatanWaveVisualEntity;
 import net.sweenus.simplyswords.registry.SoundRegistry;
@@ -73,6 +74,7 @@ public final class LivyatanWaveManager {
     }
 
     public static void tryFire(ServerWorld world, LivingEntity caster, net.minecraft.item.ItemStack stack) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (world == null || caster == null || stack == null || stack.isEmpty() || !caster.isAlive()) {
             return;
         }
@@ -140,10 +142,12 @@ public final class LivyatanWaveManager {
         }
 
         playWaveStartSounds(world, caster, start, plan);
+        }
     }
 
     public static void fireAxolotlWave(ServerWorld world, net.sweenus.simplyswords.entity.SimplySwordsAxolotlEntity ravager,
                                       LivingEntity owner, LivingEntity rider, ItemStack stack, float damage) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (world == null || ravager == null || owner == null || !ravager.isAlive() || !owner.isAlive()
                 || damage <= 0 || !Float.isFinite(damage)) {
             return;
@@ -165,6 +169,7 @@ public final class LivyatanWaveManager {
                         Math.max(1, Config.uniqueEffects.livyatan.waveTargetCap)));
         playWaveStartSounds(world, ravager, start,
                 new LivyatanAbilityManager.WavePlan(false, false, false));
+        }
     }
 
     public static void tick(ServerWorld world) {
@@ -295,6 +300,7 @@ public final class LivyatanWaveManager {
     private static void applyCalmBreakerDamage(ServerWorld world, ActiveCalmBreaker breaker,
                                                 LivingEntity owner, double previousRadius,
                                                 double currentRadius, boolean finalStep) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(breaker == null ? null : CombatProvenanceApi.from(breaker.stack, null))) {
         if (breaker.hitEntities.size() >= breaker.targetCap) return;
         double tolerance = Math.max(.65, breaker.radius / breaker.duration);
         double innerRadius = Math.max(0, previousRadius - tolerance);
@@ -336,10 +342,12 @@ public final class LivyatanWaveManager {
                     StormFrostWaterMasteryAbilities.HIT, target, 1, damage);
             LivyatanAbilityManager.recordWaveHit(world, owner, breaker.stack, target, breaker.tuning);
         }
+        }
     }
 
     private static void spawnCalmBreakerVisual(ServerWorld world, ActiveCalmBreaker breaker,
                                                double radius, int step) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(breaker == null ? null : CombatProvenanceApi.from(breaker.stack, null))) {
         if (radius <= .1) return;
         double baseY = findGroundTopY(world, breaker.center.x, breaker.center.z, breaker.center.y);
         int laneCount = Math.clamp((int) Math.ceil(Math.PI * 2 * radius), 8, 48);
@@ -361,6 +369,7 @@ public final class LivyatanWaveManager {
         if (world.spawnEntity(visual)) {
             breaker.visuals.add(new WaveVisual(visual.getUuid(), breaker.center.x, baseY,
                     breaker.center.z, world.getTime(), step));
+        }
         }
     }
 
@@ -391,6 +400,7 @@ public final class LivyatanWaveManager {
     }
 
     private static void applyWaveDamage(ServerWorld world, Vec3d center, ActiveWave wave) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(wave == null ? null : CombatProvenanceApi.from(wave.stack, null))) {
         Entity ownerEntity = world.getEntity(wave.ownerId);
         if (!(ownerEntity instanceof LivingEntity owner) || !owner.isAlive()) return;
 
@@ -428,6 +438,7 @@ public final class LivyatanWaveManager {
             }
             if (wave.lightning) spawnLightningImpact(world, candidate);
             if (++affected >= wave.targetCap) break;
+        }
         }
     }
 

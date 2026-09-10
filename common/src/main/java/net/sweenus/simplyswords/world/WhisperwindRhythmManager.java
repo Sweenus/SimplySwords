@@ -9,6 +9,7 @@ import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.server.world.ServerWorld;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.ability.StormSoulMasteryTuning;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 
 import java.util.HashMap;
@@ -67,6 +68,7 @@ public final class WhisperwindRhythmManager {
     // Dancing Gale: a refresh shortens the cooldown instead of clearing it.
     public static boolean tryPartialRefresh(ServerWorld world, LivingEntity owner, ItemStack stack,
                                             StormSoulMasteryTuning tuning, int totalCooldownTicks) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         int refund = tuning.integer(StormSoulMasteryTuning.Setting.REFRESH_REFUND_TICKS, 0);
         if (refund <= 0) return false;
         RhythmState state = state(world, owner.getUuid());
@@ -83,6 +85,7 @@ public final class WhisperwindRhythmManager {
                     false, true, true), owner);
         }
         return true;
+        }
     }
 
     // Perfect Tempo: dashing soon after a refresh sharpens the next strike.
@@ -164,6 +167,7 @@ public final class WhisperwindRhythmManager {
     // Light on Foot: a standing buff while Fatal Flicker is off cooldown.
     public static void tickHolder(ServerWorld world, LivingEntity owner, ItemStack stack,
                                   StormSoulMasteryTuning tuning) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         int amplifier = tuning.integer(StormSoulMasteryTuning.Setting.READY_SPEED_AMPLIFIER, -1);
         double fall = tuning.get(StormSoulMasteryTuning.Setting.FALL_DAMAGE_REDUCTION, 0);
         if (amplifier < 0 && fall <= 0) return;
@@ -174,6 +178,7 @@ public final class WhisperwindRhythmManager {
         if (amplifier >= 0 && state.ready) {
             owner.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, 40, amplifier,
                     false, false, true), owner);
+        }
         }
     }
 

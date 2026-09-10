@@ -13,6 +13,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.*;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
@@ -57,6 +58,7 @@ public final class IcewhisperCometManager {
 
     public static void startStorm(ServerWorld world, LivingEntity owner, ItemStack stack, double radius, float damage,
                                   int durationTicks, StormFrostWaterMasteryTuning tuning, UniqueAbilityExecution execution) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(execution == null ? null : execution.provenance())) {
         if (owner == null || durationTicks <= 0) {
             return;
         }
@@ -79,6 +81,7 @@ public final class IcewhisperCometManager {
                 && !tuning.flag(IcewhisperAbilityManager.MODE_BLACK_ICE)) {
             owner.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, globe,
                     tuning.integer(s("ICEWHISPER_GLOBE_AMPLIFIER"), 0)), owner);
+        }
         }
     }
 
@@ -240,6 +243,7 @@ public final class IcewhisperCometManager {
 
     private static void spawnComet(ServerWorld world, LivingEntity owner, ActiveStorm storm, Vec3d impact,
                                    boolean selfTargeted) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(storm == null ? null : CombatProvenanceApi.from(storm.stack, null))) {
         long startTick = world.getTime();
         int fallTicks = fallTicks(storm.tuning, Math.max(1, Config.uniqueEffects.icewhisper.cometFallTicks));
         Vec3d start = impact.add(
@@ -260,6 +264,7 @@ public final class IcewhisperCometManager {
         ActiveComet comet = new ActiveComet(owner.getUuid(), storm.stack, visualId, start, impact,
                 startTick, fallTicks, storm.damage, selfTargeted, storm.tuning, storm.execution);
         ACTIVE_COMETS.computeIfAbsent(world, w -> new ArrayList<>()).add(comet);
+        }
     }
 
     private static boolean tickComet(ServerWorld world, ActiveComet comet) {
@@ -282,6 +287,7 @@ public final class IcewhisperCometManager {
     }
 
     private static void impact(ServerWorld world, ActiveComet comet) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(comet == null ? null : CombatProvenanceApi.from(comet.stack(), null))) {
         Entity ownerEntity = world.getEntity(comet.ownerId());
         if (!(ownerEntity instanceof LivingEntity owner)) {
             return;
@@ -343,9 +349,11 @@ public final class IcewhisperCometManager {
             world.playSound(null, impact.x, impact.y, impact.z, SoundEvents.ENTITY_GENERIC_EXPLODE, SoundCategory.PLAYERS, 0.35F, 1.35F + world.random.nextFloat() * 0.25F);
             world.playSound(null, impact.x, impact.y, impact.z, SoundEvents.ENTITY_DRAGON_FIREBALL_EXPLODE, SoundCategory.PLAYERS, 0.25F, 1.6F + world.random.nextFloat() * 0.25F);
         }
+        }
     }
 
     private static void grantImpactBuffs(LivingEntity owner, ActiveComet comet, Vec3d impact) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(comet == null ? null : CombatProvenanceApi.from(comet.stack(), null))) {
         StormFrostWaterMasteryTuning tuning = comet.tuning;
         if (tuning.flag(IcewhisperAbilityManager.MODE_BLACK_ICE)) {
             return;
@@ -361,6 +369,7 @@ public final class IcewhisperCometManager {
         if (comet.selfTargeted() && tuning.flag(IcewhisperAbilityManager.MODE_LAST_SNOW) && resistance > 0) {
             owner.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, resistance,
                     tuning.integer(s("ICEWHISPER_LAST_SNOW_AMPLIFIER"), 1)), owner);
+        }
         }
     }
 

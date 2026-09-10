@@ -12,6 +12,9 @@ import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryTuning;
 import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
+import net.sweenus.simplyswords.api.combat.CombatProvenance;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
+import net.sweenus.simplyswords.api.combat.DamageProvenanceCarrier;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
@@ -52,6 +55,7 @@ public final class MjolnirCombatManager {
         UniqueAbilityExecution execution = StormFrostWaterMasteryCombatManager.beginPassive(
                 StormFrostWaterMasteryAbilities.MJOLNIR_STORM, world, stack, owner, null);
         state.tuning = StormFrostWaterMasteryAbilities.tuning(execution);
+        state.provenance = execution.provenance();
         state.tuningExpiresAt = now + RESOLVE_INTERVAL * 4L;
         UniqueAbilityApi.finish(execution, StormFrostWaterMasteryAbilities.FINISH, 0);
     }
@@ -62,6 +66,7 @@ public final class MjolnirCombatManager {
         }
         OwnerState state = state(owner, world.getTime());
         state.tuning = tuning;
+        state.provenance = CombatProvenanceApi.current();
         state.tuningExpiresAt = world.getTime() + STATE_LIFETIME;
     }
 
@@ -160,9 +165,11 @@ public final class MjolnirCombatManager {
                 s("SECONDARY_DAMAGE_MULTIPLIER"), 0.2);
         DamageSource reprisal = victim.getDamageSources().indirectMagic(victim, victim);
         rebuking = true;
-        try {
-            HelperMethods.damageThroughIframes(attacker, reprisal,
-                    HelperMethods.applyAbilityDamageEnchantments(world, stack, attacker, reprisal, damage));
+        try (var ignored = CombatProvenanceApi.scope(state.provenance)) {
+            float enchantedDamage = HelperMethods.applyAbilityDamageEnchantments(world, stack, attacker, reprisal, damage);
+            ((DamageProvenanceCarrier) reprisal).simplyswords$bind(attacker, state.provenance);
+            HelperMethods.damageThroughIframes(attacker, reprisal, enchantedDamage);
+
         } finally {
             rebuking = false;
         }
@@ -263,6 +270,7 @@ public final class MjolnirCombatManager {
     }
 
     private static final class OwnerState {
+        private CombatProvenance provenance;
         private final Map<UUID, Long> conductiveMemory = new HashMap<>();
         private StormFrostWaterMasteryTuning tuning;
         private long tuningExpiresAt;

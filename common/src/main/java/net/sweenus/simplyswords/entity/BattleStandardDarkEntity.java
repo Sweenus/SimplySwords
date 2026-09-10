@@ -23,6 +23,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance;
@@ -97,6 +98,7 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
     public void configureMastery(UniqueAbilityExecution execution, ItemStack stack) {
         this.masteryExecution = execution;
         this.abilityStack = stack.copy();
+        CombatProvenanceApi.attach(this, stack);
         BattleStandardMasteryManager.registerHarbinger(this, execution, stack);
     }
 
@@ -214,7 +216,7 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
                                 && !(le instanceof BattleStandardDarkEntity)) {
                             le.timeUntilRegen = 0;
                             DamageSource damageSource = this.getDamageSources().indirectMagic(ownerEntity, ownerEntity);
-                            le.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments((ServerWorld) getWorld(), damageStack, le, damageSource,
+                            CombatProvenanceApi.damage(damageStack, (damageSource).getAttacker(), le, damageSource, HelperMethods.applyAbilityDamageEnchantments((ServerWorld) getWorld(), damageStack, le, damageSource,
                                     enigmaTargetDamage(le, abilityDamage, sharedCurrent)));
                             le.timeUntilRegen = 0;
                             if (le.distanceTo(this) > radius - 1)
@@ -249,7 +251,7 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
                     for (Entity entity : this.getWorld().getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
                         if ((entity instanceof LivingEntity le) && HelperMethods.checkAbilityTarget(le, ownerEntity) && le != ownerEntity) {
                             DamageSource damageSource = this.getDamageSources().indirectMagic(ownerEntity, ownerEntity);
-                            le.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments((ServerWorld) getWorld(), ownerEntity.getMainHandStack(), le, damageSource, abilityDamage * 3));
+                            CombatProvenanceApi.damage(ownerEntity.getMainHandStack(), (damageSource).getAttacker(), le, damageSource, HelperMethods.applyAbilityDamageEnchantments((ServerWorld) getWorld(), ownerEntity.getMainHandStack(), le, damageSource, abilityDamage * 3));
                             le.setVelocity((le.getX() - this.getX()) / 4, 0.5, (le.getZ() - this.getZ()) / 4);
                         }
                     }

@@ -14,6 +14,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.ability.*;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.entity.WraithfangEntity;
 import net.sweenus.simplyswords.item.custom.WraithfangSwordItem;
 import net.sweenus.simplyswords.mixin.ItemCooldownEntryAccessor;
@@ -43,6 +44,7 @@ public final class WraithfangAbilityManager {
     }
 
     private static State obtain(ServerWorld world, LivingEntity actor, ItemStack stack) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         Map<UUID, State> states = STATES.computeIfAbsent(world, ignored -> new HashMap<>());
         State state = states.computeIfAbsent(actor.getUuid(), ignored -> new State());
         UUID id = weaponId(stack);
@@ -57,6 +59,7 @@ public final class WraithfangAbilityManager {
         state.stack = stack.copy();
         state.expires = world.getTime() + 2400;
         return state;
+        }
     }
 
     public static boolean hasActiveThrow(ServerWorld world, LivingEntity actor) {

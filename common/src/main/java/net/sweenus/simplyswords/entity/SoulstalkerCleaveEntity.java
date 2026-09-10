@@ -21,6 +21,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.registry.EntityRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -85,6 +86,7 @@ public final class SoulstalkerCleaveEntity extends Entity {
         dataTracker.set(OWNER_ID, owner.getId());
         dataTracker.set(OWNER_UUID, Optional.of(owner.getUuid()));
         dataTracker.set(WEAPON_STACK, stack.copy());
+        CombatProvenanceApi.attach(this, stack);
         dataTracker.set(DIRECTION, normalized.toVector3f());
         dataTracker.set(INITIAL_WIDTH, Math.max(0.25F, initialWidth));
         dataTracker.set(FINAL_WIDTH, Math.max(0.25F, finalWidth));

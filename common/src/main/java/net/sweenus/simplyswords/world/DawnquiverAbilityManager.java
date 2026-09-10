@@ -20,6 +20,7 @@ import net.sweenus.simplyswords.api.ability.MartialCommandEldritchMasteryTuning;
 import net.sweenus.simplyswords.api.ability.MartialCommandEldritchMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.DawnquiverArrowEntity;
 import net.sweenus.simplyswords.entity.DawnquiverBowVisualEntity;
@@ -222,6 +223,7 @@ public final class DawnquiverAbilityManager {
     }
 
     public static boolean startDraw(ServerWorld world, LivingEntity owner, ItemStack stack, Hand hand) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (world == null || owner == null || stack == null || stack.isEmpty()
                 || hand == null || !stack.isOf(ItemsRegistry.DAWNQUIVER.get())) {
             return false;
@@ -260,6 +262,7 @@ public final class DawnquiverAbilityManager {
         world.playSound(null, owner.getBlockPos(), SoundRegistry.MAGIC_BOW_CHARGE_LONG_VERSION.get(),
                 SoundCategory.PLAYERS, 0.5F, 1.0F);
         return true;
+        }
     }
 
     public static void tickDraw(ServerWorld world, LivingEntity owner, float drawProgress) {
@@ -296,6 +299,7 @@ public final class DawnquiverAbilityManager {
     }
 
     public static int release(ServerWorld world, LivingEntity owner, ItemStack stack, float chargeRatio) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(activeDraw(world, owner.getUuid()) == null ? null : activeDraw(world, owner.getUuid()).execution.provenance())) {
         DawnquiverSwordItem.EffectSettings settings = Config.uniqueEffects.dawnquiver;
         chargeRatio = capDrawProgress(stack, chargeRatio);
         ActiveDraw drawState = activeDraw(world, owner.getUuid());
@@ -427,6 +431,7 @@ public final class DawnquiverAbilityManager {
                 SoundCategory.PLAYERS, empowered ? 0.72F : 0.55F, empowered ? 1.12F : 1.0F);
         if (drawState != null) MartialCommandEldritchMasteryCombatManager.finish(drawState.execution, 1);
         return resolveCooldown(owner, tuning, chorusTuning, tier, settings);
+        }
     }
 
     private static int resolveCooldown(LivingEntity owner, MartialCommandEldritchMasteryTuning tuning,
@@ -493,6 +498,7 @@ public final class DawnquiverAbilityManager {
     public static void onFullArrowImpact(ServerWorld world, LivingEntity owner, ItemStack stack,
                                          Hand hand, Vec3d center, @Nullable LivingEntity preferredTarget,
                                          float lesserDamage) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         DawnquiverSwordItem.EffectSettings settings = Config.uniqueEffects.dawnquiver;
         MartialCommandEldritchMasteryTuning tuning = DRAW_TUNING.remove(owner.getUuid());
         if (tuning == null) tuning = MartialCommandEldritchMasteryTuning.EMPTY;
@@ -534,6 +540,7 @@ public final class DawnquiverAbilityManager {
                 42, radius * 0.32, 0.65, radius * 0.32, 0.04);
         world.playSound(null, net.minecraft.util.math.BlockPos.ofFloored(center),
                 SoundRegistry.MAGIC_SHAMANIC_VOICE_20.get(), SoundCategory.PLAYERS, 0.7F, 1.08F);
+        }
     }
 
     public static void cancel(ServerWorld world, UUID ownerUuid) {
@@ -547,6 +554,7 @@ public final class DawnquiverAbilityManager {
     }
 
     public static void tickHeldPassive(LivingEntity owner, ItemStack stack) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (owner == null || stack == null || stack.isEmpty()
                 || !stack.isOf(ItemsRegistry.DAWNQUIVER.get())
                 || !AwakeningApi.isAbilityUnlocked(stack)
@@ -645,6 +653,7 @@ public final class DawnquiverAbilityManager {
         world.playSound(null, owner.getBlockPos(), SoundRegistry.MAGIC_BOW_PULL_BACK_SHORT_VERSION_01.get(),
                 SoundCategory.PLAYERS, 0.3F, 1.25F);
         MartialCommandEldritchMasteryCombatManager.finish(execution, 1);
+        }
     }
 
     public static boolean hasActive(ServerWorld world) {
@@ -801,6 +810,7 @@ public final class DawnquiverAbilityManager {
                                         Vec3d anchor, LivingEntity target, float damage,
                                         MartialCommandEldritchMasteryTuning tuning,
                                         DawnquiverSwordItem.EffectSettings settings, int mode) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         boolean marks = tuning.has(MartialCommandEldritchMasteryTuning.Setting.STATUS_DURATION_TICKS);
         float scaled = marks && target.hasStatusEffect(net.minecraft.entity.effect.StatusEffects.GLOWING)
                 ? damage * (float) tuning.get(
@@ -816,6 +826,7 @@ public final class DawnquiverAbilityManager {
         if (marks) target.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
                 net.minecraft.entity.effect.StatusEffects.GLOWING,
                 tuning.integer(MartialCommandEldritchMasteryTuning.Setting.STATUS_DURATION_TICKS, 60), 0), owner);
+        }
     }
 
     private static List<LivingEntity> additionalLesserTargets(ServerWorld world, LivingEntity owner,
@@ -839,12 +850,14 @@ public final class DawnquiverAbilityManager {
 
     private static void scheduleTwinHymn(ServerWorld world, LivingEntity owner, ItemStack stack,
                                          Hand hand, LivingEntity target, float damage, int delay) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         Vec3d anchor = shoulderAnchor(owner);
         SCHEDULED_SHOTS.computeIfAbsent(world, ignored -> new ArrayList<>()).add(
                 new ScheduledShot(owner.getUuid(), target == null ? null : target.getUuid(),
                         null, stack.copy(), hand, anchor, aimPoint(target), damage,
                         world.getTime() + Math.max(1, delay),
                         DawnquiverArrowEntity.MODE_QUICK_CHORUS, false));
+        }
     }
 
     private static void grantChorus(ServerWorld world, LivingEntity owner, ItemStack stack, Hand hand) {
@@ -860,6 +873,7 @@ public final class DawnquiverAbilityManager {
 
     private static void scheduleQuickVolley(ServerWorld world, LivingEntity owner, ItemStack stack,
                                             Hand hand, @Nullable LivingEntity target, float damage) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         Vec3d anchor = shoulderAnchor(owner);
         Vec3d direction = target == null ? horizontalOrLook(owner) : directionTo(owner, target);
         DawnquiverBowVisualEntity bow = new DawnquiverBowVisualEntity(world, owner, hand,
@@ -877,6 +891,7 @@ public final class DawnquiverAbilityManager {
                 new ScheduledShot(owner.getUuid(), target == null ? null : target.getUuid(),
                         bow.getUuid(), stack.copy(), hand, anchor, aimCenter, damage,
                         world.getTime() + 3L, DawnquiverArrowEntity.MODE_QUICK_CHORUS, false));
+        }
     }
 
     public static void synchronizeMinimumDraw(ItemStack stack, MartialCommandEldritchMasteryTuning tuning) {

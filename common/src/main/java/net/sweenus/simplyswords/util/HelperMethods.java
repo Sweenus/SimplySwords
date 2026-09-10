@@ -43,6 +43,7 @@ import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.DelegatedWeaponHitContext;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.compat.opac.OpacCompat;
 import net.sweenus.simplyswords.config.Config;
@@ -635,6 +636,7 @@ public class HelperMethods {
     }
 
     public static float applyAbilityDamageEnchantments(ServerWorld world, ItemStack stack, Entity target, DamageSource damageSource, float damage) {
+        if (world != null) CombatProvenanceApi.bind(damageSource, stack, target);
         float finalDamage = damage;
         if (Config.general.enableAbilityDamageEnchantScaling && world != null && stack != null && !stack.isEmpty() && target != null && damageSource != null) {
             finalDamage = EnchantmentHelper.getDamage(world, stack, target, damageSource, finalDamage);
@@ -852,7 +854,7 @@ public class HelperMethods {
                 if ((sourceEntity instanceof PlayerEntity livingEntity)
                         && (entity instanceof LivingEntity livingTarget)
                         && HelperMethods.checkFriendlyFire(livingTarget, livingEntity)) {
-                    livingTarget.damage(damageSource, applyAbilityDamageEnchantments(world, stack, livingTarget, damageSource, damage));
+                    CombatProvenanceApi.damage(stack, (damageSource).getAttacker(), livingTarget, damageSource, applyAbilityDamageEnchantments(world, stack, livingTarget, damageSource, damage));
                 }
             }
         }
@@ -873,7 +875,7 @@ public class HelperMethods {
             if (entityBox.intersects(searchBox)
                     && entity instanceof LivingEntity livingTarget
                     && HelperMethods.checkAbilityTarget(livingTarget, sourceEntity)) {
-                livingTarget.damage(damageSource, applyAbilityDamageEnchantments(world, stack, livingTarget, damageSource, damage));
+                CombatProvenanceApi.damage(stack, (damageSource).getAttacker(), livingTarget, damageSource, applyAbilityDamageEnchantments(world, stack, livingTarget, damageSource, damage));
             }
         }
     }

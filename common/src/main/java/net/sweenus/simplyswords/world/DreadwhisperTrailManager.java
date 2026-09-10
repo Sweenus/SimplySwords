@@ -16,6 +16,7 @@ import net.sweenus.simplyswords.api.ability.StormSoulMasteryTuning;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.util.HelperMethods;
 
@@ -39,6 +40,7 @@ public final class DreadwhisperTrailManager {
                                 StormSoulMasteryTuning tuning, UUID castId, Vec3d castStart,
                                 Vec3d castEnd, float baseDamage, UniqueAbilityExecution execution,
                                 int reportedHits) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(execution == null ? null : execution.provenance())) {
         int ticks = tuning.integer(StormSoulMasteryTuning.Setting.LIVING_SHADOW_TICKS, 0);
         double multiplier = tuning.get(StormSoulMasteryTuning.Setting.LIVING_SHADOW_MULTIPLIER, 0);
         if (ticks <= 0 || multiplier <= 0) return false;
@@ -60,6 +62,7 @@ public final class DreadwhisperTrailManager {
         state.execution = execution;
         state.reportedHits = Math.max(0, reportedHits);
         return true;
+        }
     }
 
     // Veiled Passage and Fading Footprint both persist briefly past the dash.
@@ -165,6 +168,7 @@ public final class DreadwhisperTrailManager {
     }
 
     private static void tickFootprint(ServerWorld world, LivingEntity owner, TrailState state, long now) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(state == null ? null : CombatProvenanceApi.from(state.stack, null))) {
         boolean sheltered = state.footprintReduction > 0 && now < state.footprintUntil
                 && owner.isOnGround()
                 && GloamStainManager.isOnOwnerGloam(world, owner.getUuid(), owner);
@@ -182,6 +186,7 @@ public final class DreadwhisperTrailManager {
             owner.removeStatusEffect(StatusEffects.SPEED);
         }
         state.speedExpiry = Long.MIN_VALUE;
+        }
     }
 
     private static void tickShelter(LivingEntity owner, TrailState state, long now) {
@@ -213,6 +218,7 @@ public final class DreadwhisperTrailManager {
     }
 
     private static void pulse(ServerWorld world, LivingEntity owner, TrailState state) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(state == null ? null : CombatProvenanceApi.from(state.stack, null))) {
         if (state.damage <= 0 || state.castId == null) return;
         int affected = 0;
         List<LivingEntity> targets = world.getEntitiesByClass(LivingEntity.class, state.castBounds,
@@ -230,6 +236,7 @@ public final class DreadwhisperTrailManager {
             }
         }
         state.reportedHits += affected;
+        }
     }
 
     private static void release(TrailState state, boolean cancelled) {

@@ -36,6 +36,7 @@ import net.sweenus.simplyswords.api.ability.AbyssalSpectralMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.DevourerMassVisualEntity;
 import net.sweenus.simplyswords.entity.DevourerTendrilVisualEntity;
@@ -373,6 +374,7 @@ public final class DevourerAbilityManager {
 
     private static void captureLooseTarget(ServerWorld world, ActiveMass mass,
                                            DevourerMassVisualEntity visual, Entity target) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(mass == null || mass.execution == null ? null : mass.execution.provenance())) {
         UUID targetId = target.getUuid();
         long mixed = mix(targetId.getMostSignificantBits() ^ targetId.getLeastSignificantBits());
         double baseAngle = unit(mixed) * MathHelper.TAU;
@@ -392,6 +394,7 @@ public final class DevourerAbilityManager {
             target.addCommandTag(CAPTURED_GRAVITY_TAG);
         }
         target.setNoGravity(true);
+        }
     }
 
     private static boolean tickLooseTargets(ServerWorld world, ActiveMass mass,
@@ -547,6 +550,7 @@ public final class DevourerAbilityManager {
 
     private static void acquireTargets(ServerWorld world, LivingEntity actor,
                                        ActiveMass mass, DevourerMassVisualEntity visual) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(mass == null || mass.execution == null ? null : mass.execution.provenance())) {
         AbyssalSpectralMasteryTuning tuning = AbyssalSpectralMasteryAbilities.tuning(mass.execution);
         int cap = Math.max(1, tuning.integer(AbyssalSpectralMasteryTuning.Setting.TARGET_CAP,
                 Config.uniqueEffects.devourer.maxTargets));
@@ -575,6 +579,7 @@ public final class DevourerAbilityManager {
                     target.getPos()));
             visual.feed();
             spawnCaptureEffects(world, target);
+        }
         }
     }
 
@@ -868,6 +873,7 @@ public final class DevourerAbilityManager {
 
     private static boolean damageTarget(ServerWorld world, LivingEntity actor, ItemStack stack,
                                         LivingEntity target, float baseDamage) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (baseDamage <= 0.0F || !target.isAlive()) {
             return false;
         }
@@ -878,6 +884,7 @@ public final class DevourerAbilityManager {
         WeaponImplicitRegistry.runSuppressed(
                 () -> damaged[0] = HelperMethods.damageThroughIframes(target, source, damage));
         return damaged[0];
+        }
     }
 
     private static void collapseDamage(ServerWorld world, LivingEntity actor, ActiveMass mass) {

@@ -21,6 +21,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.util.HelperMethods;
 import org.jetbrains.annotations.Nullable;
 
@@ -57,6 +58,7 @@ public class SimplySwordsGoatStampedeEntity extends GoatEntity implements Simply
         this.ownerUuid = owner.getUuid();
         this.stampedeId = stampedeId;
         this.sourceStack = stack.copy();
+        CombatProvenanceApi.attach(this, stack);
         this.direction = direction.lengthSquared() > 1.0E-4 ? direction.normalize() : Vec3d.fromPolar(0.0F, owner.getYaw());
         this.expiresAtTick = expiresAtTick;
         this.damage = Math.max(0.0F, damage);

@@ -17,6 +17,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.ShadowstingAfterimageVisualEntity;
 import net.sweenus.simplyswords.registry.EffectRegistry;
@@ -165,6 +166,7 @@ public final class ShadowstingShadowDanceManager {
 
     public static boolean start(ServerWorld world, ServerPlayerEntity player, ItemStack stack,
                                 DeathShadowBloodMasteryTuning tuning) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (world == null || player == null || ACTIVE_DANCES.containsKey(player.getUuid())) {
             return false;
         }
@@ -217,6 +219,7 @@ public final class ShadowstingShadowDanceManager {
         spawnDepartureParticles(world, player.getPos().add(0.0, player.getHeight() * 0.5, 0.0));
         performStrike(world, player, dance, target);
         return true;
+        }
     }
 
     public static boolean start(ServerWorld world, LivingEntity actor, LivingEntity target, ItemStack stack) {
@@ -350,14 +353,14 @@ public final class ShadowstingShadowDanceManager {
         double multiplier = cloneDamageMultiplier(tuning);
         for (int i = 0; i < cloneCount(tuning); i++) pending.add(new PendingShadowCloneStrike(
                 owner.getUuid(), target.getUuid(), world.getTime() + delay,
-                chainDepth, tuning, multiplier));
+                chainDepth, tuning, multiplier, captureCloneStack(owner)));
         int proc = PASSIVE_PROCS.merge(owner.getUuid(), 1, Integer::sum);
         if (tuning.flag(1 << 5) && proc % Math.max(1, tuning.integer(
                 DeathShadowBloodMasteryTuning.Setting.SHADOW_TWIN_INTERVAL, 4)) == 0) {
             pending.add(new PendingShadowCloneStrike(owner.getUuid(), target.getUuid(),
                     world.getTime() + tuning.integer(DeathShadowBloodMasteryTuning.Setting.SHADOW_TWIN_DELAY_TICKS, 5),
                     chainDepth, tuning, multiplier * tuning.get(
-                    DeathShadowBloodMasteryTuning.Setting.SHADOW_TWIN_DAMAGE_MULTIPLIER, .5)));
+                    DeathShadowBloodMasteryTuning.Setting.SHADOW_TWIN_DAMAGE_MULTIPLIER, .5), captureCloneStack(owner)));
         }
         if (tuning.flag(1 << 8)) PASSIVE_LOCKOUTS.put(owner.getUuid(), world.getTime()
                 + tuning.integer(DeathShadowBloodMasteryTuning.Setting.SHADOW_FLAWLESS_LOCKOUT_TICKS, 60));
@@ -405,6 +408,7 @@ public final class ShadowstingShadowDanceManager {
     }
 
     private static void beginFinishTranslation(ServerWorld world, ServerPlayerEntity player, ActiveShadowDance dance) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(dance == null ? null : CombatProvenanceApi.from(dance.stack, null))) {
         if (dance.lastStrikePos == null) {
             finishNow(player);
             return;
@@ -421,7 +425,7 @@ public final class ShadowstingShadowDanceManager {
                             target -> HelperMethods.checkAbilityTarget(target, player))
                     .stream().limit(dance.tuning.integer(
                             DeathShadowBloodMasteryTuning.Setting.SHADOW_FLOURISH_TARGET_CAP, 8))
-                    .forEach(target -> target.damage(
+                    .forEach(target -> CombatProvenanceApi.damage(dance.stack, player, target,
                             player.getDamageSources().playerAttack(player), damage));
         }
         if (dance.tuning.flag(1 << 25)) {
@@ -457,6 +461,7 @@ public final class ShadowstingShadowDanceManager {
                 SoundEvents.ENTITY_ENDERMAN_TELEPORT,
                 SoundCategory.PLAYERS, 0.25F, 0.65F);
         tickFinishTranslation(world, player, dance);
+        }
     }
 
     private static void tickFinishTranslation(ServerWorld world, ServerPlayerEntity player, ActiveShadowDance dance) {
@@ -493,6 +498,7 @@ public final class ShadowstingShadowDanceManager {
     }
 
     private static void applyArrivalEffects(ServerWorld world, ServerPlayerEntity player, ActiveShadowDance dance) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(dance == null ? null : CombatProvenanceApi.from(dance.stack, null))) {
         if (dance.tuning.flag(1 << 19)) {
             world.getEntitiesByClass(LivingEntity.class, player.getBoundingBox().expand(
                             dance.tuning.get(DeathShadowBloodMasteryTuning.Setting.SHADOW_SMOKE_RADIUS, 2.5)),
@@ -507,9 +513,11 @@ public final class ShadowstingShadowDanceManager {
                 StatusEffects.SPEED,
                 dance.tuning.integer(DeathShadowBloodMasteryTuning.Setting.SHADOW_SPEED_DURATION_TICKS, 40),
                 dance.tuning.integer(DeathShadowBloodMasteryTuning.Setting.SHADOW_SPEED_AMPLIFIER, 1)), player);
+        }
     }
 
     private static void performStrike(ServerWorld world, ServerPlayerEntity player, ActiveShadowDance dance, LivingEntity target) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(dance == null ? null : CombatProvenanceApi.from(dance.stack, null))) {
         Vec3d previousPos = dance.lastVisualPos == null ? dance.anchorPos : dance.lastVisualPos;
         Vec3d strikePos = findStrikePosition(world, player, target, dance.tuning);
         Vec3d lookTarget = target.getPos().add(0.0, Math.max(0.35, target.getHeight() * 0.55), 0.0);
@@ -554,6 +562,7 @@ public final class ShadowstingShadowDanceManager {
         spawnTrail(world, previousPos.add(0.0, player.getHeight() * 0.5, 0.0), lookTarget);
         spawnShadowEcho(world, strikePos, lookTarget, player.getHeight());
         dance.nextStrikeTick = world.getTime() + getStrikeIntervalTicks(dance.tuning);
+        }
     }
 
     private static int getActiveDurationTicks(DeathShadowBloodMasteryTuning tuning) {
@@ -565,7 +574,16 @@ public final class ShadowstingShadowDanceManager {
         return strikeInterval(Math.max(1, Config.uniqueEffects.shadowsting.strikeInterval / 2), tuning);
     }
 
+    private static ItemStack captureCloneStack(ServerPlayerEntity owner) {
+        var origin = CombatProvenanceApi.current();
+        for (var stack : owner.getHandItems()) {
+            if (origin != null && CombatProvenanceApi.matches(stack, origin)) return stack.copy();
+        }
+        return ItemStack.EMPTY;
+    }
+
     private static void executePassiveCloneStrike(ServerWorld world, PendingShadowCloneStrike strike) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(strike == null ? null : CombatProvenanceApi.from(strike.stack(), null))) {
         if (!(world.getEntity(strike.ownerId()) instanceof ServerPlayerEntity owner)
                 || !(world.getEntity(strike.targetId()) instanceof LivingEntity target)
                 || !owner.isAlive()
@@ -587,7 +605,7 @@ public final class ShadowstingShadowDanceManager {
         int previousDepth = CURRENT_CLONE_DEPTH.get();
         CURRENT_CLONE_DEPTH.set(strike.chainDepth());
         try {
-            performWeaponStrike(owner, target, owner.getMainHandStack(), strike.damageMultiplier());
+            performWeaponStrike(owner, target, strike.stack(), strike.damageMultiplier());
         } finally {
             CURRENT_CLONE_DEPTH.set(previousDepth);
         }
@@ -609,10 +627,12 @@ public final class ShadowstingShadowDanceManager {
             DeathShadowBloodMasteryCombatManager.scheduleCooldownRefund(world, owner, owner.getMainHandStack(),
                     strike.tuning().integer(DeathShadowBloodMasteryTuning.Setting.SHADOW_KILL_REFUND_TICKS, 20));
         }
+        }
     }
 
     private static void performWeaponStrike(ServerPlayerEntity player, LivingEntity target, ItemStack stack,
                                             double multiplier) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (player == null || target == null || !player.isAlive() || !target.isAlive()) {
             return;
         }
@@ -622,13 +642,15 @@ public final class ShadowstingShadowDanceManager {
         float damage = HelperMethods.abilityScaledDamage("soul", player, stack,
                 Config.uniqueEffects.shadowsting.damageScaling * (float) multiplier,
                 Config.uniqueEffects.shadowsting.spellScaling);
-        if (target.damage(damageSource, damage) && !stack.isEmpty()) {
+        if (CombatProvenanceApi.damage(stack, player, target, damageSource, damage) && !stack.isEmpty()) {
             stack.getItem().postHit(stack, target, player);
+        }
         }
     }
 
     private static void performWeaponStrike(LivingEntity actor, LivingEntity target, ItemStack stack,
                                             double multiplier) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (actor == null || target == null || !actor.isAlive() || !target.isAlive() || !HelperMethods.checkAbilityTarget(target, actor)) {
             return;
         }
@@ -637,6 +659,7 @@ public final class ShadowstingShadowDanceManager {
                 Config.uniqueEffects.shadowsting.spellScaling);
         damage = HelperMethods.applyNonPlayerAbilityDamageModifier(actor, damage);
         SimplySwordsAPI.applyEntityWeaponHit(stack, target, actor, damage);
+        }
     }
 
     public static boolean consumeVeil(ServerPlayerEntity owner, DeathShadowBloodMasteryTuning tuning) {
@@ -882,6 +905,6 @@ public final class ShadowstingShadowDanceManager {
     }
 
     private record PendingShadowCloneStrike(UUID ownerId, UUID targetId, long triggerTick, int chainDepth,
-                                            DeathShadowBloodMasteryTuning tuning, double damageMultiplier) {
+                                            DeathShadowBloodMasteryTuning tuning, double damageMultiplier, ItemStack stack) {
     }
 }

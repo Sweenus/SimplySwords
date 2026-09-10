@@ -20,6 +20,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.registry.EntityRegistry;
 import net.sweenus.simplyswords.world.DragonMawManager;
 
@@ -50,6 +51,7 @@ public class DragonMawBreathCloudEntity extends Entity {
         this.origin = origin;
         this.dataTracker.set(OWNER_ENTITY_ID, owner.getId());
         this.dataTracker.set(WEAPON_STACK, stack.copy());
+        CombatProvenanceApi.attach(this, stack);
         this.dataTracker.set(DAMAGE, Math.max(0.0F, damage));
         this.dataTracker.set(RADIUS, (float) Math.max(0.25, radius));
         this.dataTracker.set(LIFETIME, Math.max(1, lifetime));

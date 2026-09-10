@@ -12,6 +12,7 @@ import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.entity.ChainLightningVisualEntity;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -72,6 +73,7 @@ public final class ChainLightningVisualManager {
 
     public static boolean damageBoltTarget(ServerWorld world, LivingEntity player, ItemStack stack,
                                            LivingEntity target, float damage) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (world == null || player == null || target == null || !player.isAlive() || !target.isAlive() || !HelperMethods.checkAbilityTarget(target, player)) {
             return false;
         }
@@ -80,6 +82,7 @@ public final class ChainLightningVisualManager {
         float enchantedDamage = HelperMethods.applyAbilityDamageEnchantments(world, stack, target, source, damage);
         WeaponImplicitRegistry.runSuppressed(() -> result[0] = HelperMethods.damageThroughIframes(target, source, enchantedDamage));
         return result[0];
+        }
     }
 
     public static boolean damageBoltTargetWithoutKnockback(ServerWorld world, LivingEntity player, ItemStack stack,
@@ -145,6 +148,7 @@ public final class ChainLightningVisualManager {
     public static int damageChain(ServerWorld world, LivingEntity player, LivingEntity sourceEntity, ItemStack stack,
                                   LivingEntity firstTarget, int chainCount, float damage, double range,
                                   LightningVisualSettings settings) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (chainCount <= 0 || firstTarget == null || !firstTarget.isAlive()) {
             return 0;
         }
@@ -176,6 +180,7 @@ public final class ChainLightningVisualManager {
         spawnChain(world, points, settings);
         playChainStartSounds(world, visualSource, firstTarget);
         return damaged;
+        }
     }
 
     private static List<LivingEntity> buildChain(ServerWorld world, LivingEntity player, LivingEntity firstTarget, int chainCount, double range) {

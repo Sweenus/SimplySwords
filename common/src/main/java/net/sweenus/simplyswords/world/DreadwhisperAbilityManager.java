@@ -19,6 +19,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.DreadwhisperVisualEntity;
 import net.sweenus.simplyswords.registry.EffectRegistry;
@@ -439,6 +440,7 @@ public final class DreadwhisperAbilityManager {
     private static int splinterPain(ServerWorld world, LivingEntity attacker, LivingEntity victim,
                                     ItemStack stack, StormSoulMasteryTuning tuning, float bonusDamage,
                                     UniqueAbilityExecution execution) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(execution == null ? null : execution.provenance())) {
         double multiplier = tuning.get(StormSoulMasteryTuning.Setting.SPLINTER_MULTIPLIER, 0);
         double range = tuning.get(StormSoulMasteryTuning.Setting.SPLINTER_RANGE, 0);
         if (multiplier <= 0 || range <= 0 || bonusDamage <= 0) return 0;
@@ -450,6 +452,7 @@ public final class DreadwhisperAbilityManager {
         UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, StormSoulMasteryAbilities.HIT,
                 nearest, 1, damage);
         return 1;
+        }
     }
 
     // Reopen: consuming a wound can leave a fresh, shorter one behind.
@@ -516,6 +519,7 @@ public final class DreadwhisperAbilityManager {
 
     private static void damageDashTargets(ServerWorld world, LivingEntity owner, ActiveRend active,
                                           Vec3d start, Vec3d end) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(active == null ? null : CombatProvenanceApi.from(active.stack, null))) {
         if (active.voidCrossing) {
             return;
         }
@@ -575,6 +579,7 @@ public final class DreadwhisperAbilityManager {
                 stopAtContact(owner, active, start, end, target);
                 break;
             }
+        }
         }
     }
 
@@ -711,6 +716,7 @@ public final class DreadwhisperAbilityManager {
 
     private static int burst(ServerWorld world, LivingEntity owner, ActiveRend active, Vec3d centre,
                              float damage, double radius, int targetCap) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(active == null ? null : CombatProvenanceApi.from(active.stack, null))) {
         if (damage <= 0 || radius <= 0) return 0;
         int affected = 0;
         int cap = Math.max(1, targetCap);
@@ -726,10 +732,12 @@ public final class DreadwhisperAbilityManager {
         world.spawnParticles(REND_DUST, centre.x, centre.y + 0.6, centre.z,
                 26, radius * 0.4, 0.6, radius * 0.4, 0.07);
         return affected;
+        }
     }
 
     private static int collapseCast(ServerWorld world, LivingEntity owner, ActiveRend active,
                                     Vec3d end, float damage) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(active == null ? null : CombatProvenanceApi.from(active.stack, null))) {
         int cap = Math.max(1, active.tuning.integer(
                 StormSoulMasteryTuning.Setting.VOID_COLLAPSE_TARGET_CAP, 12));
         double padding = Math.max(rendWidth(active.tuning),
@@ -754,6 +762,7 @@ public final class DreadwhisperAbilityManager {
         }
         GloamStainManager.removeSourcePatches(world, active.castId);
         return affected;
+        }
     }
 
     // Umbral Shelter: each enemy the dash reaches leaves a sliver of Absorption.

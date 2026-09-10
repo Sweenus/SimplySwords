@@ -16,6 +16,7 @@ import net.sweenus.simplyswords.api.ability.FireForgeMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.effect.FlameSeedEffect;
 import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance;
@@ -208,6 +209,7 @@ public final class FlamewindMasteryManager {
     // Spark Harvest: each detonation shortens the cast's own cooldown, up to a per-cast ceiling.
     public static void onDetonation(ServerWorld world, LivingEntity owner, ItemStack stack,
                                     FireForgeMasteryTuning tuning) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (owner == null || stack == null) return;
         OwnerState state = owner(world, owner);
         long now = world.getTime();
@@ -243,6 +245,7 @@ public final class FlamewindMasteryManager {
             }
         }
         state.lastDetonationAt = now;
+        }
     }
 
     // Chain Flash: a detonation landing close behind another hits harder.

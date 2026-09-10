@@ -16,6 +16,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.FaultlineSpikeVisualEntity;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -155,7 +156,7 @@ public final class FaultlineSunderManager {
                 continue;
             }
             DamageSource damageSource = owner.getDamageSources().indirectMagic(owner, owner);
-            target.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(world, owner.getMainHandStack(), target, damageSource, damage));
+            CombatProvenanceApi.damage(owner.getMainHandStack(), (damageSource).getAttacker(), target, damageSource, HelperMethods.applyAbilityDamageEnchantments(world, owner.getMainHandStack(), target, damageSource, damage));
         }
     }
 

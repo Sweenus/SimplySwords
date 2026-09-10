@@ -15,6 +15,7 @@ import net.minecraft.util.math.Box;
 import net.sweenus.simplyswords.api.ability.ArcaneCosmicMasteryTuning;
 import net.sweenus.simplyswords.api.ability.ArcaneCosmicMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.registry.EffectRegistry;
@@ -100,6 +101,7 @@ public final class MagiscytheMasteryManager {
 
     public static int start(ServerWorld world, LivingEntity owner, ItemStack stack,
                             ArcaneCosmicMasteryTuning tuning, UniqueAbilityExecution execution) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(execution == null ? null : execution.provenance())) {
         int duration = Math.max(1, tuning.integer(ArcaneCosmicMasteryTuning.Setting.DURATION_TICKS,
                 Config.uniqueEffects.magiscythe.duration));
         StormState replaced = STORMS.put(owner.getUuid(), new StormState(
@@ -108,6 +110,7 @@ public final class MagiscytheMasteryManager {
         if (tuning.flag(1 << 5)) owner.addStatusEffect(new StatusEffectInstance(
                 StatusEffects.RESISTANCE, duration, 0), owner);
         return duration;
+        }
     }
 
     public static void tick(LivingEntity owner) {
@@ -245,6 +248,7 @@ public final class MagiscytheMasteryManager {
     }
 
     private static void attemptRefresh(ServerWorld world, LivingEntity owner, StormState state) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(state == null || state.execution == null ? null : state.execution.provenance())) {
         int chance = state.tuning.integer(ArcaneCosmicMasteryTuning.Setting.CHANCE, 5);
         int roll = owner.getRandom().nextInt(100);
         boolean passed = chance > 0 && roll < chance;
@@ -260,6 +264,7 @@ public final class MagiscytheMasteryManager {
         StatusEffectInstance effect = owner.getStatusEffect(EffectRegistry.getReference(EffectRegistry.MAGISTORM));
         owner.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.MAGISTORM),
                 Math.max(restored, effect == null ? 0 : effect.getDuration()), Math.min(9, state.refreshes + 1)), owner);
+        }
     }
 
     private static void repair(ServerWorld world, LivingEntity owner, ItemStack weapon, boolean guaranteed) {
@@ -288,6 +293,7 @@ public final class MagiscytheMasteryManager {
 
     private static void performRepair(ServerWorld world, LivingEntity owner, ItemStack weapon,
                                       ArcaneCosmicMasteryTuning tuning, StormState state) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(weapon, null))) {
         if (state == null) state = STORMS.computeIfAbsent(owner.getUuid(), ignored -> new StormState(
                 world, ArcaneCosmicMasteryTuning.EMPTY, null, world.getTime() + 20));
         state.pity = 0;
@@ -313,6 +319,7 @@ public final class MagiscytheMasteryManager {
                 StatusEffects.ABSORPTION, 40, 0), owner);
         if (tuning.flag(1 << 26)) weapon.damage(tuning.integer(ArcaneCosmicMasteryTuning.Setting.TERTIARY_TARGET_CAP, 2),
                 owner, owner.getMainHandStack() == weapon ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
+        }
     }
 
     private static void damageTarget(ServerWorld world, LivingEntity owner, ItemStack stack,

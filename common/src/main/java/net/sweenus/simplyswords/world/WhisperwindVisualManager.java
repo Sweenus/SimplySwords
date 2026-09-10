@@ -8,6 +8,7 @@ import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.math.Vec3d;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.WhisperwindSlashVisualEntity;
 import net.sweenus.simplyswords.registry.SoundRegistry;
@@ -37,6 +38,7 @@ public final class WhisperwindVisualManager {
     }
 
     public static void startDash(ServerWorld world, LivingEntity user, ItemStack stack) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (world == null || user == null) {
             return;
         }
@@ -44,12 +46,15 @@ public final class WhisperwindVisualManager {
         ACTIVE_DASHES.computeIfAbsent(world, ignored -> new HashMap<>())
                 .put(user.getUuid(), new ActiveDash(user.getPos(), user.getPos(), stack.copy(), null,
                         StormSoulMasteryTuning.EMPTY));
+        }
     }
 
     public static void startDash(ServerWorld world, LivingEntity user, ItemStack stack,
                                  UniqueAbilityExecution execution, StormSoulMasteryTuning tuning) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(execution == null ? null : execution.provenance())) {
         ACTIVE_DASHES.computeIfAbsent(world, ignored -> new HashMap<>())
                 .put(user.getUuid(), new ActiveDash(user.getPos(), user.getPos(), stack.copy(), execution, tuning));
+        }
     }
 
     public static StormSoulMasteryTuning dashTuning(ServerWorld world, LivingEntity user) {
@@ -94,7 +99,7 @@ public final class WhisperwindVisualManager {
                             Config.uniqueEffects.whisperwind.delayedDamageScaling,
                             Config.uniqueEffects.whisperwind.delayedSpellScaling) * passingCut);
                     var source = world.getDamageSources().indirectMagic(user, user);
-                    target.damage(source, HelperMethods.applyAbilityDamageEnchantments(
+                    CombatProvenanceApi.damage(dash.stack, (source).getAttacker(), target, source, HelperMethods.applyAbilityDamageEnchantments(
                             world, dash.stack, target, source, immediate));
                 }
             }
@@ -136,6 +141,7 @@ public final class WhisperwindVisualManager {
 
     public static void scheduleTargetStrike(ServerWorld world, LivingEntity user, LivingEntity target, ItemStack stack,
                                             UniqueAbilityExecution execution, StormSoulMasteryTuning tuning) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(execution == null ? null : execution.provenance())) {
         if (world == null || user == null || target == null || !user.isAlive()
                 || !target.isAlive() || !HelperMethods.checkAbilityTarget(target, user)) {
             return;
@@ -150,11 +156,13 @@ public final class WhisperwindVisualManager {
                                 Config.uniqueEffects.whisperwind.delayedDamageDelay), execution, tuning, false));
         world.playSound(null, start.x, start.y, start.z, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_01.get(),
                 SoundCategory.PLAYERS, 0.6F, 1.0F);
+        }
     }
 
     public static void scheduleStillWindStrike(ServerWorld world, LivingEntity user, LivingEntity target,
                                                ItemStack stack, UniqueAbilityExecution execution,
                                                StormSoulMasteryTuning tuning) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(execution == null ? null : execution.provenance())) {
         Vec3d start = user.getPos();
         Vec3d end = target.getPos();
         Set<UUID> targets = new HashSet<>();
@@ -165,6 +173,7 @@ public final class WhisperwindVisualManager {
                                 Config.uniqueEffects.whisperwind.delayedDamageDelay), execution, tuning, true));
         world.playSound(null, start.x, start.y, start.z, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_01.get(),
                 SoundCategory.PLAYERS, 0.6F, 1.0F);
+        }
     }
 
     public static void tick(ServerWorld world) {
@@ -191,6 +200,7 @@ public final class WhisperwindVisualManager {
     }
 
     private static void applyStrike(ServerWorld world, PendingStrike strike) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(strike == null ? null : CombatProvenanceApi.from(strike.stack(), null))) {
         Entity sourceEntity = world.getEntity(strike.sourceId);
         if (!(sourceEntity instanceof LivingEntity source) || !source.isAlive()) {
             if (strike.execution != null) UniqueAbilityApi.cancel(strike.execution);
@@ -240,7 +250,7 @@ public final class WhisperwindVisualManager {
             boolean damaged = false;
             for (int hit = 0; hit < hits; hit++) {
                 if (hit > 0) target.timeUntilRegen = 0;
-                damaged |= target.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(
+                damaged |= CombatProvenanceApi.damage(strike.stack, (damageSource).getAttacker(), target, damageSource, HelperMethods.applyAbilityDamageEnchantments(
                         world, strike.stack, target, damageSource, resolved));
                 if (!target.isAlive()) break;
             }
@@ -269,6 +279,7 @@ public final class WhisperwindVisualManager {
                 SoundRegistry.ELEMENTAL_SWORD_WIND_ATTACK_03.get(),
                 SoundCategory.PLAYERS, 0.75F, 1.25F + world.random.nextFloat() * 0.18F);
         spawnSlash(world, strike.start, strike.end);
+        }
     }
 
 
@@ -293,6 +304,7 @@ public final class WhisperwindVisualManager {
     // Second Flowering: a lethal strike spills into nearby caught enemies.
     private static void secondFlowering(ServerWorld world, LivingEntity source, PendingStrike strike,
                                         LivingEntity victim, float dealt) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(strike == null ? null : CombatProvenanceApi.from(strike.stack(), null))) {
         double multiplier = strike.tuning.get(StormSoulMasteryTuning.Setting.FLOWERING_MULTIPLIER, 0);
         double radius = strike.tuning.get(StormSoulMasteryTuning.Setting.FLOWERING_RADIUS, 0);
         if (multiplier <= 0 || radius <= 0 || dealt <= 0) return;
@@ -305,9 +317,10 @@ public final class WhisperwindVisualManager {
                         && EntityPredicates.VALID_LIVING_ENTITY.test(entity)
                         && HelperMethods.checkAbilityTarget(entity, source))) {
             nearby.timeUntilRegen = 0;
-            nearby.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(
+            CombatProvenanceApi.damage(strike.stack, (damageSource).getAttacker(), nearby, damageSource, HelperMethods.applyAbilityDamageEnchantments(
                     world, strike.stack, nearby, damageSource, (float) (dealt * multiplier)));
             if (++splashed >= cap) break;
+        }
         }
     }
 

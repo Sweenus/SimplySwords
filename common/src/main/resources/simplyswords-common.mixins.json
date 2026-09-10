@@ -42,7 +42,15 @@
     "EvokerFangsEntityMixin",
     "TargetPredicateMixin",
     "compat.BetterCombatServerNetworkMixin",
-    "compat.LootrDefaultLootFillerMixin"
+    "compat.LootrDefaultLootFillerMixin",
+    "CombatEntityProvenanceMixin",
+    "CombatTickProvenanceMixin",
+    "CombatItemProvenanceMixin",
+    "CombatAttackProvenanceMixin",
+    "CombatStatusProvenanceMixin",
+    "DamageSourceProvenanceMixin",
+    "CombatDamageScopeMixin",
+    "CombatFireProvenanceMixin"
   ],
   "injectors": {
     "defaultRequire": 1

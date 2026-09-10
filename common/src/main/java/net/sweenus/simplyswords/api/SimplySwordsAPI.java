@@ -26,6 +26,8 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.combat.CombatProvenance;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.SimplySwordsExpectPlatform;
@@ -263,6 +265,14 @@ public class SimplySwordsAPI {
     }
 
     public static boolean tryActivateWeaponAbility(WeaponAbilityContext context) {
+        if (context == null) return false;
+        try (var ignored = CombatProvenanceApi.origin(
+                context.actor(), context.stack(), CombatProvenance.ABILITY)) {
+            return activateWeaponWithProvenance(context);
+        }
+    }
+
+    private static boolean activateWeaponWithProvenance(WeaponAbilityContext context) {
         if (context == null
                 || context.stack() == null
                 || context.stack().isEmpty()
@@ -431,8 +441,10 @@ public class SimplySwordsAPI {
         facing = facing.normalize();
 
         DelegatedWeaponHitContext context = new DelegatedWeaponHitContext(owner instanceof ServerPlayerEntity sp ? sp : null, actor, actor.getPos(), facing);
+        DelegatedWeaponHitContext previousContext = DELEGATED_WEAPON_HIT_CONTEXT.get();
         DELEGATED_WEAPON_HIT_CONTEXT.set(context);
-        try {
+        try (var ignored = CombatProvenanceApi.scope(
+                CombatProvenanceApi.from(stack, actor))) {
             DamageSource source = owner instanceof ServerPlayerEntity sp
                     ? owner.getDamageSources().playerAttack(sp)
                     : owner.getDamageSources().mobAttack(owner);
@@ -453,7 +465,8 @@ public class SimplySwordsAPI {
             }
             return true;
         } finally {
-            DELEGATED_WEAPON_HIT_CONTEXT.remove();
+            if (previousContext == null) DELEGATED_WEAPON_HIT_CONTEXT.remove();
+            else DELEGATED_WEAPON_HIT_CONTEXT.set(previousContext);
         }
     }
 
@@ -477,8 +490,10 @@ public class SimplySwordsAPI {
         facing = facing.normalize();
 
         DelegatedWeaponHitContext context = new DelegatedWeaponHitContext(actor instanceof ServerPlayerEntity player ? player : null, actor, actor.getPos(), facing);
+        DelegatedWeaponHitContext previousContext = DELEGATED_WEAPON_HIT_CONTEXT.get();
         DELEGATED_WEAPON_HIT_CONTEXT.set(context);
-        try {
+        try (var ignored = CombatProvenanceApi.scope(
+                CombatProvenanceApi.from(stack, actor))) {
             DamageSource source = getWeaponDamageSource(actor);
             float modifiedDamage = WeaponImplicitRegistry.modifyDamage(stack, target, source, damage);
             target.timeUntilRegen = 0;
@@ -497,7 +512,8 @@ public class SimplySwordsAPI {
             }
             return true;
         } finally {
-            DELEGATED_WEAPON_HIT_CONTEXT.remove();
+            if (previousContext == null) DELEGATED_WEAPON_HIT_CONTEXT.remove();
+            else DELEGATED_WEAPON_HIT_CONTEXT.set(previousContext);
         }
     }
 
@@ -508,13 +524,16 @@ public class SimplySwordsAPI {
         }
         DelegatedWeaponHitContext context = new DelegatedWeaponHitContext(actor instanceof ServerPlayerEntity player ? player : null,
                 actor, actor.getPos(), actor.getRotationVec(1.0F));
+        DelegatedWeaponHitContext previousContext = DELEGATED_WEAPON_HIT_CONTEXT.get();
         DELEGATED_WEAPON_HIT_CONTEXT.set(context);
-        try {
+        try (var ignored = CombatProvenanceApi.scope(
+                CombatProvenanceApi.from(stack, actor))) {
             float hitDamage = net.sweenus.simplyswords.util.HelperMethods.applyNonPlayerWeaponHitDamageModifier(actor, damage);
             WeaponImplicitRegistry.onHit(stack, target, actor, hitDamage);
             NecromanticArsenalPower.runSuppressed(() -> item.postHit(stack, target, actor));
         } finally {
-            DELEGATED_WEAPON_HIT_CONTEXT.remove();
+            if (previousContext == null) DELEGATED_WEAPON_HIT_CONTEXT.remove();
+            else DELEGATED_WEAPON_HIT_CONTEXT.set(previousContext);
         }
     }
 
@@ -751,9 +770,17 @@ public class SimplySwordsAPI {
         DamageSource resolvedSource = source;
         boolean[] damaged = {false};
         WeaponImplicitRegistry.runSuppressed(() -> damaged[0] = bypassIframes
-                ? HelperMethods.damageThroughIframes(target, resolvedSource, adjustedDamage)
-                : target.damage(resolvedSource, adjustedDamage));
+                ? provenanceDamageThroughIframes(scalingStack, actor, target, resolvedSource, adjustedDamage)
+                : CombatProvenanceApi.damage(scalingStack, actor, target, resolvedSource, adjustedDamage));
         return damaged[0];
+    }
+
+    private static boolean provenanceDamageThroughIframes(ItemStack stack, LivingEntity actor, LivingEntity target,
+                                                          DamageSource source, float amount) {
+        try (var ignored = CombatProvenanceApi.scope(
+                CombatProvenanceApi.from(stack, actor))) {
+            return HelperMethods.damageThroughIframes(target, source, amount);
+        }
     }
 
     public static LivingEntity findLenientAbilityTarget(PlayerEntity player, double range,

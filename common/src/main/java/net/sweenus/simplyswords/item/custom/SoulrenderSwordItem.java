@@ -20,6 +20,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
@@ -124,7 +125,7 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
                     + SoulrenderAbilityManager.takeTitheBonus(world, attacker));
             if (bonus > 0) {
                 var source = attacker.getDamageSources().indirectMagic(attacker, attacker);
-                target.damage(source, HelperMethods.applyAbilityDamageEnchantments(world, stack, target, source,
+                CombatProvenanceApi.damage(stack, (source).getAttacker(), target, source, HelperMethods.applyAbilityDamageEnchantments(world, stack, target, source,
                         (float) attacker.getAttributeValue(net.minecraft.entity.attribute.EntityAttributes.GENERIC_ATTACK_DAMAGE)
                                 * bonus));
             }
@@ -196,7 +197,7 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
             var damageSource = user.getDamageSources().indirectMagic(user, user);
             float multiplier = (float) (damageMultiplier + Math.min(stackBonusCap, stacks * stackBonus));
             float dealt = stacks * damage * multiplier;
-            le.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(world, stack, le, damageSource, dealt));
+            CombatProvenanceApi.damage(stack, (damageSource).getAttacker(), le, damageSource, HelperMethods.applyAbilityDamageEnchantments(world, stack, le, damageSource, dealt));
             totalDealt += dealt;
             if (execution != null) UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT,
                     StormSoulMasteryAbilities.HIT, le, 1, dealt);

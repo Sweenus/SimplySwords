@@ -26,6 +26,8 @@ public class FrostVortexEffect extends OrbitingEffect {
     @Override
     public boolean applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
         if (!livingEntity.getWorld().isClient()) {
+            sourceEntity = null;
+            scaledDamage = 0;
             ServerWorld serverWorld = (ServerWorld) livingEntity.getWorld();
             if (TempestAbilityManager.hasManagedMark(livingEntity, TempestAbilityManager.Element.FROST)) {
                 if (livingEntity.age % 40 == 0) {

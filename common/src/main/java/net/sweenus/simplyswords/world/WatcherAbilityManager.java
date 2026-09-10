@@ -35,6 +35,7 @@ import net.sweenus.simplyswords.api.ability.MartialCommandEldritchMasteryAbiliti
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.WatcherBatEntity;
 import net.sweenus.simplyswords.registry.SoundRegistry;
@@ -93,6 +94,7 @@ public final class WatcherAbilityManager {
 
     public static void addDread(ServerWorld world, LivingEntity actor, LivingEntity target, WatcherWeaponType type,
                                 ItemStack stack) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (world == null || actor == null || target == null || type == null
                 || !actor.isAlive() || !isValidTarget(world, actor, null, target)) {
             return;
@@ -252,6 +254,7 @@ public final class WatcherAbilityManager {
             UniqueAbilityApi.finish(execution, execution.definition().id(), 1);
         }
         if (wargExecution != null) MartialCommandEldritchMasteryCombatManager.finish(wargExecution, 1);
+        }
     }
 
     private static void spreadDread(ServerWorld world, LivingEntity actor, LivingEntity target,
@@ -684,6 +687,7 @@ public final class WatcherAbilityManager {
 
     private static void applyHuntStrike(ServerWorld world, LivingEntity actor, LivingEntity target,
                                         ActiveHunt hunt, float scale) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(hunt == null ? null : CombatProvenanceApi.from(hunt.stack, null))) {
         float distinctMultiplier = huntStrikeMultiplier(hunt.tuning, hunt.sanguine,
                 hunt.struckTargets.size(), hunt.dreadConsumed);
         float beforeVitality = target.getHealth() + target.getAbsorptionAmount();
@@ -726,6 +730,7 @@ public final class WatcherAbilityManager {
             world.playSound(null, pos.x, pos.y, pos.z,
                     SoundRegistry.DARK_SWORD_ATTACK_WITH_BLOOD_02.get(),
                     target.getSoundCategory(), 0.45F, 1.5F);
+        }
         }
     }
 
@@ -1075,6 +1080,7 @@ public final class WatcherAbilityManager {
 
     private static void applyOmenSwoopStrike(ServerWorld world, LivingEntity actor,
                                               LivingEntity target, ActiveOmen omen) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(omen == null ? null : CombatProvenanceApi.from(omen.stack, null))) {
         AbyssalSpectralMasteryTuning tuning = AbyssalSpectralMasteryAbilities.tuning(omen.execution);
         int mode = tuning.integer(AbyssalSpectralMasteryTuning.Setting.MODE, 0);
         int maxDread = Math.max(1, tuning.integer(AbyssalSpectralMasteryTuning.Setting.STACK_CAP,
@@ -1110,9 +1116,11 @@ public final class WatcherAbilityManager {
         world.playSound(null, pos.x, pos.y, pos.z,
                 SoundRegistry.DARK_SWORD_ATTACK_WITH_BLOOD_01.get(),
                 target.getSoundCategory(), 0.25F, 1.55F + world.random.nextFloat() * 0.18F);
+        }
     }
 
     private static void resolveFinalOmen(ServerWorld world, LivingEntity actor, LivingEntity target, ActiveOmen omen) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(omen == null ? null : CombatProvenanceApi.from(omen.stack, null))) {
         AbyssalSpectralMasteryTuning tuning = AbyssalSpectralMasteryAbilities.tuning(omen.execution);
         actor.swingHand(omen.hand, true);
         float missingHealth = 1.0F - MathHelper.clamp(target.getHealth() / Math.max(1.0F, target.getMaxHealth()), 0.0F, 1.0F);
@@ -1195,6 +1203,7 @@ public final class WatcherAbilityManager {
         UniqueAbilityApi.emit(omen.execution, net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
                 AbyssalSpectralMasteryAbilities.HIT, target, damaged ? 1 : 0, baseDamage);
         UniqueAbilityApi.finish(omen.execution, omen.execution.definition().id(), damaged ? 1 : 0);
+        }
     }
 
     static int totalSwoops(int mode, int spearCount, int minimum, int maximum, int dread,
@@ -1466,6 +1475,7 @@ public final class WatcherAbilityManager {
 
     private static boolean damageTarget(ServerWorld world, ItemStack stack, LivingEntity target,
                                         DamageSource source, float baseDamage, float minimumVitality) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (baseDamage <= 0.0F || !target.isAlive()) {
             return false;
         }
@@ -1483,6 +1493,7 @@ public final class WatcherAbilityManager {
                 () -> damaged[0] = HelperMethods.damageThroughIframes(target, source, resolvedDamage)
         );
         return damaged[0];
+        }
     }
 
     private static float vitality(LivingEntity target) {

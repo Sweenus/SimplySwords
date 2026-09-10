@@ -23,6 +23,7 @@ import net.sweenus.simplyswords.api.ability.LongPathFinalFormsMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance;
@@ -225,6 +226,7 @@ public final class BattleStandardMasteryManager {
 
     private static int sunfireHostilePulse(ServerWorld world, BattleStandardEntity standard,
                                             StandardState state, LongPathFinalFormsMasteryTuning tuning) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(state == null ? null : CombatProvenanceApi.from(state.stack, null))) {
         if (tuning.flag(512)) return 0;
         double radius = tuning.get(s("RADIUS"), 6);
         int cap = tuning.integer(s("TARGET_CAP"), 32);
@@ -267,6 +269,7 @@ public final class BattleStandardMasteryManager {
         state.sunfirePulses.entrySet().removeIf(entry -> entry.getValue().isEmpty()
                 || now - entry.getValue().getLast() > window);
         return affected;
+        }
     }
 
     private static int sunfireLanding(ServerWorld world, BattleStandardEntity standard,
@@ -293,6 +296,7 @@ public final class BattleStandardMasteryManager {
 
     private static void sunfireSupportPulse(ServerWorld world, BattleStandardEntity standard,
                                              StandardState state, LongPathFinalFormsMasteryTuning tuning) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(state == null ? null : CombatProvenanceApi.from(state.stack, null))) {
         double radius = tuning.get(s("SUPPORT_RADIUS"), 6);
         List<LivingEntity> allies = targets(world, standard, standard.ownerEntity, radius,
                 tuning.integer(s("SUPPORT_TARGET_CAP"), 16), false);
@@ -345,10 +349,12 @@ public final class BattleStandardMasteryManager {
         }
         UniqueAbilityApi.emit(state.execution, UniqueAbilityPhase.HIT, LongPathFinalFormsMasteryAbilities.SUPPORT,
                 null, affected, heal);
+        }
     }
 
     private static int harbingerHostilePulse(ServerWorld world, BattleStandardDarkEntity standard,
                                               StandardState state, LongPathFinalFormsMasteryTuning tuning) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(state == null ? null : CombatProvenanceApi.from(state.stack, null))) {
         if (tuning.flag(1024)) return 0;
         double radius = tuning.flag(8) ? 4 : tuning.flag(2048) ? 5 : tuning.get(s("RADIUS"), 6);
         List<LivingEntity> targets = targets(world, standard, standard.ownerEntity, radius,
@@ -397,6 +403,7 @@ public final class BattleStandardMasteryManager {
         state.sunfirePulses.entrySet().removeIf(entry -> entry.getValue().isEmpty()
                 || now - entry.getValue().getLast() > window);
         return affected;
+        }
     }
 
     private static int harbingerLanding(ServerWorld world, BattleStandardDarkEntity standard,
@@ -427,6 +434,7 @@ public final class BattleStandardMasteryManager {
 
     private static void harbingerSupportPulse(ServerWorld world, BattleStandardDarkEntity standard,
                                                StandardState state, LongPathFinalFormsMasteryTuning tuning) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(state == null ? null : CombatProvenanceApi.from(state.stack, null))) {
         if (tuning.flag(2048)) return;
         List<LivingEntity> allies = targets(world, standard, standard.ownerEntity,
                 tuning.get(s("SUPPORT_RADIUS"), 6), tuning.integer(s("SUPPORT_TARGET_CAP"), 16), false);
@@ -455,6 +463,7 @@ public final class BattleStandardMasteryManager {
         }
         UniqueAbilityApi.emit(state.execution, UniqueAbilityPhase.HIT, LongPathFinalFormsMasteryAbilities.SUPPORT,
                 null, affected, 0);
+        }
     }
 
     private static void harbingerOwnerAura(BattleStandardDarkEntity standard, LongPathFinalFormsMasteryTuning tuning) {
@@ -528,8 +537,10 @@ public final class BattleStandardMasteryManager {
 
     private static boolean deal(ServerWorld world, LivingEntity owner, ItemStack stack,
                                 LivingEntity target, float amount) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         DamageSource source = owner.getDamageSources().indirectMagic(owner, owner);
-        return target.damage(source, HelperMethods.applyAbilityDamageEnchantments(world, stack, target, source, amount));
+        return CombatProvenanceApi.damage(stack, (source).getAttacker(), target, source, HelperMethods.applyAbilityDamageEnchantments(world, stack, target, source, amount));
+        }
     }
 
     private static void pull(LivingEntity target, Vec3d center, double strength) {

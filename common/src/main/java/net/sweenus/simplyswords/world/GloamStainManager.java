@@ -13,6 +13,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.entity.BloodStainVisualEntity;
@@ -551,6 +552,8 @@ public final class GloamStainManager {
     }
 
     private static void expirePatch(ServerWorld world, ActivePatch patch) {
+        try (var ignored = CombatProvenanceApi.scope(
+                CombatProvenanceApi.from(patch.behavior.weaponStack(), null))) {
         PatchBehavior behavior = patch.behavior;
         LivingEntity owner = resolveLiving(world, patch.ownerId);
         if (behavior.expiryDamageMultiplier() <= 0 || behavior.expiryRadius() <= 0
@@ -574,6 +577,7 @@ public final class GloamStainManager {
             if (SimplySwordsAPI.applyEntityWeaponHit(stack, target, owner, damage)) hits++;
         }
         patch.resolve(hits);
+        }
     }
 
     private static void enforceGrowthCap(ServerWorld world, List<ActivePatch> patches, UUID ownerId) {

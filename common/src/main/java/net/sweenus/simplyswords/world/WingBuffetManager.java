@@ -13,6 +13,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.AwakeningApi;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.config.Config;
@@ -99,12 +100,14 @@ public final class WingBuffetManager {
     }
 
     private static boolean damageTarget(ServerWorld world, ItemStack stack, LivingEntity target, DamageSource damageSource, float damage) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         int timeUntilRegen = target.timeUntilRegen;
         target.timeUntilRegen = 0;
         float enchantedDamage = HelperMethods.applyAbilityDamageEnchantments(world, stack, target, damageSource, damage);
-        boolean damaged = target.damage(damageSource, enchantedDamage);
+        boolean damaged = CombatProvenanceApi.damage(stack, damageSource.getAttacker(), target, damageSource, enchantedDamage);
         target.timeUntilRegen = timeUntilRegen;
         return damaged;
+        }
     }
 
     private static void spawnVisual(ServerWorld world, LivingEntity attacker, Vec3d direction) {

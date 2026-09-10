@@ -1,6 +1,8 @@
 package net.sweenus.simplyswords.api.ability;
 
 import java.util.List;
+import net.sweenus.simplyswords.api.combat.CombatProvenance;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 
 public final class UniqueAbilityExecution {
     private final long id;
@@ -8,12 +10,17 @@ public final class UniqueAbilityExecution {
     private final UniqueAbilityContext context;
     private final UniqueAbilityTuning tuning;
     private final List<UniqueAbilityObserver> observers;
+    private final CombatProvenance provenance;
+    public CombatProvenance provenance() { return provenance; }
     private boolean started;
     private boolean terminal;
     private double pendingCooldownRefundFraction;
 
     UniqueAbilityExecution(long id, UniqueAbilityDefinition definition, UniqueAbilityContext context,
                            UniqueAbilityTuning tuning, List<UniqueAbilityObserver> observers) {
+        try (var ignored = CombatProvenanceApi.origin(context.actor(), context.stack(), CombatProvenance.ABILITY)) {
+            this.provenance = CombatProvenanceApi.current();
+        }
         this.id = id;
         this.definition = definition;
         this.context = context;

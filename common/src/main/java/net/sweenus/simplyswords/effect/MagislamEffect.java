@@ -11,6 +11,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.Box;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.registry.EffectRegistry;
@@ -55,7 +56,7 @@ public class MagislamEffect extends OrbitingEffect {
                                 if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, player)) {
                                     le.setVelocity((le.getX() - player.getX()) / 4, (le.getY() - player.getY()) / 4, (le.getZ() - player.getZ()) / 4);
                                     var damageSource = player.getDamageSources().playerAttack(player);
-                                    le.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments((ServerWorld) player.getWorld(), player.getMainHandStack(), le, damageSource, (float) damage));
+                                    CombatProvenanceApi.damage(player.getMainHandStack(), (damageSource).getAttacker(), le, damageSource, HelperMethods.applyAbilityDamageEnchantments((ServerWorld) player.getWorld(), player.getMainHandStack(), le, damageSource, (float) damage));
                                 }
                             }
                         }

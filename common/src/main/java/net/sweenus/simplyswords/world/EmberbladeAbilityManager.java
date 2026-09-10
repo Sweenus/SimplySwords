@@ -27,6 +27,7 @@ import net.sweenus.simplyswords.api.ability.FireForgeMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -72,6 +73,7 @@ public final class EmberbladeAbilityManager {
     }
 
     public static boolean startChannel(ServerWorld world, ServerPlayerEntity actor, ItemStack stack, Hand hand) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (world == null || actor == null || stack == null || stack.isEmpty()
                 || actor.getItemCooldownManager().isCoolingDown(stack.getItem())) return false;
         State state = state(world, actor);
@@ -88,6 +90,7 @@ public final class EmberbladeAbilityManager {
                 channelTicks(tuning));
         if (tuning.flag(1 << 7)) applyChannelSlow(actor, state.channel);
         return true;
+        }
     }
 
     public static boolean releaseChannel(ServerWorld world, ItemStack stack, LivingEntity actor,
@@ -391,6 +394,7 @@ public final class EmberbladeAbilityManager {
     private static void applyRewards(UniqueAbilityExecution execution, ServerWorld world, LivingEntity actor,
                                      ItemStack stack, LivingEntity target, FireForgeMasteryTuning tuning,
                                      float charge, int elapsed, boolean fullCharge, int affected) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(execution == null ? null : execution.provenance())) {
         if (affected <= 0) return;
         State state = state(world, actor);
         long now = world.getTime();
@@ -449,6 +453,7 @@ public final class EmberbladeAbilityManager {
                 state.flashoverUntil = 0;
             }
         }
+        }
     }
 
     private static void startMovementReward(State state, LivingEntity actor, FireForgeMasteryTuning tuning,
@@ -501,6 +506,7 @@ public final class EmberbladeAbilityManager {
     private static boolean dealAndRecord(UniqueAbilityExecution execution, ServerWorld world, LivingEntity actor,
                                          ItemStack stack, LivingEntity target, float damage,
                                          FireForgeMasteryTuning tuning) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(execution == null ? null : execution.provenance())) {
         boolean hit = deal(world, actor, stack, target, damage);
         if (hit && !target.isAlive()) {
             UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, FireForgeMasteryAbilities.KILL, target, 1, damage);
@@ -513,14 +519,17 @@ public final class EmberbladeAbilityManager {
             }
         }
         return hit;
+        }
     }
 
     private static boolean deal(ServerWorld world, LivingEntity actor, ItemStack stack,
                                 LivingEntity target, float damage) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         DamageSource source = actor instanceof PlayerEntity player
                 ? world.getDamageSources().playerAttack(player) : world.getDamageSources().mobAttack(actor);
         float adjusted = HelperMethods.applyAbilityDamageEnchantments(world, stack, target, source, damage);
         return HelperMethods.damageThroughIframes(target, source, adjusted);
+        }
     }
 
     private static List<LivingEntity> targets(ServerWorld world, LivingEntity actor, Vec3d center,
@@ -549,15 +558,18 @@ public final class EmberbladeAbilityManager {
     }
 
     private static void applyChannelSlow(LivingEntity actor, Channel channel) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(channel == null ? null : CombatProvenanceApi.from(channel.stack, null))) {
         StatusEffectInstance existing = actor.getStatusEffect(StatusEffects.SLOWNESS);
         channel.previousSlowness = existing == null ? null : new StatusEffectInstance(existing);
         channel.slowed = true;
         actor.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS,
                 channel.channelTicks + CHANNEL_SLOW_GRACE_TICKS, 1), actor);
+        }
     }
 
     // Only clears the channel's own Slowness, restoring whatever the wielder already had.
     private static void removeChannelSlow(LivingEntity actor, Channel channel) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(channel == null ? null : CombatProvenanceApi.from(channel.stack, null))) {
         if (channel == null || !channel.slowed) return;
         channel.slowed = false;
         StatusEffectInstance current = actor.getStatusEffect(StatusEffects.SLOWNESS);
@@ -565,6 +577,7 @@ public final class EmberbladeAbilityManager {
                 && current.getDuration() <= channel.channelTicks + CHANNEL_SLOW_GRACE_TICKS) {
             actor.removeStatusEffect(StatusEffects.SLOWNESS);
             if (channel.previousSlowness != null) actor.addStatusEffect(channel.previousSlowness, actor);
+        }
         }
     }
 

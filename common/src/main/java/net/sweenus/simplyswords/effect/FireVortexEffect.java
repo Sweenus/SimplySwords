@@ -26,6 +26,8 @@ public class FireVortexEffect extends OrbitingEffect {
     @Override
     public boolean applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
         if (!livingEntity.getWorld().isClient()) {
+            sourceEntity = null;
+            scaledDamage = 0;
             ServerWorld serverWorld = (ServerWorld) livingEntity.getWorld();
 			if (TempestAbilityManager.hasManagedMark(livingEntity, TempestAbilityManager.Element.FIRE)) {
                 if (livingEntity.age % 40 == 0) {

@@ -26,6 +26,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.minecraft.item.ItemStack;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.registry.EffectRegistry;
@@ -97,6 +98,7 @@ public class BattleStandardEntity extends PathAwareEntity {
     public void configureMastery(UniqueAbilityExecution execution, ItemStack stack) {
         this.masteryExecution = execution;
         this.masteryStack = stack.copy();
+        CombatProvenanceApi.attach(this, stack);
         if ("sunfire".equals(standardType)) BattleStandardMasteryManager.registerSunfire(this, execution, stack);
     }
 
@@ -163,7 +165,7 @@ public class BattleStandardEntity extends PathAwareEntity {
                             switch (standardType) {
                                 case "sunfire" -> {
                                     DamageSource damageSource = ownerEntity.getDamageSources().magic();
-                                    le.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments((ServerWorld) getWorld(), ownerEntity.getMainHandStack(), le, damageSource, abilityDamage));
+                                    CombatProvenanceApi.damage(ownerEntity.getMainHandStack(), (damageSource).getAttacker(), le, damageSource, HelperMethods.applyAbilityDamageEnchantments((ServerWorld) getWorld(), ownerEntity.getMainHandStack(), le, damageSource, abilityDamage));
                                     le.setOnFireFor(1);
                                     le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, 1), this);
                                 }
@@ -181,7 +183,7 @@ public class BattleStandardEntity extends PathAwareEntity {
                                 case "api" -> {
                                     if (dealsDamage) {
                                         DamageSource damageSource = ownerEntity.getDamageSources().magic();
-                                        le.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments((ServerWorld) getWorld(), ownerEntity.getMainHandStack(), le, damageSource, abilityDamage));
+                                        CombatProvenanceApi.damage(ownerEntity.getMainHandStack(), (damageSource).getAttacker(), le, damageSource, HelperMethods.applyAbilityDamageEnchantments((ServerWorld) getWorld(), ownerEntity.getMainHandStack(), le, damageSource, abilityDamage));
                                     }
                                     if (negativeEffect != null) {
                                         try {
@@ -225,7 +227,7 @@ public class BattleStandardEntity extends PathAwareEntity {
                     for (Entity entity : getWorld().getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
                         if ((entity instanceof LivingEntity le) && HelperMethods.checkAbilityTarget(le, ownerEntity) && le != ownerEntity) {
                             DamageSource damageSource = ownerEntity.getDamageSources().magic();
-                            le.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments((ServerWorld) getWorld(), ownerEntity.getMainHandStack(), le, damageSource, abilityDamage * 3));
+                            CombatProvenanceApi.damage(ownerEntity.getMainHandStack(), (damageSource).getAttacker(), le, damageSource, HelperMethods.applyAbilityDamageEnchantments((ServerWorld) getWorld(), ownerEntity.getMainHandStack(), le, damageSource, abilityDamage * 3));
                             le.setOnFireFor(1);
                             le.setVelocity((le.getX() - this.getX()) / 4, 0.5, (le.getZ() - this.getZ()) / 4);
                         }

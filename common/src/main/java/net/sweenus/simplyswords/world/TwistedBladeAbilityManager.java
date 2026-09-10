@@ -25,6 +25,7 @@ import net.sweenus.simplyswords.api.ability.DeathShadowBloodMasteryTuning;
 import net.sweenus.simplyswords.api.ability.DeathShadowBloodMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.TwistedBladeCrescendoVisualEntity;
 import net.sweenus.simplyswords.registry.EffectRegistry;
@@ -211,6 +212,7 @@ public final class TwistedBladeAbilityManager {
 
     public static void onMeleeHit(ServerWorld world, ItemStack stack,
                                   LivingEntity reportedAttacker, LivingEntity target) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (world == null
                 || stack == null
                 || stack.isEmpty()
@@ -311,6 +313,7 @@ public final class TwistedBladeAbilityManager {
                     sourceOwner == null ? null : sourceOwner.getUuid(), stack.copy(), stacks,
                     world.getTime() + state.crescendoTuning.integer(
                     DeathShadowBloodMasteryTuning.Setting.TWISTED_DOUBLE_DELAY_TICKS, 4), state.crescendoTuning));
+        }
         }
     }
 
@@ -483,6 +486,7 @@ public final class TwistedBladeAbilityManager {
                                                     LivingEntity sourceOwner, LivingEntity impactTarget,
                                                     boolean empowered, boolean secondary, int stacks,
                                                     WielderState state, DeathShadowBloodMasteryTuning tuning) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         int maximumStacks = maximumStacks(Config.uniqueEffects.twisted_blade.maxStacks,
                 state.ferocityTuning);
         float stackFraction = tuning.flag(1 << 25) ? 1 : MathHelper.clamp(
@@ -620,6 +624,7 @@ public final class TwistedBladeAbilityManager {
                 syncopated
         );
         return new CrescendoResult(affected, kills, damage);
+        }
     }
 
     private static boolean isValidTarget(ServerWorld world, LivingEntity actor,

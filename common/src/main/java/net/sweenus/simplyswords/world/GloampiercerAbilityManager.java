@@ -28,6 +28,7 @@ import net.sweenus.simplyswords.api.ability.AbyssalSpectralMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.GloampiercerCloneVisualEntity;
 import net.sweenus.simplyswords.entity.GloampiercerSpearEntity;
@@ -128,6 +129,7 @@ public final class GloampiercerAbilityManager {
     }
 
     public static void onSwing(ItemStack stack, ServerWorld world, LivingEntity owner) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (stack == null || !stack.isOf(ItemsRegistry.GLOAMPIERCER.get())
                 || owner == null || !owner.isAlive() || isActive(owner)) {
             return;
@@ -200,6 +202,7 @@ public final class GloampiercerAbilityManager {
             spawnCloneMaterialization(world, clonePosition);
         }
         complete(execution, 0);
+        }
     }
 
     public static boolean isActive(LivingEntity owner) {
@@ -510,6 +513,7 @@ public final class GloampiercerAbilityManager {
     private static void launchSpear(ServerWorld world, LivingEntity owner, ItemStack stack,
                                     Vec3d origin, Vec3d destination, LivingEntity target, float damage,
                                     UniqueAbilityExecution execution) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(execution == null ? null : execution.provenance())) {
         AbyssalSpectralMasteryTuning tuning = AbyssalSpectralMasteryAbilities.tuning(execution);
         GloampiercerSpearEntity spear = new GloampiercerSpearEntity(world, owner, stack,
                 origin, destination, target, damage,
@@ -517,6 +521,7 @@ public final class GloampiercerAbilityManager {
                         Config.uniqueEffects.gloampiercer.projectileSpeed)), execution);
         if (!world.spawnEntity(spear)) {
             spear.releaseTracking();
+        }
         }
     }
 
@@ -611,6 +616,7 @@ public final class GloampiercerAbilityManager {
 
     private static void spawnActiveClones(ServerWorld world, LivingEntity owner,
                                           ActiveChannel channel, int cloneCount) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(channel == null ? null : CombatProvenanceApi.from(channel.stack, null))) {
         Vec3d facing = channel.center.subtract(channel.start);
         facing = facing.horizontalLengthSquared() < 1.0E-6
                 ? Vec3d.fromPolar(0.0F, owner.getYaw())
@@ -647,6 +653,7 @@ public final class GloampiercerAbilityManager {
             channel.clonePositions.add(position);
             channel.cloneIds.add(clone.getUuid());
             spawnCloneMaterialization(world, position);
+        }
         }
     }
 

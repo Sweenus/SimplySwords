@@ -16,6 +16,8 @@ import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.api.PlayerMovementIntent;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.ability.*;
+import net.sweenus.simplyswords.api.combat.CombatProvenance;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance;
 import net.sweenus.simplyswords.item.component.StoredChargeComponent;
@@ -57,6 +59,7 @@ public final class RibboncleaverDreadtideMasteryManager {
     }
 
     public static void tickRibbon(LivingEntity actor, ItemStack stack) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (!(actor.getWorld() instanceof ServerWorld world)) {
             return;
         }
@@ -107,9 +110,11 @@ public final class RibboncleaverDreadtideMasteryManager {
                     Math.max(1, tuning.integer(MartialCommandEldritchMasteryTuning.Setting.STATUS_DURATION_TICKS, 20)),
                     0, false, false, true), actor);
         tickRush(world, actor, state);
+        }
     }
 
     private static void tickRush(ServerWorld world, LivingEntity actor, HeldState state) {
+        try (var ignored = CombatProvenanceApi.scope(state.rushProvenance)) {
         long now = world.getTime();
         if (now > state.rushUntil) {
             state.rushTargets.clear();
@@ -151,6 +156,7 @@ public final class RibboncleaverDreadtideMasteryManager {
                 SimplySwordsAPI.reduceWeaponCooldown(actor, actor.getMainHandStack(),
                         Config.uniqueEffects.ribboncleaver.cooldown, refund);
             }
+        }
         }
     }
 
@@ -215,6 +221,7 @@ public final class RibboncleaverDreadtideMasteryManager {
     }
 
     public static void tickDreadtide(LivingEntity actor, ItemStack stack) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (!(actor.getWorld() instanceof ServerWorld world)) return;
         if (!HelperMethods.isHolding(stack, actor)) {
             removeDreadAttributes(actor);
@@ -274,6 +281,7 @@ public final class RibboncleaverDreadtideMasteryManager {
                     MartialCommandEldritchMasteryTuning.Setting.DELAY_TICKS, 200);
         }
         applyDreadAttributes(actor, cloak, pact, current);
+        }
     }
 
     public static MartialCommandEldritchMasteryTuning dreadCloakBase() {
@@ -410,6 +418,7 @@ public final class RibboncleaverDreadtideMasteryManager {
     }
 
     public static void onRibbonHit(ServerWorld world, LivingEntity actor, LivingEntity target, ItemStack stack) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         UniqueAbilityExecution execution = MartialCommandEldritchMasteryCombatManager.beginPassive(
                 MartialCommandEldritchMasteryAbilities.RIBBON_PROMISE, world, stack, actor, target, ribbonPromiseBase());
         MartialCommandEldritchMasteryTuning tuning = MartialCommandEldritchMasteryAbilities.tuning(execution);
@@ -455,10 +464,12 @@ public final class RibboncleaverDreadtideMasteryManager {
             }
         }
         MartialCommandEldritchMasteryCombatManager.finish(execution, 1);
+        }
     }
 
     public static MartialCommandEldritchMasteryTuning ribbonRush(ServerWorld world, LivingEntity actor, ItemStack stack,
                                                    LivingEntity target) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         UniqueAbilityExecution execution = MartialCommandEldritchMasteryCombatManager.beginActive(
                 MartialCommandEldritchMasteryAbilities.RIBBON_RUSH,
                 net.sweenus.simplyswords.api.WeaponAbilityContext.of(world, stack, actor,
@@ -474,6 +485,7 @@ public final class RibboncleaverDreadtideMasteryManager {
         HeldState state = RIBBON.computeIfAbsent(actor.getUuid(), ignored -> new HeldState());
         state.activatedAt = world.getTime();
         state.rushTuning = tuning;
+        state.rushProvenance = execution.provenance();
         state.rushTargets.clear();
         state.rushRefunded = false;
         state.steerTargetId = null;
@@ -513,6 +525,7 @@ public final class RibboncleaverDreadtideMasteryManager {
         MartialCommandEldritchMasteryCombatManager.finish(promiseExecution, 0);
         MartialCommandEldritchMasteryCombatManager.finish(execution, target == null ? 0 : 1);
         return tuning;
+        }
     }
 
     private static void blinkForward(ServerWorld world, LivingEntity actor, Vec3d preferred, double distance) {
@@ -533,6 +546,7 @@ public final class RibboncleaverDreadtideMasteryManager {
     }
 
     public static void onDreadtideHit(LivingEntity actor, LivingEntity target, ItemStack stack) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         HeldState state = DREAD.get(actor.getUuid());
         if (state == null || actor.getWorld().getTime() > state.retortUntil) return;
         float bonus = (float) HelperMethods.getAttackFromStack(stack,
@@ -540,6 +554,7 @@ public final class RibboncleaverDreadtideMasteryManager {
                 * (float) Math.max(0, state.tuning.get(MartialCommandEldritchMasteryTuning.Setting.OUTGOING_MULTIPLIER, 1.12) - 1);
         HelperMethods.damageThroughIframes(target, actor.getDamageSources().indirectMagic(actor, actor), bonus);
         state.retortUntil = 0;
+        }
     }
 
     private static void applyDreadAttributes(LivingEntity actor, MartialCommandEldritchMasteryTuning cloak,
@@ -604,6 +619,7 @@ public final class RibboncleaverDreadtideMasteryManager {
     }
 
     public static boolean activateDreadtide(ServerWorld world, LivingEntity actor, ItemStack stack) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         HeldState cloakState = refresh(DREAD, MartialCommandEldritchMasteryAbilities.DREAD_CLOAK, world, actor, stack,
                 dreadCloakBase());
         UniqueAbilityExecution pactExecution = MartialCommandEldritchMasteryCombatManager.beginPassive(
@@ -665,6 +681,7 @@ public final class RibboncleaverDreadtideMasteryManager {
         actor.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.VOIDCLOAK));
         MartialCommandEldritchMasteryCombatManager.finish(pactExecution, 1);
         return true;
+        }
     }
 
     public static boolean tickAssault(LivingEntity target, int amplifier, int baseDamage) {
@@ -695,7 +712,7 @@ public final class RibboncleaverDreadtideMasteryManager {
         }
         float damage = baseDamage + amplifier;
         target.timeUntilRegen = 0;
-        target.damage(target.getDamageSources().indirectMagic(target, actor), damage);
+        CombatProvenanceApi.damage(state.stack, actor, target, target.getDamageSources().indirectMagic(target, actor), damage);
         if (!state.tuning.flag(1 << 17) && state.tuning.has(MartialCommandEldritchMasteryTuning.Setting.STATUS_DURATION_TICKS))
             target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS,
                     state.tuning.integer(MartialCommandEldritchMasteryTuning.Setting.STATUS_DURATION_TICKS, 30),
@@ -705,6 +722,7 @@ public final class RibboncleaverDreadtideMasteryManager {
 
     private static boolean jumpAssault(ServerWorld world, LivingEntity actor, LivingEntity victim,
                                        AssaultState state) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(state == null ? null : CombatProvenanceApi.from(state.stack, null))) {
         if (state.tuning.flag(1 << 17)) return false;
         double radius = state.tuning.get(MartialCommandEldritchMasteryTuning.Setting.RANGE, 0);
         if (radius <= 0) return false;
@@ -730,10 +748,12 @@ public final class RibboncleaverDreadtideMasteryManager {
         ASSAULTS.put(next.getUuid(), new AssaultState(state.tuning, state.execution, state.actorId,
                 state.stack, state.expiresAt, state.stacks, state.jumpsLeft - 1, state.struck));
         return true;
+        }
     }
 
     private static void finalScream(ServerWorld world, LivingEntity actor, LivingEntity victim,
                                     AssaultState state, int baseDamage) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(state == null ? null : CombatProvenanceApi.from(state.stack, null))) {
         double radius = state.tuning.get(MartialCommandEldritchMasteryTuning.Setting.RADIUS, 0);
         int cap = state.tuning.integer(MartialCommandEldritchMasteryTuning.Setting.TARGET_CAP, 0);
         double multiplier = state.tuning.get(MartialCommandEldritchMasteryTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 0);
@@ -744,6 +764,7 @@ public final class RibboncleaverDreadtideMasteryManager {
                 .stream().sorted(Comparator.comparingDouble(victim::squaredDistanceTo)).limit(cap)
                 .forEach(other -> HelperMethods.damageThroughIframes(other,
                         actor.getDamageSources().indirectMagic(actor, actor), damage));
+        }
     }
 
     private static int corruption(ItemStack stack) {
@@ -756,6 +777,7 @@ public final class RibboncleaverDreadtideMasteryManager {
     }
 
     private static final class HeldState {
+        private CombatProvenance rushProvenance;
         private MartialCommandEldritchMasteryTuning tuning = MartialCommandEldritchMasteryTuning.EMPTY;
         private MartialCommandEldritchMasteryTuning rushTuning = MartialCommandEldritchMasteryTuning.EMPTY;
         private MartialCommandEldritchMasteryTuning pact = MartialCommandEldritchMasteryTuning.EMPTY;

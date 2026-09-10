@@ -10,6 +10,7 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.Box;
 import net.sweenus.simplyswords.api.AwakeningApi;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.SimplySwordsMinion;
@@ -37,6 +38,7 @@ public final class WolfPackManager {
     }
 
     private static boolean trySummonNonPlayer(LivingEntity attacker, ItemStack stack) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (attacker == null || stack == null || stack.isEmpty() || !attacker.isAlive()) {
             return false;
         }
@@ -60,9 +62,11 @@ public final class WolfPackManager {
         world.spawnParticles(ParticleTypes.CLOUD, minion.getX(), minion.getBodyY(0.45), minion.getZ(), 10, 0.3, 0.3, 0.3, 0.03);
         world.playSound(null, minion.getBlockPos(), SoundEvents.ENTITY_WOLF_GROWL, SoundCategory.PLAYERS, 0.7F, 1.15F);
         return true;
+        }
     }
 
     public static boolean trySummon(ServerPlayerEntity player, ItemStack stack) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (player == null || stack == null || stack.isEmpty() || !player.isAlive()) {
             return false;
         }
@@ -86,6 +90,7 @@ public final class WolfPackManager {
         world.spawnParticles(ParticleTypes.CLOUD, minion.getX(), minion.getBodyY(0.45), minion.getZ(), 10, 0.3, 0.3, 0.3, 0.03);
         world.playSound(null, minion.getBlockPos(), SoundEvents.ENTITY_WOLF_GROWL, SoundCategory.PLAYERS, 0.7F, 1.15F);
         return true;
+        }
     }
 
     public static void retargetMinions(ServerPlayerEntity player, LivingEntity attacker) {

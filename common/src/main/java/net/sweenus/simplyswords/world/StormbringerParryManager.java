@@ -19,6 +19,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.api.WeaponAbilityActivationSource;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
@@ -208,6 +209,7 @@ public final class StormbringerParryManager {
 
     private static void performCounterattack(ServerPlayerEntity player, StormFrostWaterMasteryTuning tuning,
                                              UniqueAbilityExecution execution) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(execution == null ? null : execution.provenance())) {
         ServerWorld world = player.getServerWorld();
         double radius = value(tuning, s("STORMBRINGER_COUNTER_RADIUS"), s("RADIUS"),
                 Math.max(0.5, Config.uniqueEffects.stormbringer.radius));
@@ -230,7 +232,7 @@ public final class StormbringerParryManager {
 
             DamageSource damageSource = player.getDamageSources().indirectMagic(player, player);
             float damage = HelperMethods.applyAbilityDamageEnchantments(world, stack, target, damageSource, abilityDamage);
-            if (!target.damage(damageSource, damage)) continue;
+            if (!CombatProvenanceApi.damage(stack, player, target, damageSource, damage)) continue;
             affected++;
             Vec3d direction = target.getPos().subtract(player.getPos());
             if (direction.lengthSquared() > 0.0001) {
@@ -254,6 +256,7 @@ public final class StormbringerParryManager {
         spawnCounterattackEffects(world, player, radius);
         world.playSound(null, player.getBlockPos(), SoundRegistry.ELEMENTAL_BOW_THUNDER_SHOOT_IMPACT_01.get(),
                 SoundCategory.PLAYERS, 0.8F, 0.85F);
+        }
     }
 
     private static void spawnActivationEffects(ServerWorld world, ServerPlayerEntity player) {

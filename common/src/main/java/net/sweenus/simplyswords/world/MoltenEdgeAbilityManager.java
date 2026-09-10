@@ -32,6 +32,7 @@ import net.sweenus.simplyswords.api.ability.FireForgeMasteryTuning;
 import net.sweenus.simplyswords.api.ability.FireForgeMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.MoltenRuptureVisualEntity;
 import net.sweenus.simplyswords.item.component.MoltenHeatComponent;
@@ -407,12 +408,14 @@ public final class MoltenEdgeAbilityManager {
 
     private static void spawnRuptureLane(ServerWorld world, LivingEntity owner, ItemStack stack, RuptureCast cast,
                                          Vec3d forward, float damage, double length) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         Vec3d right = new Vec3d(-forward.z, 0.0, forward.x).normalize();
         Vec3d origin = owner.getPos().add(forward.multiply(.65));
         int steps = Math.max(1, (int) Math.ceil(length
                 / Math.max(.25, Config.uniqueEffects.molten_edge.ruptureStepDistance)));
         ACTIVE_RUPTURES.computeIfAbsent(world, ignored -> new ArrayList<>()).add(new ActiveRupture(
                 owner.getUuid(), stack.copy(), origin, forward, right, damage, steps, 0, cast));
+        }
     }
 
     public static void tickHeldStack(ItemStack stack, World world, Entity entity) {
@@ -684,6 +687,7 @@ public final class MoltenEdgeAbilityManager {
     }
 
     private static void damageShockwaveTargets(ServerWorld world, LivingEntity owner, ActiveShockwave shockwave, double previousRadius, double currentRadius) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(shockwave == null ? null : CombatProvenanceApi.from(shockwave.stack, null))) {
         double outer = currentRadius + 1.0;
         double inner = Math.max(0.0, previousRadius - 1.0);
         Box box = Box.of(shockwave.origin.add(0.0, 0.8, 0.0), outer * 2.0, 3.5, outer * 2.0);
@@ -731,6 +735,7 @@ public final class MoltenEdgeAbilityManager {
             target.velocityDirty = true;
             spawnShockwaveHitEffects(world, target);
         }
+        }
     }
 
     private static void tickRuptures(ServerWorld world) {
@@ -766,6 +771,7 @@ public final class MoltenEdgeAbilityManager {
     }
 
     private static void damageRuptureTargets(ServerWorld world, LivingEntity owner, ActiveRupture rupture, Vec3d center, double segmentLength) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(rupture == null ? null : CombatProvenanceApi.from(rupture.stack, null))) {
         FireForgeMasteryTuning tuning = rupture.cast.snapshot.tuning();
         double width = tuning.get(FireForgeMasteryTuning.Setting.MOLTEN_RUPTURE_WIDTH,
                 Config.uniqueEffects.molten_edge.ruptureWidth);
@@ -821,6 +827,7 @@ public final class MoltenEdgeAbilityManager {
             target.velocityDirty = true;
             world.spawnParticles(ParticleTypes.LAVA, target.getX(), target.getBodyY(0.45), target.getZ(), 5, 0.25, 0.25, 0.25, 0.04);
             world.spawnParticles(ParticleTypes.FLAME, target.getX(), target.getBodyY(0.45), target.getZ(), 10, 0.3, 0.3, 0.3, 0.05);
+        }
         }
     }
 

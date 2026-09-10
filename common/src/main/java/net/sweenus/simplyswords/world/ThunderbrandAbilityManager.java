@@ -22,6 +22,7 @@ import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
@@ -224,6 +225,7 @@ public final class ThunderbrandAbilityManager {
     }
 
     private static void beginDash(ServerWorld world, LivingEntity actor, ActiveThunderBlitz ability, long now) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(ability == null ? null : CombatProvenanceApi.from(ability.stack, null))) {
         ability.phase = Phase.DASHING;
         ability.dashStartedAt = now;
         ability.previousPosition = actor.getPos();
@@ -240,6 +242,7 @@ public final class ThunderbrandAbilityManager {
             }
         }
         spawnDashStartEffects(world, actor, ability.storedDamageInstances);
+        }
     }
 
     private static boolean tickDashing(ServerWorld world, LivingEntity actor, ActiveThunderBlitz ability, long now) {
@@ -293,7 +296,7 @@ public final class ThunderbrandAbilityManager {
             ability.dashHitTargets.add(target.getUuid());
             float damage = dashDamage(world, actor, target, ability);
             DamageSource source = actor.getDamageSources().indirectMagic(actor, actor);
-            if (damageSuppressed(target, source, damage)) {
+            if (damageSuppressed(ability.stack, actor, target, source, damage)) {
                 if (ability.tuning.flag(1 << 21)) mark(world, actor, target, ability);
                 spawnDashHitEffects(world, target);
                 UniqueAbilityApi.emit(ability.execution, UniqueAbilityPhase.HIT, StormFrostWaterMasteryAbilities.HIT,
@@ -465,7 +468,7 @@ public final class ThunderbrandAbilityManager {
         int affected = 0;
         for (LivingEntity target : targets) {
             float enchanted = HelperMethods.applyAbilityDamageEnchantments(world, ability.stack, target, source, damage);
-            if (damageSuppressed(target, source, enchanted)) affected++;
+            if (damageSuppressed(ability.stack, actor, target, source, enchanted)) affected++;
         }
         UniqueAbilityApi.emit(ability.execution, UniqueAbilityPhase.HIT, StormFrostWaterMasteryAbilities.PULSE,
                 null, affected, damage);
@@ -480,11 +483,13 @@ public final class ThunderbrandAbilityManager {
     }
 
     private static void retaliate(DamageSource source, ActiveThunderBlitz ability) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(ability == null ? null : CombatProvenanceApi.from(ability.stack, null))) {
         int ticks = ability.tuning.integer(s("THUNDERBRAND_RETALIATORY_SLOW_TICKS"), 0);
         Entity attacker = source.getAttacker();
         if (ticks <= 0 || attacker == null || attacker != source.getSource()
                 || !(attacker instanceof LivingEntity living)) return;
         living.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, ticks, 0), living);
+        }
     }
 
     private static void grantReactiveAbsorption(ServerWorld world, LivingEntity actor, ActiveThunderBlitz ability) {
@@ -501,6 +506,7 @@ public final class ThunderbrandAbilityManager {
     }
 
     private static void applyChargeEffects(LivingEntity actor, ActiveThunderBlitz ability) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(ability == null ? null : CombatProvenanceApi.from(ability.stack, null))) {
         int duration = chargeDuration(ability) + 2;
         ability.chargeEffectsRemoved = false;
         ability.previousSlowness = copy(actor.getStatusEffect(StatusEffects.SLOWNESS));
@@ -510,6 +516,7 @@ public final class ThunderbrandAbilityManager {
         if (ability.tuning.flag(1 << 16)) {
             actor.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE,
                     duration + ability.tuning.integer(s("THUNDERBRAND_DEFENSE_PADDING_TICKS"), 0), 2), actor);
+        }
         }
     }
 
@@ -830,10 +837,12 @@ public final class ThunderbrandAbilityManager {
         }
     }
 
-    private static boolean damageSuppressed(LivingEntity target, DamageSource source, float damage) {
+    private static boolean damageSuppressed(ItemStack stack, LivingEntity actor, LivingEntity target, DamageSource source, float damage) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         boolean[] result = {false};
-        WeaponImplicitRegistry.runSuppressed(() -> result[0] = target.damage(source, damage));
+        WeaponImplicitRegistry.runSuppressed(() -> result[0] = CombatProvenanceApi.damage(stack, actor, target, source, damage));
         return result[0];
+        }
     }
 
     private static void cancel(UniqueAbilityExecution execution) {

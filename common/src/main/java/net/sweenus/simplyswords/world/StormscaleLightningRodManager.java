@@ -32,6 +32,7 @@ import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.api.render.LightningPhenomenonShape;
 import net.sweenus.simplyswords.api.render.LightningPhenomenonStyle;
 import net.sweenus.simplyswords.api.render.SurfaceDischargeStyle;
@@ -432,6 +433,7 @@ public final class StormscaleLightningRodManager {
 
     private static void pulse(ServerWorld world, LivingEntity actor, ActiveRod rod,
                               float radius, float baseDamage) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(rod == null ? null : CombatProvenanceApi.from(rod.stack, null))) {
         LivingEntity sourceOwner = resolveLiving(world, rod.sourceOwnerId);
         double verticalRadius = Math.max(1.5, radius * 0.72);
         Box box = new Box(
@@ -544,6 +546,7 @@ public final class StormscaleLightningRodManager {
             rodVisual.triggerPulse();
         }
         spawnPulseEffects(world, actor, rod.anchor, radius, damaged);
+        }
     }
 
     private static void pullTowardRod(LivingEntity target, Vec3d center, double configuredStrength) {
@@ -825,6 +828,7 @@ public final class StormscaleLightningRodManager {
 
     private static void chainBeyondPulse(ServerWorld world, LivingEntity actor, LivingEntity sourceOwner,
                                          ActiveRod rod, float radius, float baseDamage, HashSet<UUID> excluded) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(rod == null ? null : CombatProvenanceApi.from(rod.stack, null))) {
         double chainRange = rod.tuning.get(StormSoulMasteryTuning.Setting.CHAIN_RANGE, 3);
         List<LivingEntity> targets = world.getEntitiesByClass(LivingEntity.class,
                 new Box(rod.anchor, rod.anchor).expand(radius + chainRange), target ->
@@ -841,6 +845,7 @@ public final class StormscaleLightningRodManager {
                     baseDamage * (float) rod.tuning.get(
                             StormSoulMasteryTuning.Setting.CHAIN_DAMAGE_MULTIPLIER, .25));
             WeaponImplicitRegistry.runSuppressed(() -> HelperMethods.damageThroughIframes(target, source, damage));
+        }
         }
     }
 

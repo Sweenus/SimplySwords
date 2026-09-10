@@ -24,6 +24,7 @@ import net.sweenus.simplyswords.api.ability.MartialCommandEldritchMasteryTuning;
 import net.sweenus.simplyswords.api.ability.MartialCommandEldritchMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.RiftmaneChargerEntity;
 import net.sweenus.simplyswords.entity.RiftmaneRiftVisualEntity;
@@ -435,6 +436,7 @@ public final class RiftmaneAbilityManager {
                                                 boolean waterWalk, double distanceMultiplier,
                                                 boolean audioLead, MartialCommandEldritchMasteryTuning tuning,
                                                 @Nullable UUID targetId, double supportY) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         double speed = Math.max(0.05, settings.chargeSpeed
                 * tuning.get(MartialCommandEldritchMasteryTuning.Setting.SPEED, 1));
         double distance = Math.max(1.0, tuning.get(MartialCommandEldritchMasteryTuning.Setting.RANGE,
@@ -473,6 +475,7 @@ public final class RiftmaneAbilityManager {
         spawnRift(world, position, groundY, yaw, rearTicks, seed, audioLead);
         world.spawnParticles(RIFT_DUST, position.x, groundY + 0.8, position.z, 16, 0.4, 0.5, 0.4, 0.04);
         return charger;
+        }
     }
 
     private static double findSupportTopY(ServerWorld world, double x, double z, double centerY,

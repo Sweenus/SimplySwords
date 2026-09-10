@@ -27,6 +27,7 @@ import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.ability.ArcaneCosmicMasteryTuning;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.CaelestisBreachCreature;
 import net.sweenus.simplyswords.entity.CaelestisBreachVisualEntity;
@@ -141,6 +142,7 @@ public final class CaelestisBreachManager {
 
     public static boolean start(WeaponAbilityContext context, ArcaneCosmicMasteryTuning tuning,
                                 UniqueAbilityExecution execution) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(execution == null ? null : execution.provenance())) {
         if (context == null || context.world() == null || context.actor() == null
                 || !context.actor().isAlive() || context.stack() == null || context.stack().isEmpty()
                 || hasActiveForActor(context.world(), context.actor().getUuid())) {
@@ -209,6 +211,7 @@ public final class CaelestisBreachManager {
         ACTIVE.computeIfAbsent(world, ignored -> new HashMap<>()).put(breachId, breach);
         spawnOpeningEffects(world, center);
         return true;
+        }
     }
 
     public static void tick(ServerWorld world) {
@@ -235,6 +238,7 @@ public final class CaelestisBreachManager {
     }
 
     private static boolean tickBreach(ServerWorld world, ActiveBreach breach) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(breach == null ? null : CombatProvenanceApi.from(breach.stack, null))) {
         Entity actorEntity = world.getEntity(breach.actorId);
         if (!(actorEntity instanceof LivingEntity actor) || !actor.isAlive()
                 || !world.isChunkLoaded(ChunkPos.toLong(BlockPos.ofFloored(breach.center)))) {
@@ -314,6 +318,7 @@ public final class CaelestisBreachManager {
             playAmbientPulse(world, breach.center, phase);
         }
         return false;
+        }
     }
 
     private static void updateVisual(ServerWorld world, ActiveBreach breach, float radius, int phase) {
@@ -357,6 +362,7 @@ public final class CaelestisBreachManager {
 
     private static void tickCollapseRim(ServerWorld world, ActiveBreach breach, LivingEntity actor,
                                         float radius, long now) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(breach == null ? null : CombatProvenanceApi.from(breach.stack, null))) {
         double pull = breach.tuning.get(ArcaneCosmicMasteryTuning.Setting.PULL_STRENGTH, 0);
         double damageFraction = breach.tuning.get(ArcaneCosmicMasteryTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, 0);
         if (pull <= 0 && damageFraction <= 0) return;
@@ -385,9 +391,11 @@ public final class CaelestisBreachManager {
             if (doDamage && damaged++ < damageCap && damage > 0) HelperMethods.damageThroughIframes(target,
                     world.getDamageSources().indirectMagic(actor, actor), damage);
         }
+        }
     }
 
     private static boolean spawnUnbound(ServerWorld world, ActiveBreach breach) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(breach == null ? null : CombatProvenanceApi.from(breach.stack, null))) {
         float radius = radiusAt(world.getTime(), breach);
         int archetype = world.random.nextBoolean() ? 1 : 2;
         boolean spawned = spawnCreature(world, breach, radius, archetype, true);
@@ -414,6 +422,7 @@ public final class CaelestisBreachManager {
             }
         }
         return true;
+        }
     }
 
     private static int chooseArchetype(ServerWorld world) {
@@ -433,6 +442,7 @@ public final class CaelestisBreachManager {
 
     private static boolean spawnCreature(ServerWorld world, ActiveBreach breach, float radius,
                                          int archetype, boolean unbound) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(breach == null ? null : CombatProvenanceApi.from(breach.stack, null))) {
         MobEntity mob = createCreature(world, archetype);
         if (!(mob instanceof CaelestisBreachCreature creature)) {
             return false;
@@ -463,6 +473,7 @@ public final class CaelestisBreachManager {
         breach.creatureIds.add(mob.getUuid());
         spawnCreatureArrivalEffects(world, mob, unbound);
         return true;
+        }
     }
 
     private static MobEntity createCreature(ServerWorld world, int archetype) {
@@ -474,6 +485,7 @@ public final class CaelestisBreachManager {
     }
 
     private static void spawnTentacle(ServerWorld world, ActiveBreach breach, float radius) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(breach == null ? null : CombatProvenanceApi.from(breach.stack, null))) {
         if (breach.profile.maxTentacles <= 0
                 || countActiveTentacles(world, breach) >= breach.profile.maxTentacles) {
             return;
@@ -503,6 +515,7 @@ public final class CaelestisBreachManager {
                 position.x, position.y + 0.12, position.z,
                 7, tentacle.getContactRadius() * 0.45, 0.12,
                 tentacle.getContactRadius() * 0.45, 0.02);
+        }
     }
 
     private static int chooseTentacleSize(ServerWorld world) {
@@ -726,6 +739,7 @@ public final class CaelestisBreachManager {
 
     private static void applyTentacleContactSlow(ServerWorld world, ActiveBreach breach,
                                                  CaelestisTentacleEntity tentacle) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(breach == null ? null : CombatProvenanceApi.from(breach.stack, null))) {
         float radius = tentacle.getContactRadius();
         Box contactBox = new Box(
                 tentacle.getX() - radius,
@@ -775,6 +789,7 @@ public final class CaelestisBreachManager {
                     tentacle.getY() + Math.min(1.0F, tentacle.getTentacleHeight() * 0.35F),
                     tentacle.getZ(),
                     2, radius * 0.4, 0.25, radius * 0.4, 0.0);
+        }
         }
     }
 

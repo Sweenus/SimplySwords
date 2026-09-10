@@ -3,6 +3,7 @@ package net.sweenus.simplyswords.api.ability;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -184,7 +185,7 @@ public final class UniqueAbilityApi {
         UniqueAbilityEvent event = new UniqueAbilityEvent(execution, phase, eventId, target,
                 Math.max(0, affectedTargets), magnitude);
         UniqueAbilityExecution outer = STARTED_EXECUTION.get();
-        try {
+        try (var ignored = CombatProvenanceApi.scope(execution.provenance())) {
             for (UniqueAbilityObserver observer : execution.observers()) {
                 try {
                     observer.onEvent(event);

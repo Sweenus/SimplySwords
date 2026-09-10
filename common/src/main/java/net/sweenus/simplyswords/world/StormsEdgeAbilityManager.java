@@ -21,6 +21,7 @@ import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
@@ -264,6 +265,7 @@ public final class StormsEdgeAbilityManager {
     }
 
     private static void finishDash(ServerWorld world, LivingEntity actor, ActiveStormbreak stormbreak) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(stormbreak == null ? null : CombatProvenanceApi.from(stormbreak.stack, null))) {
         stopDashMovement(actor);
         UniqueAbilityApi.emit(stormbreak.execution, UniqueAbilityPhase.HIT,
                 BuiltinUniqueAbilities.DASH_END, null, stormbreak.successfulCorridorHits,
@@ -286,6 +288,7 @@ public final class StormsEdgeAbilityManager {
                     .add(new ResidualStorm(stormbreak, center, result.baseDamage, result.affectedTargets));
         } else {
             UniqueAbilityApi.finish(stormbreak.execution, stormbreak.execution.definition().id(), result.affectedTargets);
+        }
         }
     }
 
@@ -478,6 +481,7 @@ public final class StormsEdgeAbilityManager {
 
     private static boolean damageTarget(ServerWorld world, LivingEntity actor, ItemStack stack,
                                         LivingEntity target, float baseDamage) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         DamageSource source = actor.getDamageSources().indirectMagic(actor, actor);
         float damage = HelperMethods.applyAbilityDamageEnchantments(world, stack, target, source, baseDamage);
         boolean[] damaged = {false};
@@ -485,6 +489,7 @@ public final class StormsEdgeAbilityManager {
                 () -> damaged[0] = HelperMethods.damageThroughIframes(target, source, damage)
         );
         return damaged[0];
+        }
     }
 
     private static boolean intersectsCorridor(LivingEntity target, Vec3d start, Vec3d end,

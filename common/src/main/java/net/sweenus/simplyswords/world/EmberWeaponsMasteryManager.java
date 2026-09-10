@@ -21,6 +21,7 @@ import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityDefinition;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
@@ -293,10 +294,12 @@ public final class EmberWeaponsMasteryManager {
 
     private static boolean deal(ServerWorld world, LivingEntity actor, ItemStack stack,
                                 LivingEntity target, float damage) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         DamageSource source = actor instanceof PlayerEntity player
                 ? world.getDamageSources().playerAttack(player) : world.getDamageSources().mobAttack(actor);
         float adjusted = HelperMethods.applyAbilityDamageEnchantments(world, stack, target, source, damage);
         return HelperMethods.damageThroughIframes(target, source, adjusted);
+        }
     }
 
     private static int splash(ServerWorld world, LivingEntity actor, ItemStack stack, Vec3d center,

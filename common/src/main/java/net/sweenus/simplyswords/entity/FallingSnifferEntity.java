@@ -27,6 +27,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.power.powers.SnifferSlamPower;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.EntityRegistry;
@@ -72,6 +73,7 @@ public class FallingSnifferEntity extends SnifferEntity implements SimplySwordsM
         this.dataTracker.set(OWNER_ID, owner.getId());
         this.dataTracker.set(TARGET_ID, target.getId());
         this.dataTracker.set(WEAPON_STACK, stack.copy());
+        CombatProvenanceApi.attach(this, stack);
         this.dataTracker.set(LINGER_TICKS, Math.max(1, lingerTicks));
         this.damage = Math.max(0.0F, damage);
         this.fallSpeed = Math.max(0.05, fallSpeed);

@@ -21,6 +21,7 @@ import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.api.ability.ArcaneCosmicMasteryTuning;
 import net.sweenus.simplyswords.api.ability.ArcaneCosmicMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.MagispearFallingSpearVisualEntity;
 import net.sweenus.simplyswords.entity.MagispearFirmamentVisualEntity;
@@ -121,6 +122,7 @@ public final class MagispearAbilityManager {
 
     public static void scheduleEcho(ServerWorld world, LivingEntity owner, LivingEntity target,
                                     net.minecraft.item.ItemStack stack, float damage, int delay) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (world == null || owner == null || target == null || stack == null || damage <= 0) {
             return;
         }
@@ -130,6 +132,7 @@ public final class MagispearAbilityManager {
         }
         echoes.add(new PendingEcho(owner.getUuid(), target.getUuid(), stack.copy(), damage,
                 world.getTime() + Math.max(1, delay)));
+        }
     }
 
     private static void tickEchoes(ServerWorld world) {
@@ -491,6 +494,7 @@ public final class MagispearAbilityManager {
 
     private static void finish(ServerWorld world, LivingEntity owner,
                                ActiveMagislam magislam, Vec3d impact) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(magislam == null ? null : CombatProvenanceApi.from(magislam.stack, null))) {
         magislam.center = impact;
         updateFieldVisual(world, magislam, impact);
         owner.setVelocity(0.0, 0.12, 0.0);
@@ -536,6 +540,7 @@ public final class MagispearAbilityManager {
                     ArcaneCosmicMasteryTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, .35);
             magislam.craterPulseRadius = radius;
         }
+        }
     }
 
     private static List<LivingEntity> slamTargets(ServerWorld world, LivingEntity owner,
@@ -552,6 +557,7 @@ public final class MagispearAbilityManager {
 
     private static void applyLandingBuffs(ServerWorld world, LivingEntity owner,
                                           ActiveMagislam magislam, Vec3d impact) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(magislam == null ? null : CombatProvenanceApi.from(magislam.stack, null))) {
         if (magislam.slam.flag(1 << 22)) {
             owner.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
                     net.minecraft.entity.effect.StatusEffects.RESISTANCE,
@@ -577,6 +583,7 @@ public final class MagispearAbilityManager {
                         <= allyRadius * allyRadius)) {
             MasteryAbsorptionTracker.grant(ally, "magispear/support", absorption, duration, absorption);
         }
+        }
     }
 
     private static void craterPulse(ServerWorld world, LivingEntity owner, ActiveMagislam magislam) {
@@ -597,12 +604,14 @@ public final class MagispearAbilityManager {
 
     private static boolean damageTarget(ServerWorld world, LivingEntity owner, net.minecraft.item.ItemStack stack,
                                         LivingEntity target, float baseDamage) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         DamageSource source = owner.getDamageSources().indirectMagic(owner, owner);
         float damage = HelperMethods.applyAbilityDamageEnchantments(world, stack, target, source, baseDamage);
         boolean[] damaged = {false};
         WeaponImplicitRegistry.runSuppressed(
                 () -> damaged[0] = HelperMethods.damageThroughIframes(target, source, damage));
         return damaged[0];
+        }
     }
 
     private static void pullTowardCenter(LivingEntity target, Vec3d center, double strength) {
@@ -692,6 +701,7 @@ public final class MagispearAbilityManager {
 
     private static void spawnSpearVisual(ServerWorld world, ActiveMagislam magislam,
                                          Vec3d start, Vec3d end, int lifetime, int mode, float scale) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(magislam == null ? null : CombatProvenanceApi.from(magislam.stack, null))) {
         MagispearFallingSpearVisualEntity visual = new MagispearFallingSpearVisualEntity(
                 world, start.x, start.y, start.z,
                 end.x - start.x, end.y - start.y, end.z - start.z,
@@ -699,6 +709,7 @@ public final class MagispearAbilityManager {
         visual.addCommandTag(SPEAR_VISUAL_TAG);
         world.spawnEntity(visual);
         magislam.spearVisualIds.add(visual.getUuid());
+        }
     }
 
     private static void updateFieldVisual(ServerWorld world, ActiveMagislam magislam, Vec3d position) {

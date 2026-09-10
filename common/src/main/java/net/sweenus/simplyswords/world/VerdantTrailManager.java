@@ -21,6 +21,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.AwakeningApi;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.VerdantTrailVisualEntity;
@@ -133,6 +134,7 @@ public final class VerdantTrailManager {
     }
 
     private static void createSegment(ServerWorld world, LivingEntity owner, Vec3d center, ItemStack stack) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         int duration = Math.max(1, Config.gemPowers.verdantTrail.duration);
         float damage = HelperMethods.gemPowerScaledDamage(SpellScalingComponents.power("verdant_trail"), owner, stack,
                 Config.gemPowers.verdantTrail.damageScaling,
@@ -170,6 +172,7 @@ public final class VerdantTrailManager {
             world.playSound(null, center.x, center.y, center.z, SoundEvents.BLOCK_GRASS_PLACE, SoundCategory.BLOCKS, 0.25F, 1.15F + world.random.nextFloat() * 0.2F);
             world.spawnParticles(ParticleTypes.COMPOSTER, center.x, center.y + 0.12, center.z, 4, 0.45, 0.04, 0.45, 0.0);
         }
+        }
     }
 
     private static void applyAura(ServerWorld world, TrailSegment segment, LivingEntity owner, Set<UUID> affectedThisPulse) {
@@ -197,15 +200,17 @@ public final class VerdantTrailManager {
 
     private static void damageWithoutKnockback(
             LivingEntity target, LivingEntity owner, ItemStack stack, float damage) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (damage <= 0.0F) {
             return;
         }
         Vec3d velocity = target.getVelocity();
         var damageSource = owner.getDamageSources().indirectMagic(owner, owner);
-        if (target.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(
+        if (CombatProvenanceApi.damage(stack, (damageSource).getAttacker(), target, damageSource, HelperMethods.applyAbilityDamageEnchantments(
                 (ServerWorld) owner.getWorld(), stack, target, damageSource, damage))) {
             target.setVelocity(velocity);
             target.velocityModified = true;
+        }
         }
     }
 

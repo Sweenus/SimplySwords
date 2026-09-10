@@ -24,6 +24,7 @@ import net.sweenus.simplyswords.api.ability.DeathShadowBloodMasteryTuning;
 import net.sweenus.simplyswords.api.ability.DeathShadowBloodMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.DeathKnellVisualEntity;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
@@ -111,6 +112,7 @@ public final class DeathKnellAbilityManager {
 
     public static void onMeleeHit(ServerWorld world, ItemStack stack,
                                   LivingEntity reportedAttacker, LivingEntity target) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (world == null
                 || stack == null
                 || stack.isEmpty()
@@ -219,6 +221,7 @@ public final class DeathKnellAbilityManager {
             FEVER_STATES.remove(world);
         }
         finishAll(pestilenceExecution, knellExecution, outbreakExecution);
+        }
     }
 
     private static List<CarriedAilment> tryConvertEffects(ServerWorld world, LivingEntity actor,
@@ -259,6 +262,7 @@ public final class DeathKnellAbilityManager {
 
     private static void startOutbreak(ServerWorld world, FeverKey key, FeverState state,
                                       LivingEntity actor, LivingEntity target) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(state == null ? null : CombatProvenanceApi.from(state.stack, null))) {
         int maximumTolls = maximumTolls(Config.uniqueEffects.toxic_longsword.maxCascadeTolls,
                 state.outbreak);
         Outbreak outbreak = new Outbreak(
@@ -282,12 +286,14 @@ public final class DeathKnellAbilityManager {
                     outbreak.knell.get(DeathShadowBloodMasteryTuning.Setting.PLAGUE_PAIRED_DAMAGE_MULTIPLIER, .65),
                     outbreak.knell.get(DeathShadowBloodMasteryTuning.Setting.PLAGUE_PAIRED_RADIUS_MULTIPLIER, .8));
         }
+        }
     }
 
     private static void scheduleToll(ServerWorld world, Outbreak outbreak, FeverKey key,
                                      LivingEntity target,
                                      Map<RegistryEntry<StatusEffect>, CarriedAilment> ailments,
                                      int depth, int windupTicks) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(outbreak == null ? null : CombatProvenanceApi.from(outbreak.stack, null))) {
         if (outbreak.scheduledTolls >= outbreak.maximumTolls
                 || !outbreak.queuedTargetIds.add(target.getUuid())) {
             return;
@@ -311,6 +317,7 @@ public final class DeathKnellAbilityManager {
                 visualId
         ));
         outbreak.scheduledTolls++;
+        }
     }
 
     private static void scheduleRepeatedToll(ServerWorld world, Outbreak outbreak, FeverKey key,
@@ -318,6 +325,7 @@ public final class DeathKnellAbilityManager {
                                              Map<RegistryEntry<StatusEffect>, CarriedAilment> ailments,
                                              int depth, int windupTicks, double damageMultiplier,
                                              double radiusMultiplier) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(outbreak == null ? null : CombatProvenanceApi.from(outbreak.stack, null))) {
         DeathKnellVisualEntity visual = DeathKnellVisualEntity.toll(world, target,
                 Math.max(.1F, (float) (tollRadius(Config.uniqueEffects.toxic_longsword.tollRadius,
                         outbreak.knell) * radiusMultiplier)), Math.max(1, windupTicks),
@@ -325,6 +333,7 @@ public final class DeathKnellAbilityManager {
         UUID visualId = world.spawnEntity(visual) ? visual.getUuid() : null;
         outbreak.pendingTolls.add(new PendingToll(key, target.getUuid(), world.getTime() + Math.max(1, windupTicks),
                 depth, new HashMap<>(ailments), visualId, damageMultiplier, radiusMultiplier, true));
+        }
     }
 
     private static void tickFeverStates(ServerWorld world) {
@@ -422,6 +431,7 @@ public final class DeathKnellAbilityManager {
 
     private static void executeToll(ServerWorld world, Outbreak outbreak,
                                     LivingEntity actor, PendingToll pending) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(outbreak == null ? null : CombatProvenanceApi.from(outbreak.stack, null))) {
         Entity targetEntity = world.getEntity(pending.targetId);
         if (!(targetEntity instanceof LivingEntity target) || !target.isAlive()) {
             discardVisual(world, pending.visualId);
@@ -555,11 +565,13 @@ public final class DeathKnellAbilityManager {
             }
             addSpreadFever(world, outbreak, actor, sourcePlayer, candidate, feverSpread, pending.depth + 1);
         }
+        }
     }
 
     private static void addSpreadFever(ServerWorld world, Outbreak outbreak,
                                        LivingEntity actor, ServerPlayerEntity sourcePlayer,
                                        LivingEntity target, int feverGain, int depth) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(outbreak == null ? null : CombatProvenanceApi.from(outbreak.stack, null))) {
         FeverKey key = new FeverKey(actor.getUuid(), target.getUuid());
         if (findPendingToll(world, key) != null) {
             return;
@@ -595,10 +607,12 @@ public final class DeathKnellAbilityManager {
         if (states.isEmpty()) {
             FEVER_STATES.remove(world);
         }
+        }
     }
 
     private static boolean damageTarget(ServerWorld world, LivingEntity actor, ItemStack stack,
                                         LivingEntity target, float baseDamage) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         DamageSource source = world.getDamageSources().indirectMagic(actor, actor);
         float damage = HelperMethods.applyAbilityDamageEnchantments(
                 world,
@@ -612,6 +626,7 @@ public final class DeathKnellAbilityManager {
                 () -> damaged[0] = HelperMethods.damageThroughIframes(target, source, damage)
         );
         return damaged[0];
+        }
     }
 
     private static void applyCarriedAilments(ServerWorld world, LivingEntity actor,
@@ -677,6 +692,7 @@ public final class DeathKnellAbilityManager {
 
     private static void updateFeverVisual(ServerWorld world, FeverState state,
                                           LivingEntity target, int threshold) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(state == null ? null : CombatProvenanceApi.from(state.stack, null))) {
         Entity existing = state.visualId == null ? null : world.getEntity(state.visualId);
         DeathKnellVisualEntity visual;
         if (existing instanceof DeathKnellVisualEntity deathKnell
@@ -694,6 +710,7 @@ public final class DeathKnellAbilityManager {
         visual.setStacks(state.stacks);
         visual.setMaxStacks(threshold);
         visual.setPosition(target.getX(), target.getY(), target.getZ());
+        }
     }
 
     private static void discardVisual(ServerWorld world, UUID visualId) {

@@ -18,6 +18,7 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.ability.ArcaneCosmicMasteryTuning;
@@ -94,6 +95,7 @@ public final class ArcanethystAssaultManager {
     public static void start(ServerWorld world, LivingEntity owner, ItemStack stack, double radius, float damage,
                              ArcaneCosmicMasteryTuning suspension, ArcaneCosmicMasteryTuning impact,
                              UniqueAbilityExecution execution) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(execution == null ? null : execution.provenance())) {
         if (owner == null || !owner.isAlive()) {
             return;
         }
@@ -117,6 +119,7 @@ public final class ArcanethystAssaultManager {
         assaults.add(assault);
         spawnCastParticles(world, owner.getPos());
         world.playSound(null, owner.getX(), owner.getY(), owner.getZ(), SoundRegistry.MAGIC_BOW_SHOOT_IMPACT_02.get(), SoundCategory.PLAYERS, 0.55F, 1.15F);
+        }
     }
 
     public static void tick(ServerWorld world) {
@@ -259,6 +262,7 @@ public final class ArcanethystAssaultManager {
 
     private static boolean tickSlam(ServerWorld world, LivingEntity owner, ActiveAssault assault,
                                     LivingEntity target, ActiveTarget active, long slamAge, int slamTicks) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(assault == null ? null : CombatProvenanceApi.from(assault.stack, null))) {
         target.setVelocity(0.0, -1.75, 0.0);
         target.velocityModified = true;
         spawnSlamTrail(world, target);
@@ -294,6 +298,7 @@ public final class ArcanethystAssaultManager {
             return true;
         }
         return false;
+        }
     }
 
     public static void markTarget(ServerWorld world, LivingEntity owner, LivingEntity target,
@@ -334,6 +339,7 @@ public final class ArcanethystAssaultManager {
 
     public static void onPassiveProc(ServerWorld world, LivingEntity owner, LivingEntity target, ItemStack stack,
                                      ArcaneCosmicMasteryTuning tuning) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (tuning.flag(1 << 5)) target.addStatusEffect(new StatusEffectInstance(
                 StatusEffects.WEAKNESS, tuning.integer(
                         ArcaneCosmicMasteryTuning.Setting.SECONDARY_STATUS_DURATION_TICKS, 40), 0), owner);
@@ -351,10 +357,12 @@ public final class ArcanethystAssaultManager {
                 world.getTime() + tuning.integer(ArcaneCosmicMasteryTuning.Setting.DELAY_TICKS, 6), tuning, false));
         if (tuning.flag(1 << 7)) PENDING_PULSES.computeIfAbsent(world, ignored -> new ArrayList<>()).add(
                 new PendingPulse(owner.getUuid(), target.getUuid(), stack.copy(), world.getTime() + 1, tuning, true));
+        }
     }
 
     private static void applyImpact(ServerWorld world, LivingEntity owner, ActiveAssault assault,
                                     LivingEntity primary, float slamDamage) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(assault == null ? null : CombatProvenanceApi.from(assault.stack, null))) {
         ArcaneCosmicMasteryTuning tuning = assault.impact();
         if (tuning.flag(1 << 21)) {
             primary.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, 40, 0), owner);
@@ -383,12 +391,15 @@ public final class ArcanethystAssaultManager {
                         world.getTime() + Math.max(1, tuning.integer(
                                 ArcaneCosmicMasteryTuning.Setting.TERTIARY_DURATION_TICKS, 80)),
                         world.getTime(), tuning, slamDamage));
+        }
     }
 
     private static void tickFields(ServerWorld world) {
         List<AmethystField> fields = FIELDS.get(world);
         if (fields == null || fields.isEmpty()) return;
         fields.removeIf(field -> {
+            try (var ignored = CombatProvenanceApi.scope(
+                    CombatProvenanceApi.from(field.stack(), null))) {
             if (world.getTime() >= field.expiresAt) return true;
             LivingEntity owner = world.getEntity(field.ownerId) instanceof LivingEntity living ? living : null;
             if (owner == null || !owner.isAlive()) return true;
@@ -407,6 +418,7 @@ public final class ArcanethystAssaultManager {
                             world.getDamageSources().indirectMagic(owner, owner), damage));
             spawnImpact(world, field.center);
             return false;
+            }
         });
         if (fields.isEmpty()) FIELDS.remove(world);
     }
@@ -458,6 +470,8 @@ public final class ArcanethystAssaultManager {
         List<PendingPulse> pulses = PENDING_PULSES.get(world);
         if (pulses == null) return;
         pulses.removeIf(pulse -> {
+            try (var ignored = CombatProvenanceApi.scope(
+                    CombatProvenanceApi.from(pulse.stack(), null))) {
             if (world.getTime() < pulse.at()) return false;
             Entity ownerEntity = world.getEntity(pulse.ownerId());
             Entity targetEntity = world.getEntity(pulse.targetId());
@@ -482,6 +496,7 @@ public final class ArcanethystAssaultManager {
                 }
             }
             return true;
+            }
         });
         if (pulses.isEmpty()) PENDING_PULSES.remove(world);
         OVERFLOW_LOCKOUTS.entrySet().removeIf(entry -> entry.getValue() <= world.getTime());

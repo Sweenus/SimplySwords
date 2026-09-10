@@ -29,6 +29,7 @@ import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
@@ -266,6 +267,7 @@ public final class LichbladeMasteryManager {
 
     private static void pulse(ServerWorld world, LivingEntity owner, ChannelState state,
                               LongPathFinalFormsMasteryTuning tuning, LivingEntity primary, boolean siphon) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(state == null ? null : CombatProvenanceApi.from(state.stack, null))) {
         double radius = tuning.get(s("RADIUS"), Config.uniqueEffects.lichblade.radius);
         int cap = tuning.integer(s("TARGET_CAP"), 24);
         List<LivingEntity> targets;
@@ -286,7 +288,7 @@ public final class LichbladeMasteryManager {
             float damage = HelperMethods.applyAbilityDamageEnchantments(world, state.stack, target, source,
                     base * (float) multiplier);
             float before = target.getHealth();
-            if (!target.damage(source, damage)) continue;
+            if (!CombatProvenanceApi.damage(state.stack, owner, target, source, damage)) continue;
             state.hits++;
             recordPulse(world, target, owner, world.getTime(), tuning);
             addCharge(state, target, world.getTime(), tuning);
@@ -301,6 +303,7 @@ public final class LichbladeMasteryManager {
         }
         world.playSoundFromEntity(null, owner, SoundRegistry.DARK_SWORD_BLOCK.get(),
                 owner.getSoundCategory(), .1F, .3F);
+        }
     }
 
     // Only Wandering Phylactery pays for the targets it chains into.
@@ -338,6 +341,7 @@ public final class LichbladeMasteryManager {
 
     private static void recallBurst(ServerWorld world, LivingEntity owner, ChannelState state,
                                     LongPathFinalFormsMasteryTuning tuning) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(state == null ? null : CombatProvenanceApi.from(state.stack, null))) {
         state.cloud = owner.getPos();
         double radius = tuning.get(s("RECALL_RADIUS"), 4);
         double multiplier = tuning.get(s("DAMAGE_MULTIPLIER"), 1)
@@ -347,12 +351,13 @@ public final class LichbladeMasteryManager {
                 * (float) multiplier;
         for (LivingEntity target : recallTargets(world, owner, state, tuning, radius)) {
             DamageSource source = owner.getDamageSources().indirectMagic(owner, owner);
-            if (target.damage(source, HelperMethods.applyAbilityDamageEnchantments(world, state.stack,
+            if (CombatProvenanceApi.damage(state.stack, (source).getAttacker(), target, source, HelperMethods.applyAbilityDamageEnchantments(world, state.stack,
                     target, source, base))) {
                 state.hits++;
             }
         }
         spawnCloudParticles(world, state.cloud, radius);
+        }
     }
 
     private static void recordPulse(ServerWorld world, LivingEntity target, LivingEntity owner, long tick,
@@ -440,12 +445,14 @@ public final class LichbladeMasteryManager {
     private static void applyOverflowResistance(LivingEntity owner, ChannelState state,
                                                 LongPathFinalFormsMasteryTuning tuning, float cap, float granted,
                                                 float perAbsorption, double interest) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(state == null ? null : CombatProvenanceApi.from(state.stack, null))) {
         int duration = overflowResistanceTicks(cap, granted, state.charge,
                 tuning.integer(s("RESISTANCE_CHARGE_STEP"), 4),
                 tuning.integer(s("RESISTANCE_STEP_TICKS"), 40),
                 tuning.integer(s("RESISTANCE_DURATION_CAP_TICKS"), 120), perAbsorption, interest);
         if (duration <= 0) return;
         owner.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, duration, 0), owner);
+        }
     }
 
     static int overflowResistanceTicks(float cap, float granted, int charge, int step,
@@ -485,11 +492,13 @@ public final class LichbladeMasteryManager {
 
     private static void deathBurst(ServerWorld world, LivingEntity owner, ChannelState state,
                                    LongPathFinalFormsMasteryTuning tuning, Vec3d center, float pulseDamage) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(state == null ? null : CombatProvenanceApi.from(state.stack, null))) {
         double radius = tuning.get(s("DEATH_BURST_RADIUS"), 3);
         int cap = tuning.integer(s("DEATH_BURST_TARGET_CAP"), 4);
         for (LivingEntity target : nearest(world, owner, center, radius, cap)) {
             DamageSource source = owner.getDamageSources().indirectMagic(owner, owner);
-            target.damage(source, pulseDamage * (float) tuning.get(s("DEATH_BURST_DAMAGE_MULTIPLIER"), .35));
+            CombatProvenanceApi.damage(state.stack, owner, target, source, pulseDamage * (float) tuning.get(s("DEATH_BURST_DAMAGE_MULTIPLIER"), .35));
+        }
         }
     }
 

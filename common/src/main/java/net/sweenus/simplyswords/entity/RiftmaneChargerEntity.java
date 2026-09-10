@@ -33,6 +33,7 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.ability.MartialCommandEldritchMasteryTuning;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.world.RiftmaneAbilityManager;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -222,6 +223,7 @@ public class RiftmaneChargerEntity extends HorseEntity implements SimplySwordsMi
                                  double chargeSpeed, double hitRadius, double stepHeight) {
         this.ownerUuid = owner.getUuid();
         this.sourceStack = stack.copy();
+        CombatProvenanceApi.attach(this, stack);
         this.direction = direction.horizontalLengthSquared() > 1.0E-4
                 ? new Vec3d(direction.x, 0.0, direction.z).normalize()
                 : Vec3d.fromPolar(0.0F, owner.getYaw());

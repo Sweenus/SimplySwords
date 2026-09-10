@@ -16,6 +16,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.registry.EntityRegistry;
 import net.sweenus.simplyswords.world.DragonMawManager;
@@ -57,6 +58,7 @@ public class DragonMawHeadVisualEntity extends Entity {
         this.dataTracker.set(OWNER_ENTITY_ID, owner.getId());
         this.dataTracker.set(TARGET_ENTITY_ID, target.getId());
         this.dataTracker.set(WEAPON_STACK, stack.copy());
+        CombatProvenanceApi.attach(this, stack);
         this.dataTracker.set(DAMAGE, Math.max(0.0F, damage));
         this.dataTracker.set(LIFETIME, Math.max(1, lifetime));
         this.dataTracker.set(BREATH_DELAY, Math.max(0, breathDelay));

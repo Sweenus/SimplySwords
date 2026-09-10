@@ -28,6 +28,7 @@ import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.DevourerReprisalVisualEntity;
 import net.sweenus.simplyswords.entity.DevourerTendrilVisualEntity;
@@ -63,6 +64,7 @@ public final class DevourerReprisalManager {
     }
 
     public static void trigger(ItemStack stack, LivingEntity bearer, DamageSource incoming) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (!(bearer.getWorld() instanceof ServerWorld world)
                 || stack == null || !stack.isOf(ItemsRegistry.THE_DEVOURER.get())
                 || !(incoming.getAttacker() instanceof LivingEntity attacker)
@@ -146,6 +148,7 @@ public final class DevourerReprisalManager {
                 now + CLOSING_EFFECT_TICK, retrieval ? dragEndTick : now + TENDRIL_RETRACT_TICK, tendrilId, execution,
                 retrieval && redirect != null, redirect == null ? null : redirect.massVisualId(), hits);
         ACTIVE.computeIfAbsent(world, ignored -> new ArrayList<>()).add(reprisal);
+        }
     }
 
     public static void tick(ServerWorld world) {
@@ -343,6 +346,7 @@ public final class DevourerReprisalManager {
 
     private static boolean damageTarget(ServerWorld world, LivingEntity bearer, ItemStack stack,
                                      LivingEntity target, float baseDamage) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (baseDamage <= 0.0F || !target.isAlive()) {
             return false;
         }
@@ -352,6 +356,7 @@ public final class DevourerReprisalManager {
         boolean[] damaged = {false};
         WeaponImplicitRegistry.runSuppressed(() -> damaged[0] = HelperMethods.damageThroughIframes(target, source, damage));
         return damaged[0];
+        }
     }
 
     private static Vec3d resolveMawCenter(ServerWorld world, LivingEntity attacker) {

@@ -10,6 +10,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryTuning;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.util.HelperMethods;
 
@@ -239,6 +240,7 @@ public final class LivyatanAbilityManager {
 
     private static void burst(ServerWorld world, LivingEntity actor, ItemStack stack,
                               LivingEntity origin, StormFrostWaterMasteryTuning tuning) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         double radius = tuning.get(s("LIVYATAN_PERFECT_STORM_RADIUS"), 0);
         int cap = tuning.integer(s("LIVYATAN_PERFECT_STORM_TARGET_CAP"), 0);
         float base = HelperMethods.abilityScaledDamage("frost", actor, stack,
@@ -250,6 +252,7 @@ public final class LivyatanAbilityManager {
         for (LivingEntity victim : victims) {
             float damage = HelperMethods.applyAbilityDamageEnchantments(world, stack, victim, source, raw);
             WeaponImplicitRegistry.runSuppressed(() -> HelperMethods.damageThroughIframes(victim, source, damage));
+        }
         }
     }
 

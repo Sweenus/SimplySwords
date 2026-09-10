@@ -37,6 +37,8 @@ public class ElementalVortexEffect extends OrbitingEffect {
     @Override
     public boolean applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
         if (!livingEntity.getWorld().isClient()) {
+            sourceEntity = null;
+            additionalData = 0;
             ServerWorld serverWorld = (ServerWorld) livingEntity.getWorld();
             Vec3d managedCenter = TempestAbilityManager.managedVortexCenter(livingEntity);
             if (managedCenter != null) {

@@ -7,6 +7,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.IncapacitatingStatusEffectRegistry;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -21,6 +22,7 @@ public final class PlayerWeaponAbilityChannelManager {
     }
 
     public static void start(ServerPlayerEntity player, Hand hand, ItemStack stack) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (player == null || hand == null || stack == null || stack.isEmpty()) {
             return;
         }
@@ -33,6 +35,7 @@ public final class PlayerWeaponAbilityChannelManager {
         ActiveChannel channel = new ActiveChannel(hand, stack.copy(), player.getWorld().getRegistryKey(),
                 player.getWorld().getTime(), maxUseTime);
         ACTIVE_CHANNELS.put(new ChannelKey(player.getUuid(), hand), channel);
+        }
     }
 
     public static boolean stop(ServerPlayerEntity player, Hand hand) {

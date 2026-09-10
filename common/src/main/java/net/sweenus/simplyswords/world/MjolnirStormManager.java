@@ -25,6 +25,7 @@ import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
@@ -357,6 +358,7 @@ public final class MjolnirStormManager {
     }
 
     private static void beginFinalSequence(ServerWorld world, LivingEntity actor, ActiveStorm storm) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(storm == null ? null : CombatProvenanceApi.from(storm.stack, null))) {
         if (!storm.tuning.flag(MODE_FINAL_SHELTER)) {
             return;
         }
@@ -364,6 +366,7 @@ public final class MjolnirStormManager {
         int span = boltCount * Math.max(1, Config.uniqueEffects.mjolnir.finalBoltInterval) + 20;
         actor.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, span,
                 storm.tuning.integer(s("MJOLNIR_SHELTER_AMPLIFIER"), 1), false, false, true), actor);
+        }
     }
 
     private static void tickHammerfall(ServerWorld world, LivingEntity actor, LivingEntity sourceOwner,
@@ -510,6 +513,7 @@ public final class MjolnirStormManager {
 
     private static void applyBoltRewards(ServerWorld world, LivingEntity actor,
                                          ActiveStorm storm, LivingEntity target) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(storm == null ? null : CombatProvenanceApi.from(storm.stack, null))) {
         if (storm.tuning.flag(MODE_SKYBOUND)) {
             int duration = storm.tuning.integer(s("MJOLNIR_SKYBOUND_DURATION_TICKS"), 40);
             if (duration > 0) {
@@ -527,6 +531,7 @@ public final class MjolnirStormManager {
         int resistance = storm.tuning.integer(s("MJOLNIR_RIDE_RESISTANCE_TICKS"), 20);
         if (resistance > 0) {
             actor.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, resistance, 0), actor);
+        }
         }
     }
 
@@ -839,6 +844,7 @@ public final class MjolnirStormManager {
 
     private static boolean damageTarget(ServerWorld world, LivingEntity actor,
                                         ItemStack stack, LivingEntity target, float baseDamage) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         DamageSource source = actor.getDamageSources().indirectMagic(actor, actor);
         float damage = HelperMethods.applyAbilityDamageEnchantments(
                 world,
@@ -852,6 +858,7 @@ public final class MjolnirStormManager {
                 () -> damaged[0] = HelperMethods.damageThroughIframes(target, source, damage)
         );
         return damaged[0];
+        }
     }
 
     private static boolean isInsideCylinder(LivingEntity target, Vec3d center,

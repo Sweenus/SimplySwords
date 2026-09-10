@@ -13,6 +13,7 @@ import net.minecraft.util.math.MathHelper;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
 import net.sweenus.simplyswords.api.ability.AbyssalSpectralMasteryTuning;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 
@@ -75,6 +76,7 @@ public final class WickpiercerMasteryStateManager {
 
     public static void applyPhoenixBlow(ServerPlayerEntity actor, LivingEntity target,
                                         ItemStack stack, float baseDamage) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         Map<UUID, ReviveState> states = REVIVE.get(actor.getServerWorld());
         ReviveState state = states == null ? null : states.remove(actor.getUuid());
         if (state == null || state.expiresAt < actor.getWorld().getTime()) return;
@@ -85,6 +87,7 @@ public final class WickpiercerMasteryStateManager {
         if (damage <= 0) return;
         SimplySwordsAPI.applyAbilityMagicDamageThroughIframes(actor.getServerWorld(), actor, stack,
                 target, damage, SpellScalingProfile.FIRE);
+        }
     }
 
     public static float modifyIncomingDamage(LivingEntity entity, DamageSource source, float amount) {
@@ -110,6 +113,7 @@ public final class WickpiercerMasteryStateManager {
 
     public static void applyWickFrenzyHit(ServerPlayerEntity actor, LivingEntity target,
                                            ItemStack stack, float baseDamage) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         StatusEffectInstance frenzy = actor.getStatusEffect(EffectRegistry.getReference(EffectRegistry.FRENZY));
         if (frenzy == null) return;
         WickState state = state(actor);
@@ -136,7 +140,7 @@ public final class WickpiercerMasteryStateManager {
                 source, baseDamage * multiplier);
         damage *= armorIgnoreMultiplier(damage, target.getArmor(), armorToughness(target),
                 (float) tuning.get(AbyssalSpectralMasteryTuning.Setting.ARMOR_IGNORE, 0));
-        boolean damaged = target.damage(source, damage);
+        boolean damaged = CombatProvenanceApi.damage(stack, actor, target, source, damage);
         if (damaged && (mode & WILDFIRE) != 0) burst(actor, target, stack, baseDamage, tuning);
         boolean conserve = !target.isAlive() && state != null && (mode & 4) != 0
                 && (mode & WILDFIRE) == 0 && now >= state.conserveReady;
@@ -146,6 +150,7 @@ public final class WickpiercerMasteryStateManager {
             for (int index = 0; index < consumption; index++) {
                 HelperMethods.decrementStatusEffect(actor, EffectRegistry.getReference(EffectRegistry.FRENZY));
             }
+        }
         }
     }
 
@@ -203,6 +208,7 @@ public final class WickpiercerMasteryStateManager {
 
     private static void burst(ServerPlayerEntity actor, LivingEntity direct, ItemStack stack,
                               float baseDamage, AbyssalSpectralMasteryTuning tuning) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         double radius = tuning.get(AbyssalSpectralMasteryTuning.Setting.MELEE_IMPACT_RADIUS, 0);
         int cap = tuning.integer(AbyssalSpectralMasteryTuning.Setting.MELEE_IMPACT_TARGET_CAP, 0);
         float damage = baseDamage * (float) tuning.get(
@@ -217,6 +223,7 @@ public final class WickpiercerMasteryStateManager {
         for (int index = 0; index < Math.min(cap, targets.size()); index++) {
             SimplySwordsAPI.applyAbilityMagicDamageThroughIframes(actor.getServerWorld(), actor, stack,
                     targets.get(index), damage, SpellScalingProfile.FIRE);
+        }
         }
     }
 

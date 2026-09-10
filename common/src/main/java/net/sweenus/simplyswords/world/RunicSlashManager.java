@@ -11,6 +11,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.AwakeningApi;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.RunicSlashProjectileEntity;
@@ -59,6 +60,7 @@ public final class RunicSlashManager {
     }
 
     public static void tryFire(ServerWorld world, LivingEntity user, ItemStack stack) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (world == null || user == null || stack == null || stack.isEmpty() || isSuppressed() || !user.isAlive()) {
             return;
         }
@@ -92,6 +94,7 @@ public final class RunicSlashManager {
         world.playSound(null, user.getX(), user.getY(), user.getZ(), SoundRegistry.SWING_WOOSH.get(), SoundCategory.PLAYERS, 0.75F, 1.25F + world.random.nextFloat() * 0.12F);
         world.playSound(null, user.getX(), user.getY(), user.getZ(), SoundRegistry.ELEMENTAL_SWORD_WIND_ATTACK_03.get(), SoundCategory.PLAYERS, 0.45F, 1.45F + world.random.nextFloat() * 0.12F);
         world.spawnParticles(ParticleTypes.SWEEP_ATTACK, start.x, start.y, start.z, 1, 0.0, 0.0, 0.0, 0.0);
+        }
     }
 
     private static boolean isAttackReady(ServerWorld world, LivingEntity user, ItemStack stack) {

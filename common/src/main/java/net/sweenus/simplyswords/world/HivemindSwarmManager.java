@@ -23,6 +23,7 @@ import net.sweenus.simplyswords.api.ability.NatureSwarmMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.SimplySwordsBeeEntity;
 import net.sweenus.simplyswords.registry.EntityRegistry;
@@ -390,7 +391,7 @@ public final class HivemindSwarmManager {
                     && (bee.getMasteryMode() & (1 << 21)) != 0
                     && (bee.getMasteryMode() & (1 << 26)) == 0) {
                 RETORT_COOLDOWN.put(owner.getUuid(), world.getTime() + bee.getMasteryRetortLockout());
-                attacker.damage(world.getDamageSources().indirectMagic(owner, owner),
+                CombatProvenanceApi.damage(ItemStack.EMPTY, bee, attacker, world.getDamageSources().indirectMagic(owner, owner),
                         bee.getSwarmStingDamage() * bee.getMasteryRetortMultiplier());
                 return;
             }
@@ -768,7 +769,7 @@ public final class HivemindSwarmManager {
                     && focus.expiresAt >= world.getTime()) damage *= bee.getMasteryFocusMultiplier();
         }
         float finalDamage = damage;
-        WeaponImplicitRegistry.runSuppressed(() -> damaged[0] = target.damage(damageSource, finalDamage));
+        WeaponImplicitRegistry.runSuppressed(() -> damaged[0] = CombatProvenanceApi.damage(stack, bee, target, damageSource, finalDamage));
         target.timeUntilRegen = iframes;
         target.setVelocity(velocity);
         target.velocityModified = true;

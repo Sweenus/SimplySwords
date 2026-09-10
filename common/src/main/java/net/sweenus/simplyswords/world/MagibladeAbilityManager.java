@@ -27,6 +27,7 @@ import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.api.ability.ArcaneCosmicMasteryTuning;
 import net.sweenus.simplyswords.api.ability.ArcaneCosmicMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.MagibladeWardenHeadVisualEntity;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
@@ -217,6 +218,7 @@ public final class MagibladeAbilityManager {
     }
 
     public static void tickHeldPassive(LivingEntity actor, ItemStack stack) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (actor == null
                 || stack == null
                 || stack.isEmpty()
@@ -308,7 +310,7 @@ public final class MagibladeAbilityManager {
             world.getEntitiesByClass(LivingEntity.class, searchBox,
                             target -> isValidEnemy(world, actor, null, target))
                     .stream().limit(passive.tuning.integer(ArcaneCosmicMasteryTuning.Setting.TARGET_CAP, 6))
-                    .forEach(target -> target.damage(
+                    .forEach(target -> CombatProvenanceApi.damage(stack, actor, target,
                             world.getDamageSources().indirectMagic(actor, actor), damage));
         }
         closest.velocityModified = true;
@@ -318,6 +320,7 @@ public final class MagibladeAbilityManager {
         HelperMethods.spawnOrbitParticles(world,
                 closest.getPos().add(0.0, closest.getHeight() * 0.5, 0.0),
                 ParticleTypes.SCULK_CHARGE_POP, 0.5, 6);
+        }
     }
 
     private static void blockIncomingProjectile(ServerWorld world, LivingEntity actor,
@@ -461,6 +464,7 @@ public final class MagibladeAbilityManager {
 
     private static void completeCharge(ServerWorld world, LivingEntity actor, LivingEntity sourceOwner,
                                        ChargeState charge, long now) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(charge == null ? null : CombatProvenanceApi.from(charge.stack, null))) {
         float damage = HelperMethods.abilityScaledDamage("arcane", actor, charge.stack,
                 Config.uniqueEffects.magiblade.damageScaling
                         * (float) charge.judgment.get(ArcaneCosmicMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1),
@@ -527,9 +531,11 @@ public final class MagibladeAbilityManager {
             spawnSummonEffects(world, actor, visual);
         }
         summons.put(actor.getUuid(), summon);
+        }
     }
 
     private static MagibladeWardenHeadVisualEntity spawnVisual(ServerWorld world, LivingEntity actor, HeadState head) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(head == null ? null : CombatProvenanceApi.from(head.stack, null))) {
         Vec3d position = orbitPosition(actor, head, world.getTime());
         MagibladeWardenHeadVisualEntity visual = new MagibladeWardenHeadVisualEntity(
                 world,
@@ -547,6 +553,7 @@ public final class MagibladeAbilityManager {
         }
         head.visualId = visual.getUuid();
         return visual;
+        }
     }
 
     private static void updateOrbit(ServerWorld world, LivingEntity actor,
@@ -562,6 +569,7 @@ public final class MagibladeAbilityManager {
     }
 
     private static void tickBoundWarden(ServerWorld world, LivingEntity actor, HeadState head, long now) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(head == null ? null : CombatProvenanceApi.from(head.stack, null))) {
         if (!head.tuning.flag(1 << 15)) return;
         if (now < head.nextGuardAt) return;
         head.nextGuardAt = now + Math.max(1, head.tuning.integer(ArcaneCosmicMasteryTuning.Setting.INTERVAL_TICKS, 80));
@@ -573,6 +581,7 @@ public final class MagibladeAbilityManager {
                 Math.max(1, head.tuning.integer(
                         ArcaneCosmicMasteryTuning.Setting.STATUS_DURATION_TICKS, 20)),
                 0, false, false, true), actor);
+        }
     }
 
     private static Vec3d orbitPosition(LivingEntity actor, HeadState head, long now) {
@@ -713,6 +722,7 @@ public final class MagibladeAbilityManager {
 
     private static void harmonicCollapse(ServerWorld world, LivingEntity actor, HeadState head,
                                          LivingEntity target, float waveDamage) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(head == null ? null : CombatProvenanceApi.from(head.stack, null))) {
         if (!head.judgment.flag(1 << 24)) return;
         int required = Math.max(1, head.judgment.integer(ArcaneCosmicMasteryTuning.Setting.COUNT, 3));
         if (head.sonicHits.merge(target.getUuid(), 1, Integer::sum) % required != 0) return;
@@ -725,6 +735,7 @@ public final class MagibladeAbilityManager {
                         ArcaneCosmicMasteryTuning.Setting.TERTIARY_TARGET_CAP, 5))
                 .forEach(other -> HelperMethods.damageThroughIframes(other,
                         world.getDamageSources().indirectMagic(actor, actor), damage));
+        }
     }
 
     private static boolean passesJudgmentFilter(HeadState head, LivingEntity target) {
@@ -736,6 +747,7 @@ public final class MagibladeAbilityManager {
     private static void fireSonicWave(ServerWorld world, LivingEntity actor, LivingEntity sourceOwner,
                                       MagibladeWardenHeadVisualEntity visual, HeadState head,
                                       LivingEntity selectedTarget, float waveDamage) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(head == null ? null : CombatProvenanceApi.from(head.stack, null))) {
         Vec3d start = getMouthPosition(visual);
         Vec3d end = selectedTarget.getPos().add(0.0, selectedTarget.getHeight() * 0.55, 0.0);
         Vec3d delta = end.subtract(start);
@@ -782,7 +794,7 @@ public final class MagibladeAbilityManager {
                             ? (float) head.judgment.get(ArcaneCosmicMasteryTuning.Setting.OUTGOING_MULTIPLIER, 1.2) : 1)
             );
             boolean[] damaged = {false};
-            WeaponImplicitRegistry.runSuppressed(() -> damaged[0] = target.damage(source, damage));
+            WeaponImplicitRegistry.runSuppressed(() -> damaged[0] = CombatProvenanceApi.damage(head.stack, actor, target, source, damage));
             if (damaged[0]) {
                 hitIndex++;
                 head.affectedTargets++;
@@ -800,6 +812,7 @@ public final class MagibladeAbilityManager {
                 actor.getSoundCategory(), 1.0F, 1.05F);
         world.spawnParticles(ParticleTypes.SCULK_CHARGE_POP,
                 start.x, start.y, start.z, 12, 0.22, 0.18, 0.22, 0.035);
+        }
     }
 
     private static Vec3d getMouthPosition(MagibladeWardenHeadVisualEntity visual) {

@@ -25,6 +25,7 @@ import net.sweenus.simplyswords.api.ability.NatureSwarmMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.WaxweaverWaxVisualEntity;
 import net.sweenus.simplyswords.registry.EffectRegistry;
@@ -274,6 +275,7 @@ public final class WaxweaverEncasementManager {
     }
 
     private static void applyPrison(ServerWorld world, LivingEntity target, ActiveEncasement state) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(state == null ? null : CombatProvenanceApi.from(state.stack, null))) {
         int remaining = Math.max(2, (int) (state.expiresAt - world.getTime()) + 2);
         long duration = Math.max(1, state.initialExpiresAt - state.startedAt);
         int amplifier = world.getTime() - state.startedAt >= Math.min(FORMATION_TICKS, duration) ? 1 : 0;
@@ -287,6 +289,7 @@ public final class WaxweaverEncasementManager {
         target.velocityDirty = true;
         if (target.getPos().squaredDistanceTo(state.anchor) > 0.0004) {
             target.teleport(state.anchor.x, state.anchor.y, state.anchor.z, false);
+        }
         }
     }
 
@@ -359,6 +362,7 @@ public final class WaxweaverEncasementManager {
     }
 
     private static void detonate(ServerWorld world, ActiveEncasement state, Vec3d center) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(state == null ? null : CombatProvenanceApi.from(state.stack, null))) {
         LivingEntity owner = resolveLiving(world, state.ownerId);
         LivingEntity principal = resolveLiving(world, state.principalId);
         if (owner == null) {
@@ -409,10 +413,12 @@ public final class WaxweaverEncasementManager {
         }
         spawnDetonationEffects(world, center, radius);
         UniqueAbilityApi.finish(state.execution, NatureSwarmMasteryAbilities.FINISH, affected);
+        }
     }
 
     public static int detonateRevival(ServerWorld world, LivingEntity owner, ItemStack stack,
                                       NatureSwarmMasteryTuning tuning, UniqueAbilityExecution execution) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(execution == null ? null : execution.provenance())) {
         double radius = Math.max(.5, tuning.get(
                 NatureSwarmMasteryTuning.Setting.WAX_EMERGENCE_RADIUS, 6));
         int maximum = Math.max(1, tuning.integer(
@@ -450,6 +456,7 @@ public final class WaxweaverEncasementManager {
         }
         spawnDetonationEffects(world, owner.getPos(), radius);
         return affected;
+        }
     }
 
     private static boolean isValidTarget(LivingEntity actor, LivingEntity principal,
@@ -511,6 +518,7 @@ public final class WaxweaverEncasementManager {
     public static boolean tryReactiveShell(ServerWorld world, LivingEntity owner, LivingEntity attacker,
                                            ItemStack stack, NatureSwarmMasteryTuning tuning,
                                            UniqueAbilityExecution execution) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(execution == null ? null : execution.provenance())) {
         if (!tuning.flag(1 << 21) || owner.getHealth() / owner.getMaxHealth()
                 >= tuning.get(NatureSwarmMasteryTuning.Setting.WAX_REACTIVE_HEALTH_THRESHOLD, .35)
                 || isCasterActive(owner) || !HelperMethods.checkAbilityTarget(attacker, owner)) return false;
@@ -531,6 +539,7 @@ public final class WaxweaverEncasementManager {
         applyPrison(world, attacker, state);
         spawnEncasementEffects(world, attacker);
         return true;
+        }
     }
 
     public static void clear(ServerWorld world) {

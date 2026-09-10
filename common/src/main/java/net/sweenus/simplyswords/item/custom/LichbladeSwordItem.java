@@ -26,6 +26,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.api.AwakeningApi;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
@@ -247,7 +248,7 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
         for (Entity entity : world.getOtherEntities(livingUser, box, EntityPredicates.VALID_LIVING_ENTITY)) {
             if (entity instanceof LivingEntity le && HelperMethods.checkAbilityTarget(le, livingUser)) {
                 DamageSource damageSource = livingUser.getDamageSources().indirectMagic(livingUser, livingUser);
-                le.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(world, stack, le, damageSource, abilityDamage));
+                CombatProvenanceApi.damage(stack, (damageSource).getAttacker(), le, damageSource, HelperMethods.applyAbilityDamageEnchantments(world, stack, le, damageSource, abilityDamage));
             }
         }
         world.playSoundFromEntity(null, livingUser, SoundRegistry.DARK_SWORD_BLOCK.get(),

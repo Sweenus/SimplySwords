@@ -6,6 +6,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.AwakeningApi;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.SimplySwordsCreeperHeadEntity;
@@ -39,6 +40,7 @@ public final class BaneheadSwarmManager {
     }
 
     public static void trySpawnHead(LivingEntity user, ItemStack stack) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (user == null || stack == null || stack.isEmpty() || !user.isAlive()) {
             return;
         }
@@ -75,6 +77,7 @@ public final class BaneheadSwarmManager {
                 Config.gemPowers.baneheadSwarm.maxHomingTicks);
 
         world.spawnEntity(head);
+        }
     }
 
     private static int getActiveHeadCount(ServerWorld world, LivingEntity owner) {

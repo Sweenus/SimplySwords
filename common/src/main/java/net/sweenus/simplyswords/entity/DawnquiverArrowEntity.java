@@ -21,6 +21,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.registry.EntityRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -96,6 +97,7 @@ public class DawnquiverArrowEntity extends Entity {
         this(EntityRegistry.DAWNQUIVER_ARROW.get(), world);
         this.ownerUuid = owner.getUuid();
         this.sourceStack = stack.copy();
+        CombatProvenanceApi.attach(this, stack);
         this.sourceHand = sourceHand == null ? Hand.MAIN_HAND : sourceHand;
         this.damage = Math.max(0.0F, damage);
         this.secondaryDamage = Math.max(0.0F, secondaryDamage);

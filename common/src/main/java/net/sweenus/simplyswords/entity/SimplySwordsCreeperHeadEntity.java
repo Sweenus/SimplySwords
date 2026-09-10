@@ -25,6 +25,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.world.BaneheadSwarmManager;
 import org.jetbrains.annotations.Nullable;
@@ -79,6 +80,7 @@ public class SimplySwordsCreeperHeadEntity extends PathAwareEntity {
                                 float damage, int maxHomingTicks) {
         this.ownerUuid = owner.getUuid();
         this.sourceStack = stack.copy();
+        CombatProvenanceApi.attach(this, stack);
         this.orbitRadius = orbitRadius;
         this.orbitHeight = orbitHeight;
         this.orbitAngularSpeed = orbitAngularSpeed;

@@ -16,6 +16,9 @@ import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
+import net.sweenus.simplyswords.api.combat.CombatProvenance;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
+import net.sweenus.simplyswords.api.combat.ProvenanceCarrier;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance;
@@ -37,7 +40,7 @@ public class FlameSeedEffect extends OrbitingEffect {
     private static final Map<ServerWorld, List<PendingDeathDetonation>> PENDING_DEATH_DETONATIONS = new HashMap<>();
 
     private record PendingDeathDetonation(UUID targetId, Vec3d position, LivingEntity sourceEntity, int spreadRemaining,
-                                          FlamewindMasteryManager.SeedSnapshot snapshot) {
+                                          FlamewindMasteryManager.SeedSnapshot snapshot, CombatProvenance provenance) {
     }
 
     public LivingEntity sourceEntity; // The player who applied the effect
@@ -56,6 +59,8 @@ public class FlameSeedEffect extends OrbitingEffect {
     @Override
     public boolean applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
         if (!livingEntity.getWorld().isClient()) {
+            sourceEntity = null;
+            additionalData = 0;
             ServerWorld serverWorld = (ServerWorld) livingEntity.getWorld();
             StatusEffectInstance currentEffect = livingEntity.getStatusEffect(EffectRegistry.getReference(EffectRegistry.FLAMESEED));
             int duration = currentEffect == null ? 0 : currentEffect.getDuration();
@@ -121,7 +126,7 @@ public class FlameSeedEffect extends OrbitingEffect {
         if (detonation) DETONATING_TARGETS.add(target.getUuid());
         damage = HelperMethods.applyAbilityDamageEnchantments(world, castingStack, target,
                 damageSource, damage);
-        target.damage(damageSource, damage);
+        CombatProvenanceApi.damage(castingStack, sourceEntity, target, damageSource, damage);
         if (detonation) DETONATING_TARGETS.remove(target.getUuid());
         SoundEvent soundEvent = detonation ? SoundRegistry.SPELL_FIRE.get() : SoundEvents.ENTITY_GENERIC_BURN;
         world.playSound(null, target.getBlockPos(), soundEvent, target.getSoundCategory(),
@@ -149,7 +154,7 @@ public class FlameSeedEffect extends OrbitingEffect {
                 continue;
             }
 
-            try {
+            try (var ignored = CombatProvenanceApi.scope(detonation.provenance())) {
                 triggerDetonation(world, detonation.position(), detonation.targetId(), detonation.sourceEntity(),
                         detonation.spreadRemaining(), detonation.snapshot());
             } finally {
@@ -184,7 +189,7 @@ public class FlameSeedEffect extends OrbitingEffect {
         }
         PENDING_DEATH_DETONATIONS.computeIfAbsent(serverWorld, ignored -> new ArrayList<>())
                 .add(new PendingDeathDetonation(targetId, livingEntity.getPos(), sourceEntity, additionalData,
-                        FlamewindMasteryManager.snapshot(livingEntity)));
+                        FlamewindMasteryManager.snapshot(livingEntity), ((ProvenanceCarrier) statusEffect).simplyswords$getProvenance()));
     }
 
     public static void triggerDeathDetonation(LivingEntity livingEntity) {
@@ -209,7 +214,8 @@ public class FlameSeedEffect extends OrbitingEffect {
             return;
         }
 
-        try {
+        try (var ignored = CombatProvenanceApi.scope(
+                ((ProvenanceCarrier) statusEffect).simplyswords$getProvenance())) {
             triggerDetonation(serverWorld, livingEntity, sourceEntity, additionalData);
             livingEntity.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.FLAMESEED));
         } finally {
@@ -278,7 +284,7 @@ public class FlameSeedEffect extends OrbitingEffect {
 
             float damage = sourceEntity == null ? abilityDamage
                     : HelperMethods.applyAbilityDamageEnchantments(serverWorld, castingStack, le, damageSource, abilityDamage);
-            boolean lethal = le.damage(damageSource, damage) && !le.isAlive();
+            boolean lethal = CombatProvenanceApi.damage(castingStack, sourceEntity, le, damageSource, damage) && !le.isAlive();
             if (lethal) FlamewindMasteryManager.onReleaseKill(serverWorld, sourceEntity);
             affected++;
             int fireTicks = tuning.integer(FireForgeMasteryTuning.Setting.FIRE_TICKS, 0);

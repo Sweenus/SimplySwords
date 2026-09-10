@@ -36,6 +36,7 @@ import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.IonboundStormscaleVisualEntity;
 import net.sweenus.simplyswords.item.component.IonCubeComponent;
@@ -325,6 +326,7 @@ public final class IonboundStormscaleAbilityManager {
     }
 
     private static void slam(ServerWorld world, LivingEntity actor, ActiveCorridor corridor) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(corridor == null || corridor.execution == null ? null : corridor.execution.provenance())) {
         corridor.slammed = true;
         corridor.followupEnds = world.getTime() + Math.max(1, corridor.tuning.integer(
                 StormSoulMasteryTuning.Setting.LOCKOUT_TICKS, Config.uniqueEffects.ionbound_stormscale.followupWindow));
@@ -379,9 +381,11 @@ public final class IonboundStormscaleAbilityManager {
             }
         }
         spawnSlamEffects(world, corridor);
+        }
     }
 
     private static boolean startBeam(ServerWorld world, LivingEntity actor, ItemStack heldStack, ActiveCorridor corridor) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(heldStack, null))) {
         if (!corridor.slammed || world.getTime() > corridor.followupEnds
                 || (corridor.tuning.integer(StormSoulMasteryTuning.Setting.MODE, 0) & MODE_ION_COFFIN) != 0
                 || !consumeCube(heldStack)) return false;
@@ -409,6 +413,7 @@ public final class IonboundStormscaleAbilityManager {
         pulseBeam(world, actor, beam);
         UniqueAbilityApi.finish(corridor.execution, StormSoulMasteryAbilities.FINISH, 0);
         return true;
+        }
     }
 
     private static void tickBeams(ServerWorld world) {
@@ -454,6 +459,7 @@ public final class IonboundStormscaleAbilityManager {
     }
 
     private static void pulseBeam(ServerWorld world, LivingEntity actor, ActiveBeam beam) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(beam == null || beam.execution == null ? null : beam.execution.provenance())) {
         int duration = Math.max(1, beam.tuning.integer(StormSoulMasteryTuning.Setting.BEAM_DURATION_TICKS,
                 Config.uniqueEffects.ionbound_stormscale.beamDuration));
         int interval = Math.max(1, beam.tuning.integer(StormSoulMasteryTuning.Setting.INTERVAL_TICKS,
@@ -491,6 +497,7 @@ public final class IonboundStormscaleAbilityManager {
         }
         world.spawnParticles(ParticleTypes.ELECTRIC_SPARK, end.x, end.y, end.z,
                 12, 0.24, 0.24, 0.24, 0.08);
+        }
     }
 
     private static List<LivingEntity> targetsAlongBeam(ServerWorld world, LivingEntity actor,
@@ -554,6 +561,7 @@ public final class IonboundStormscaleAbilityManager {
 
     private static boolean damageTarget(ServerWorld world, LivingEntity actor, ItemStack stack,
                                         LivingEntity target, float baseDamage, boolean throughIframes) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         DamageSource source = actor.getDamageSources().indirectMagic(actor, actor);
         float damage = HelperMethods.applyAbilityDamageEnchantments(world, stack, target, source, baseDamage);
         boolean[] damaged = {false};
@@ -566,6 +574,7 @@ public final class IonboundStormscaleAbilityManager {
             }
         });
         return damaged[0];
+        }
     }
 
     private static void tickShields(ServerWorld world) {

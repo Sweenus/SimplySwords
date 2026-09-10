@@ -19,6 +19,7 @@ import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.item.component.ParryComponent;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
@@ -47,6 +48,7 @@ public final class StormbringerAbilityManager {
     }
 
     public static void tryTriggerChainLightning(ItemStack stack, LivingEntity target, ServerPlayerEntity player) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (SUPPRESS_CHAIN.get() || stack == null || stack.isEmpty() || target == null || player == null
                 || !stack.isOf(ItemsRegistry.STORMBRINGER.get()) || !AwakeningApi.isAbilityUnlocked(stack)) return;
         ServerWorld world = player.getServerWorld();
@@ -184,6 +186,7 @@ public final class StormbringerAbilityManager {
         } finally {
             SUPPRESS_CHAIN.set(false);
             UniqueAbilityApi.finish(execution, StormFrostWaterMasteryAbilities.FINISH, 0);
+        }
         }
     }
 

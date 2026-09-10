@@ -28,6 +28,7 @@ import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityKey;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.BrimstoneClaymoreVisualEntity;
 import net.sweenus.simplyswords.entity.BrimstoneWakeVisualEntity;
@@ -308,6 +309,7 @@ public final class BrimstoneClaymoreAbilityManager {
 
     private static int damageInRadius(ServerWorld world, LivingEntity owner, ActiveBrimstoneClaymore instance,
                                       Vec3d pos, double radius, float damage, Identifier eventId, boolean finalImpact) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(instance == null ? null : CombatProvenanceApi.from(instance.stack, null))) {
         Box box = new Box(pos, pos).expand(radius);
         int damaged = 0;
         for (LivingEntity target : world.getEntitiesByClass(LivingEntity.class, box, candidate -> candidate != owner
@@ -331,9 +333,11 @@ public final class BrimstoneClaymoreAbilityManager {
             if (damaged >= MAX_AREA_TARGETS) break;
         }
         return damaged;
+        }
     }
 
     private static void applyPulseControl(ActiveBrimstoneClaymore instance, LivingEntity target, Vec3d center) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(instance == null ? null : CombatProvenanceApi.from(instance.stack, null))) {
         double pull = value(instance.execution, BuiltinUniqueAbilities.BRIMSTONE_RITE_PULSE_PULL);
         if (BuiltinUniqueAbilities.BRIMSTONE_GUARD_WALKING.equals(
                 value(instance.execution, BuiltinUniqueAbilities.BRIMSTONE_GUARD_MODE))) {
@@ -348,6 +352,7 @@ public final class BrimstoneClaymoreAbilityManager {
         int slow = value(instance.execution, BuiltinUniqueAbilities.BRIMSTONE_RITE_SLOWNESS_TICKS);
         if (slow > 0) target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, slow, 0,
                 false, true, true), instance.execution.context().actor());
+        }
     }
 
     private static void createInitialWake(ServerWorld world, ActiveBrimstoneClaymore instance) {

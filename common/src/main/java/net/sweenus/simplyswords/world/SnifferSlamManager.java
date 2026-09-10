@@ -7,6 +7,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.sweenus.simplyswords.api.AwakeningApi;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.FallingSnifferEntity;
@@ -18,6 +19,7 @@ public final class SnifferSlamManager {
     }
 
     public static boolean trySummon(LivingEntity attacker, LivingEntity target, ItemStack stack) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (attacker == null || target == null || stack == null || stack.isEmpty() || !attacker.isAlive() || !target.isAlive()) {
             return false;
         }
@@ -52,6 +54,7 @@ public final class SnifferSlamManager {
         }
         playSpawnSound(world, sniffer);
         return true;
+        }
     }
 
     private static void playSpawnSound(ServerWorld world, FallingSnifferEntity sniffer) {

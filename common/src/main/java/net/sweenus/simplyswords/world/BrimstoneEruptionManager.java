@@ -15,6 +15,7 @@ import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 
@@ -32,6 +33,7 @@ public final class BrimstoneEruptionManager {
     }
 
     public static int erupt(UniqueAbilityExecution execution) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(execution == null ? null : execution.provenance())) {
         UniqueAbilityContext context = execution.context();
         ServerWorld world = context.world();
         LivingEntity actor = context.actor();
@@ -72,6 +74,7 @@ public final class BrimstoneEruptionManager {
         affected += chainReactions(execution, killed, baseDamage, directHits);
         playSound(world, primary);
         return affected;
+        }
     }
 
     private static int scatterCinders(UniqueAbilityExecution execution, Vec3d origin, float baseDamage,

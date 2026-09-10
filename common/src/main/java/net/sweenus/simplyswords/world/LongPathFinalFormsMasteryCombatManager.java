@@ -16,6 +16,7 @@ import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityDefinition;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.item.custom.HarbingerSwordItem;
@@ -127,6 +128,7 @@ public final class LongPathFinalFormsMasteryCombatManager {
     }
 
     public static void sunfireMelee(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (!(attacker.getWorld() instanceof ServerWorld world)) return;
         UniqueAbilityExecution execution = begin(LongPathFinalFormsMasteryAbilities.SUNFIRE_REGEN, world, stack, attacker, target);
         LongPathFinalFormsMasteryTuning tuning = LongPathFinalFormsMasteryAbilities.tuning(execution);
@@ -183,6 +185,7 @@ public final class LongPathFinalFormsMasteryCombatManager {
         }
         if (execution.isStarted()) UniqueAbilityApi.finish(execution, LongPathFinalFormsMasteryAbilities.FINISH, 1);
         else UniqueAbilityApi.cancel(execution);
+        }
     }
 
     public static void harbingerMelee(ItemStack stack, LivingEntity target, LivingEntity attacker) {
@@ -367,6 +370,7 @@ public final class LongPathFinalFormsMasteryCombatManager {
 
     private static void flare(ServerWorld world, ItemStack stack, LivingEntity owner,
                               Vec3d center, LongPathFinalFormsMasteryTuning tuning) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         double radius = tuning.get(s("RADIUS"), 3);
         int cap = tuning.integer(s("TARGET_CAP"), 8);
         Box box = new Box(center.x + radius, center.y + radius, center.z + radius,
@@ -383,6 +387,7 @@ public final class LongPathFinalFormsMasteryCombatManager {
                     DamageSource source = owner.getDamageSources().indirectMagic(owner, owner);
                     HelperMethods.damageThroughIframes(target, source, HelperMethods.applyAbilityDamageEnchantments(world, stack, target, source, base));
                 });
+        }
     }
 
     private static void pull(LivingEntity target, Vec3d center, double strength) {

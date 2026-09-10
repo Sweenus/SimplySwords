@@ -24,6 +24,7 @@ import net.sweenus.simplyswords.api.ability.StormSoulMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -119,6 +120,7 @@ public final class SoulrenderAbilityManager {
     // The Reaping: Shared Ending splits a lethal harvest into the nearest surviving mark.
     public static void sharedEnding(ServerWorld world, LivingEntity user, ItemStack stack, LivingEntity victim,
                                     float dealt, StormSoulMasteryTuning tuning, OwnerReapState reap) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         double multiplier = tuning.get(StormSoulMasteryTuning.Setting.SHARED_END_DAMAGE_MULTIPLIER, 0);
         double range = tuning.get(StormSoulMasteryTuning.Setting.SHARED_END_RANGE, 0);
         if (multiplier <= 0 || range <= 0 || dealt <= 0 || reap == null) return;
@@ -127,10 +129,11 @@ public final class SoulrenderAbilityManager {
         for (LivingEntity nearby : nearestTargets(world, user, victim.getPos(), range, 4)) {
             if (nearby == victim || !nearby.isAlive() || !isMarked(nearby)) continue;
             DamageSource source = user.getDamageSources().indirectMagic(user, user);
-            nearby.damage(source, HelperMethods.applyAbilityDamageEnchantments(world, stack, nearby, source,
+            CombatProvenanceApi.damage(stack, (source).getAttacker(), nearby, source, HelperMethods.applyAbilityDamageEnchantments(world, stack, nearby, source,
                     (float) (dealt * multiplier)));
             reap.sharedEndings++;
             return;
+        }
         }
     }
 

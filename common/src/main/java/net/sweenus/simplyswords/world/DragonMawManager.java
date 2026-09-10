@@ -11,6 +11,7 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.Box;
 import net.sweenus.simplyswords.api.AwakeningApi;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.DragonMawHeadVisualEntity;
@@ -25,6 +26,7 @@ public final class DragonMawManager {
     }
 
     public static void tryActivate(LivingEntity owner, ItemStack stack) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (owner == null
                 || stack == null
                 || stack.isEmpty()
@@ -74,6 +76,7 @@ public final class DragonMawManager {
 
         world.playSound(null, owner.getBlockPos(), SoundEvents.ENTITY_ENDER_DRAGON_GROWL, SoundCategory.PLAYERS, 0.9F, 0.75F);
         world.playSound(null, owner.getBlockPos(), SoundEvents.ENTITY_ENDER_DRAGON_FLAP, SoundCategory.PLAYERS, 0.65F, 1.35F);
+        }
     }
 
     public static boolean isValidTarget(LivingEntity owner, LivingEntity target) {

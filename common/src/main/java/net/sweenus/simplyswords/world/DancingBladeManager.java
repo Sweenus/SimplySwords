@@ -14,6 +14,7 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.AwakeningApi;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.DancingBladeVisualEntity;
@@ -37,6 +38,7 @@ public final class DancingBladeManager {
     }
 
     public static boolean trySummon(LivingEntity player, ItemStack stack) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (player == null || stack == null || stack.isEmpty() || !player.isAlive()) {
             return false;
         }
@@ -71,6 +73,7 @@ public final class DancingBladeManager {
             world.playSound(null, player.getBlockPos(), SoundEvents.ENTITY_ILLUSIONER_CAST_SPELL, SoundCategory.PLAYERS, 0.35F, 1.55F);
         }
         return spawned;
+        }
     }
 
     public static void tickBlade(DancingBladeVisualEntity blade) {
@@ -132,7 +135,7 @@ public final class DancingBladeManager {
         target.timeUntilRegen = 0;
         var damageSource = world.getDamageSources().trident(blade, owner);
         float enchantedDamage = HelperMethods.applyAbilityDamageEnchantments(world, stack, target, damageSource, damage);
-        boolean damaged = target.damage(damageSource, enchantedDamage);
+        boolean damaged = CombatProvenanceApi.damage(stack, blade, target, damageSource, enchantedDamage);
         target.timeUntilRegen = 0;
         if (!damaged) {
             return;

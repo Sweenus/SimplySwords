@@ -22,6 +22,7 @@ import net.sweenus.simplyswords.api.ability.ArcaneCosmicMasteryTuning;
 import net.sweenus.simplyswords.api.ability.ArcaneCosmicMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.StarsEdgeConstellationVisualEntity;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
@@ -152,6 +153,7 @@ public final class StarsEdgeAbilityManager {
     }
 
     public static void onMeleeHit(ServerWorld world, ItemStack stack, LivingEntity attacker, LivingEntity target) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         HelperMethods.playHitSounds(attacker, target);
         boolean day = world.isDay();
         UniqueAbilityExecution execution = ArcaneCosmicMasteryCombatManager.beginPassive(day
@@ -198,7 +200,7 @@ public final class StarsEdgeAbilityManager {
                 }
             }
             target.timeUntilRegen = 0;
-            boolean damaged = target.damage(source, HelperMethods.applyAbilityDamageEnchantments(
+            boolean damaged = CombatProvenanceApi.damage(stack, (source).getAttacker(), target, source, HelperMethods.applyAbilityDamageEnchantments(
                     world, stack, target, source, abilityDamage));
             if (damaged && tuning.flag(1 << 1)) target.addStatusEffect(new StatusEffectInstance(
                     StatusEffects.GLOWING, tuning.integer(ArcaneCosmicMasteryTuning.Setting.STATUS_DURATION_TICKS, 60), 0), attacker);
@@ -222,7 +224,7 @@ public final class StarsEdgeAbilityManager {
                 float nightDamage = abilityDamage
                         * (float) carryOver.get(ArcaneCosmicMasteryTuning.Setting.OUTGOING_MULTIPLIER, .6);
                 target.timeUntilRegen = 0;
-                target.damage(source, HelperMethods.applyAbilityDamageEnchantments(
+                CombatProvenanceApi.damage(stack, (source).getAttacker(), target, source, HelperMethods.applyAbilityDamageEnchantments(
                         world, stack, target, source, nightDamage));
             }
             float heal = endlessDay ? 0.0F : abilityDamage
@@ -269,15 +271,18 @@ public final class StarsEdgeAbilityManager {
                     .stream().limit(2).forEach(ally -> ally.heal(sharedHeal));
         }
         ArcaneCosmicMasteryCombatManager.finish(execution, 1);
+        }
     }
 
     private static void pulse(ServerWorld world, LivingEntity actor, ItemStack stack, LivingEntity center,
                               float damage, double radius, int cap) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         DamageSource source = world.getDamageSources().indirectMagic(actor, actor);
         world.getEntitiesByClass(LivingEntity.class, center.getBoundingBox().expand(radius),
                         target -> HelperMethods.checkAbilityTarget(target, actor))
                 .stream().limit(cap).forEach(target -> HelperMethods.damageThroughIframes(target, source,
                         HelperMethods.applyAbilityDamageEnchantments(world, stack, target, source, damage)));
+        }
     }
 
     public static boolean isActive(LivingEntity actor) {
@@ -333,6 +338,7 @@ public final class StarsEdgeAbilityManager {
 
     private static boolean start(WeaponAbilityContext context, ArcaneCosmicMasteryTuning tuning,
                                  UniqueAbilityExecution execution) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(execution == null ? null : execution.provenance())) {
         LivingEntity actor = context.actor();
         Vec3d direction = resolveDirection(context);
         if (direction.lengthSquared() < 0.0001) {
@@ -362,6 +368,7 @@ public final class StarsEdgeAbilityManager {
                 * tuning.get(ArcaneCosmicMasteryTuning.Setting.RANGE, 1));
         spawnActivationEffects(context.world(), actor);
         return true;
+        }
     }
 
     private static boolean tickActive(ServerWorld world, LivingEntity actor, ActiveReprise active) {
@@ -517,6 +524,7 @@ public final class StarsEdgeAbilityManager {
     }
 
     private static void appendNode(ServerWorld world, ActiveReprise active, Vec3d position) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(active == null ? null : CombatProvenanceApi.from(active.stack, null))) {
         StarsEdgeConstellationVisualEntity nodeVisual = StarsEdgeConstellationVisualEntity.node(
                 world, position, visualLifetime());
         nodeVisual.addCommandTag(VISUAL_TAG);
@@ -533,6 +541,7 @@ public final class StarsEdgeAbilityManager {
         }
         active.nodes.add(new RouteNode(position, nodeVisual.getUuid(), linkVisualId));
         spawnNodeEffects(world, position, active.nodes.size());
+        }
     }
 
     private static int visualLifetime() {
@@ -608,6 +617,7 @@ public final class StarsEdgeAbilityManager {
     private static void damageContactSegment(ServerWorld world, LivingEntity actor, ActiveReprise active,
                                              Vec3d start, Vec3d end, double width,
                                              Set<UUID> pulseHitTargets) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(active == null ? null : CombatProvenanceApi.from(active.stack, null))) {
         if (start.squaredDistanceTo(end) < 0.0001) {
             return;
         }
@@ -641,6 +651,7 @@ public final class StarsEdgeAbilityManager {
             active.affectedTargets++;
             if (active.tuning.flag(1 << 24)) target.addStatusEffect(new StatusEffectInstance(
                     StatusEffects.SLOWNESS, 30, 1), actor);
+        }
         }
     }
 
@@ -717,6 +728,7 @@ public final class StarsEdgeAbilityManager {
 
     private static void damageTarget(ServerWorld world, LivingEntity actor, ItemStack stack,
                                      LivingEntity target, float baseDamage, boolean preserveVelocity) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         DamageSource source = actor.getDamageSources().indirectMagic(actor, actor);
         float damage = HelperMethods.applyAbilityDamageEnchantments(
                 world, stack, target, source, baseDamage);
@@ -734,6 +746,7 @@ public final class StarsEdgeAbilityManager {
                 10, 0.28, 0.32, 0.28, 0.05);
         world.spawnParticles(ParticleTypes.REVERSE_PORTAL, center.x, center.y, center.z,
                 8, 0.24, 0.28, 0.24, 0.04);
+        }
     }
 
     private static double distanceSquaredToSegment(Vec3d point, Vec3d start, Vec3d end) {

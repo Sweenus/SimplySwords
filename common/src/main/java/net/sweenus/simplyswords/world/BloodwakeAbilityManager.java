@@ -21,6 +21,7 @@ import net.sweenus.simplyswords.api.ability.DeathShadowBloodMasteryTuning;
 import net.sweenus.simplyswords.api.ability.DeathShadowBloodMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance;
 import net.sweenus.simplyswords.entity.BloodwakeBladeVisualEntity;
@@ -230,6 +231,7 @@ public final class BloodwakeAbilityManager {
     }
 
     public static void triggerPassiveHit(ServerWorld world, ItemStack stack, LivingEntity attacker, LivingEntity target) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         UniqueAbilityExecution execution = DeathShadowBloodMasteryCombatManager.beginPassive(
                 DeathShadowBloodMasteryAbilities.BLOOD_BURST, world, stack, attacker, target);
         DeathShadowBloodMasteryTuning tuning = DeathShadowBloodMasteryAbilities.tuning(execution);
@@ -261,6 +263,7 @@ public final class BloodwakeAbilityManager {
         BleedHelper.apply(target, attacker, (float) HelperMethods.getEntityAttackDamage(attacker), added,
                 BleedHelper.DEFAULT_DURATION);
         UniqueAbilityApi.finish(execution, DeathShadowBloodMasteryAbilities.FINISH, 0);
+        }
     }
 
     private static void triggerBloodBurst(ServerWorld world, ItemStack stack, LivingEntity attacker, LivingEntity primary) {
@@ -269,6 +272,7 @@ public final class BloodwakeAbilityManager {
 
     private static void triggerBloodBurst(ServerWorld world, ItemStack stack, LivingEntity attacker,
                                           LivingEntity primary, DeathShadowBloodMasteryTuning tuning) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         boolean cone = tuning.flag(1 << 7);
         double radius = burstRadius(Config.uniqueEffects.bloodwake.burstRadius, tuning);
         double reach = cone ? Math.max(radius, tuning.get(DeathShadowBloodMasteryTuning.Setting.BLOOD_CONE_RANGE, 7)) : radius;
@@ -321,6 +325,7 @@ public final class BloodwakeAbilityManager {
                 SoundCategory.PLAYERS, 0.9F, 0.72F);
         world.playSound(null, primary.getBlockPos(), SoundRegistry.OBJECT_IMPACT_THUD.get(),
                 SoundCategory.PLAYERS, 0.65F, 0.62F);
+        }
     }
 
     public static boolean activate(ServerWorld world, LivingEntity actor, ItemStack stack, Hand hand, Vec3d facing, int tier) {
@@ -386,6 +391,7 @@ public final class BloodwakeAbilityManager {
 
     private static boolean summonJudgment(ServerWorld world, LivingEntity actor, ItemStack stack, Hand hand,
                                           DeathShadowBloodMasteryTuning tuning) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         List<LivingEntity> targets = findBleedingTargets(world, actor, Config.uniqueEffects.bloodwake.targetingRadius,
                 Math.max(1, Config.uniqueEffects.bloodwake.bladeTargetCap));
         if (targets.isEmpty()) {
@@ -416,6 +422,7 @@ public final class BloodwakeAbilityManager {
         }
         world.playSound(null, actor.getBlockPos(), SoundRegistry.DARK_SWORD_UNFOLD.get(), SoundCategory.PLAYERS, 0.75F, 0.72F);
         return !blades.isEmpty();
+        }
     }
 
     private static boolean beginDeluge(ServerWorld world, LivingEntity actor, Hand hand) {
@@ -764,6 +771,7 @@ public final class BloodwakeAbilityManager {
     }
 
     private static boolean tickBlade(ServerWorld world, ActiveBlade blade, long now) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(blade == null ? null : CombatProvenanceApi.from(blade.stack(), null))) {
         LivingEntity owner = resolveLiving(world, blade.ownerId);
         LivingEntity target = resolveLiving(world, blade.targetId);
         Entity visualEntity = world.getEntity(blade.visualId);
@@ -818,6 +826,7 @@ public final class BloodwakeAbilityManager {
         }
         visual.discard();
         return true;
+        }
     }
 
     public static void applyBloodPlague(LivingEntity target, LivingEntity owner) {

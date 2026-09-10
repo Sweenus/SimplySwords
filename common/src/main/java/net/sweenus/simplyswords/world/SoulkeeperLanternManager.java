@@ -22,6 +22,7 @@ import net.sweenus.simplyswords.api.ability.DeathShadowBloodMasteryTuning;
 import net.sweenus.simplyswords.api.ability.DeathShadowBloodMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.SoulkeeperLanternVisualEntity;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
@@ -113,7 +114,7 @@ public final class SoulkeeperLanternManager {
             float bonus = (float) (HelperMethods.getEntityAttackDamage(attacker)
                     * (active.lanternTuning.get(
                     DeathShadowBloodMasteryTuning.Setting.SOULBRAND_DAMAGE_MULTIPLIER, 1) - 1));
-            if (bonus > 0) damageTarget(world, attacker, target, bonus);
+            if (bonus > 0) damageTarget(world, attacker, stack, target, bonus);
         }
         if (!target.isAlive() && active.velocityTuning.flag(1 << 14)) {
             active.capturedUntil = world.getTime() + active.velocityTuning.integer(
@@ -126,6 +127,7 @@ public final class SoulkeeperLanternManager {
     }
 
     public static void activate(LivingEntity player, ItemStack stack) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         if (player == null || stack == null || stack.isEmpty() || !stack.isOf(ItemsRegistry.SOULKEEPER.get()) || !isHoldingSoulkeeper(player)) {
             return;
         }
@@ -155,6 +157,7 @@ public final class SoulkeeperLanternManager {
         world.spawnParticles(ParticleTypes.SCULK_SOUL, pos.x, pos.y, pos.z, 8, 0.45, 0.3, 0.45, 0.02);
         world.playSound(null, player.getBlockPos(), SoundRegistry.MAGIC_SWORD_SPELL_03.get(), SoundCategory.PLAYERS, 0.75F, 0.8F + player.getRandom().nextFloat() * 0.2F);
         tickActive(world, player, stack);
+        }
     }
 
     public static void activate(WeaponAbilityContext context) {
@@ -195,7 +198,7 @@ public final class SoulkeeperLanternManager {
                         target -> HelperMethods.checkAbilityTarget(target, actor)
                                 && target.getPos().add(0, target.getHeight() * .5, 0)
                                 .squaredDistanceTo(center) <= radius * radius)
-                .forEach(target -> damageTarget(world, actor, target, damage));
+                .forEach(target -> damageTarget(world, actor, stack, target, damage));
         active.speedMultiplier = 1;
         active.extraLanternsUntilTick = 0;
         active.fifthLanternUntilTick = 0;
@@ -208,6 +211,7 @@ public final class SoulkeeperLanternManager {
     }
 
     private static void tickActive(ServerWorld world, LivingEntity player, ItemStack stack) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         UUID ownerId = player.getUuid();
         ActiveLanterns active = activeFor(world, ownerId);
         final ActiveLanterns current = active;
@@ -274,9 +278,11 @@ public final class SoulkeeperLanternManager {
             player.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, 40,
                     Math.max(0, absorption / 4 - 1)), player);
         }
+        }
     }
 
     private static void damageCollidingTargets(ServerWorld world, LivingEntity player, ItemStack stack, ActiveLanterns active, int lanternCount) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         float damage = getLanternDamage(player, stack);
         damage *= (float) active.lanternTuning.get(
                 DeathShadowBloodMasteryTuning.Setting.SOUL_CONTACT_DAMAGE_MULTIPLIER, 1);
@@ -312,7 +318,7 @@ public final class SoulkeeperLanternManager {
                 if (active.collidingTargets.contains(contact)
                         && world.getTime() - lastContact < repeatDelay) continue;
                 float contactDamage = contactDamage(active, damage, targetId, lantern, world.getTime());
-                if (!damageTarget(world, player, target, contactDamage)) continue;
+                if (!damageTarget(world, player, stack, target, contactDamage)) continue;
                 active.successfulContacts++;
                 active.lastContact.put(contact, world.getTime());
                 active.lastPassage.put(targetId, new LanternPassage(lantern, world.getTime()));
@@ -343,6 +349,7 @@ public final class SoulkeeperLanternManager {
 
         active.collidingTargets.clear();
         active.collidingTargets.addAll(currentlyColliding);
+        }
     }
 
     private static float getLanternDamage(LivingEntity player, ItemStack stack) {
@@ -351,20 +358,21 @@ public final class SoulkeeperLanternManager {
                 Config.uniqueEffects.soulkeeper.spellScaling);
     }
 
-    private static boolean damageTarget(ServerWorld world, LivingEntity player, LivingEntity target, float damage) {
+    private static boolean damageTarget(ServerWorld world, LivingEntity player, ItemStack stack, LivingEntity target, float damage) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         target.timeUntilRegen = 0;
         boolean[] damaged = {false};
-        ItemStack stack = player.getMainHandStack();
         var damageSource = player.getDamageSources().indirectMagic(player, player);
         float scaledDamage = HelperMethods.applyAbilityDamageEnchantments(world, stack, target, damageSource, damage);
-        WeaponImplicitRegistry.runSuppressed(() -> damaged[0] = target.damage(damageSource, scaledDamage));
+        WeaponImplicitRegistry.runSuppressed(() -> damaged[0] = CombatProvenanceApi.damage(stack, player, target, damageSource, scaledDamage));
         target.timeUntilRegen = 0;
         if (!damaged[0]) {
             float fallbackDamage = HelperMethods.applyNonPlayerAbilityDamageModifier(player, damage);
-            WeaponImplicitRegistry.runSuppressed(() -> damaged[0] = target.damage(world.getDamageSources().magic(), fallbackDamage));
+            WeaponImplicitRegistry.runSuppressed(() -> damaged[0] = CombatProvenanceApi.damage(stack, player, target, world.getDamageSources().magic(), fallbackDamage));
             target.timeUntilRegen = 0;
         }
         return damaged[0];
+        }
     }
 
     private static float contactDamage(ActiveLanterns active, float baseDamage, UUID targetId,
@@ -430,7 +438,7 @@ public final class SoulkeeperLanternManager {
                                 .squaredDistanceTo(center) <= radius * radius)
                 .stream().limit(active.lanternTuning.integer(
                         DeathShadowBloodMasteryTuning.Setting.SOUL_CLEAVE_TARGET_CAP, 2))
-                .forEach(other -> damageTarget(world, owner, other, cleaveDamage));
+                .forEach(other -> damageTarget(world, owner, owner.getMainHandStack(), other, cleaveDamage));
     }
 
     private static boolean isCollidingWithLantern(Vec3d center, Box targetBox, double baseAngle,

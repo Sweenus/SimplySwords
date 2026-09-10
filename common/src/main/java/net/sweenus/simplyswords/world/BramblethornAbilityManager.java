@@ -29,6 +29,7 @@ import net.sweenus.simplyswords.api.ability.NatureSwarmMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.BrambleRootVisualEntity;
 import net.sweenus.simplyswords.item.custom.StealSwordItem;
@@ -397,6 +398,7 @@ public final class BramblethornAbilityManager {
                                    LivingEntity previousTarget, LivingEntity target,
                                    NatureSwarmMasteryTuning tuning, UniqueAbilityExecution execution,
                                    float damageMultiplier) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(execution == null ? null : execution.provenance())) {
         int travelTicks = Math.max(1, Config.uniqueEffects.bramblethorn.huntTravelTicks);
         float damage = HelperMethods.abilityScaledDamage(
                 SpellScalingProfile.NATURE, attacker, stack,
@@ -437,6 +439,7 @@ public final class BramblethornAbilityManager {
         world.playSound(null, origin.x, origin.y, origin.z,
                 SoundEvents.BLOCK_CAVE_VINES_BREAK, SoundCategory.PLAYERS,
                 0.75F, 0.72F + world.random.nextFloat() * 0.12F);
+        }
     }
 
     private static void tickHunts(ServerWorld world) {
@@ -517,6 +520,7 @@ public final class BramblethornAbilityManager {
 
     private static void applyHuntHit(ServerWorld world, ActiveHunt hunt,
                                      LivingEntity attacker, LivingEntity target) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(hunt == null ? null : CombatProvenanceApi.from(hunt.stack, null))) {
         Vec3d velocity = target.getVelocity();
         boolean damaged = false;
         if (hunt.damage > 0.0F) {
@@ -551,6 +555,7 @@ public final class BramblethornAbilityManager {
                 center.x, center.y, center.z,
                 6, target.getWidth() * 0.3, target.getHeight() * 0.22,
                 target.getWidth() * 0.3, 0.01);
+        }
     }
 
     private static void tickHuntMarks(ServerWorld world) {
@@ -714,7 +719,8 @@ public final class BramblethornAbilityManager {
         }
         DamageSource echoSource = world.getDamageSources().indirectMagic(attacker, principal);
         PROPAGATING_DAMAGE.set(true);
-        try {
+        try (var ignored = CombatProvenanceApi.scope(
+                grasp.execution == null ? null : grasp.execution.provenance())) {
             for (BoundTarget bound : grasp.targets) {
                 if (bound.targetId.equals(damagedTarget.getUuid())) {
                     continue;
@@ -825,6 +831,7 @@ public final class BramblethornAbilityManager {
     }
 
     private static void applyBindingBenefits(LivingEntity actor, ActiveGrasp grasp) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(grasp == null ? null : CombatProvenanceApi.from(grasp.stack, null))) {
         if (has(grasp.tuning, NatureSwarmMasteryTuning.Setting.BRAMBLE_BRIAR_DAMAGE_MULTIPLIER)) return;
         if (has(grasp.tuning, NatureSwarmMasteryTuning.Setting.BRAMBLE_THORNWARD_TARGET_COUNT)
                 && grasp.targets.size() >= grasp.tuning.integer(
@@ -840,6 +847,7 @@ public final class BramblethornAbilityManager {
                     grasp.tuning.integer(
                             NatureSwarmMasteryTuning.Setting.BRAMBLE_ANCIENT_RESISTANCE_AMPLIFIER, 1),
                     false, true, true));
+        }
         }
     }
 
@@ -928,6 +936,7 @@ public final class BramblethornAbilityManager {
 
     private static void applySlamDamage(ServerWorld world, LivingEntity actor, ActiveGrasp grasp,
                                         LivingEntity target) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(grasp == null ? null : CombatProvenanceApi.from(grasp.stack, null))) {
         LivingEntity principal = resolveLiving(world, grasp.principalId);
         if (principal == null) {
             principal = actor;
@@ -944,6 +953,7 @@ public final class BramblethornAbilityManager {
         }
         UniqueAbilityApi.emit(grasp.execution, UniqueAbilityPhase.HIT, NatureSwarmMasteryAbilities.HIT,
                 target, 1, damage);
+        }
     }
 
     private static void pullTarget(LivingEntity target, Vec3d slot, NatureSwarmMasteryTuning tuning) {
@@ -1200,6 +1210,7 @@ public final class BramblethornAbilityManager {
     }
 
     private static void applyBriarSacrifice(ServerWorld world, LivingEntity actor, ActiveGrasp grasp) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(grasp == null ? null : CombatProvenanceApi.from(grasp.stack, null))) {
         LivingEntity principal = resolveLiving(world, grasp.principalId);
         if (principal == null) principal = actor;
         LivingEntity damagePrincipal = principal;
@@ -1229,6 +1240,7 @@ public final class BramblethornAbilityManager {
                         HelperMethods.damageThroughIframes(target, source, finalDamage));
             }
             if (damaged.size() >= cap) break;
+        }
         }
     }
 

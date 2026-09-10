@@ -26,6 +26,7 @@ import net.sweenus.simplyswords.api.ability.FireForgeMasteryTuning;
 import net.sweenus.simplyswords.api.ability.FireForgeMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
+import net.sweenus.simplyswords.api.combat.CombatProvenanceApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.FurnaceChainVisualEntity;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
@@ -600,6 +601,7 @@ public final class HearthflameAbilityManager {
     private static boolean applyAbilityDamage(ServerWorld world, LivingEntity actor, LivingEntity sourceOwner,
                                               ItemStack stack, LivingEntity target, float damage,
                                               boolean preserveVelocity, int igniteTicks) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(CombatProvenanceApi.from(stack, null))) {
         LivingEntity attributedOwner = sourceOwner == null ? actor : sourceOwner;
         DamageSource source = world.getDamageSources().indirectMagic(actor, attributedOwner);
         float finalDamage = HelperMethods.applyAbilityDamageEnchantments(world, stack, target, source, damage);
@@ -614,6 +616,7 @@ public final class HearthflameAbilityManager {
             target.setOnFireFor(igniteSeconds(Config.uniqueEffects.hearthflame.igniteSeconds, igniteTicks));
         }
         return damaged;
+        }
     }
 
     private static void pullTarget(FireForgeMasteryTuning tuning, Vec3d anchor, LivingEntity actor,
@@ -1050,6 +1053,7 @@ public final class HearthflameAbilityManager {
     }
 
     private static void grantSnapResistance(LivingEntity actor, ActiveChains ability) {
+        try (var masteryProvenanceScope = CombatProvenanceApi.scope(ability == null ? null : CombatProvenanceApi.from(ability.stack, null))) {
         int grant = ability.tuning.integer(
                 FireForgeMasteryTuning.Setting.HEARTH_SNAP_RESISTANCE_DURATION_TICKS, 0);
         if (grant <= 0) return;
@@ -1059,6 +1063,7 @@ public final class HearthflameAbilityManager {
         int existingDuration = existing != null && existing.getAmplifier() == 0 ? existing.getDuration() : 0;
         actor.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE,
                 extendedResistanceTicks(existingDuration, grant, cap), 0), actor);
+        }
     }
 
     static float gatedFinalDamage(float tunedDamage, int initialChains, int requiredChains, double multiplier) {
