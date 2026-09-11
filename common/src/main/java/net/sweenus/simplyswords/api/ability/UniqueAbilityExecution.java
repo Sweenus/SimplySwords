@@ -18,8 +18,12 @@ public final class UniqueAbilityExecution {
 
     UniqueAbilityExecution(long id, UniqueAbilityDefinition definition, UniqueAbilityContext context,
                            UniqueAbilityTuning tuning, List<UniqueAbilityObserver> observers) {
-        try (var ignored = CombatProvenanceApi.origin(context.actor(), context.stack(), CombatProvenance.ABILITY)) {
-            this.provenance = CombatProvenanceApi.current();
+        if (context == null) {
+            this.provenance = null;
+        } else {
+            try (var ignored = CombatProvenanceApi.origin(context.actor(), context.stack(), CombatProvenance.ABILITY)) {
+                this.provenance = CombatProvenanceApi.current();
+            }
         }
         this.id = id;
         this.definition = definition;
