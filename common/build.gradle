@@ -13,6 +13,11 @@ sourceSets {
     }
 }
 
+sourceSets.test {
+    compileClasspath += sourceSets.qaTest.output
+    runtimeClasspath += sourceSets.qaTest.output
+}
+
 loom {
     accessWidenerPath = file("src/main/resources/simplyswords.accesswidener")
     createRemapConfigurations(sourceSets.balanceTest)

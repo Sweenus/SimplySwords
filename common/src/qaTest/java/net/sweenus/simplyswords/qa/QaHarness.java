@@ -365,10 +365,6 @@ public final class QaHarness {
 
     private record ClientState(int protocol, long lastHeartbeat) {}
 
-    private record AbilityTiming(boolean channelled, int holdTicks, int observationTicks) {
-        private static final AbilityTiming INSTANT = new AbilityTiming(false, 1, 45);
-    }
-
     private static final class ClientProgress {
         private boolean acknowledged;
         private boolean released;
@@ -440,7 +436,7 @@ public final class QaHarness {
         private boolean observedChannel;
         private boolean automaticChannelCompletion;
         private ItemStack preparedStack = ItemStack.EMPTY;
-        private AbilityTiming activeTiming = AbilityTiming.INSTANT;
+        private QaAbilityTiming activeTiming = QaAbilityTiming.INSTANT;
         private String placementIssue = "not checked";
         private Case active;
         private boolean finished;
@@ -504,6 +500,17 @@ public final class QaHarness {
             ServerPlayerEntity target = players.get(1);
             if (phase == 0) {
                 prepare(actor, target, active);
+                String timingError = activeTiming.validationError();
+                event("case_prepared", active, timingError == null ? "running" : "failed",
+                        timingError == null ? "Ability timing prepared" : timingError,
+                        Map.of("hold_ticks", activeTiming.holdTicks(),
+                                "observation_ticks", activeTiming.observationTicks(),
+                                "timing_limit_ticks", QaAbilityTiming.MAX_TIMING_TICKS));
+                if (timingError != null) {
+                    complete(false, timingError + ": hold_ticks=" + activeTiming.holdTicks()
+                            + ", observation_ticks=" + activeTiming.observationTicks());
+                    return;
+                }
                 phase = 1;
                 return;
             }
@@ -531,7 +538,7 @@ public final class QaHarness {
                 serverActionSucceeded = true;
                 if (active.actorKind.equals("player")) {
                     new QaNetwork.ClientAction(active.id, active.action, targetEntity.getId(),
-                            active.action.equals("ability") ? activeTiming.holdTicks : 1).sendTo(actor);
+                            active.action.equals("ability") ? activeTiming.validatedHoldTicks() : 1).sendTo(actor);
                 } else {
                     serverActionSucceeded = active.action.equals("attack")
                             ? spawnedActor.tryAttack(targetEntity)
@@ -550,7 +557,7 @@ public final class QaHarness {
                 observedPlayerCooldown = true;
             }
             ClientProgress client = clientEvents.get(active.id);
-            if (activeTiming.channelled && active.actorKind.equals("player")) {
+            if (activeTiming.channelled() && active.actorKind.equals("player")) {
                 boolean channelNow = PlayerWeaponAbilityChannelManager.isChanneling(
                         actor, Hand.MAIN_HAND, actor.getMainHandStack().getItem());
                 observedChannel |= channelNow;
@@ -562,7 +569,7 @@ public final class QaHarness {
                 complete(false, client.error);
                 return;
             }
-            int observationTicks = activeTiming.observationTicks;
+            long observationTicks = activeTiming.observationTicks();
             if (phaseTicks < observationTicks) return;
             boolean locked = active.awakeningLevel < 4;
             boolean harmed = targetHarmed
@@ -578,7 +585,7 @@ public final class QaHarness {
             if (active.actorKind.equals("player") && (client == null || !client.acknowledged)) {
                 complete(false, "Client action acknowledgement timed out");
             }
-            else if (activeTiming.channelled && active.actorKind.equals("player")
+            else if (activeTiming.channelled() && active.actorKind.equals("player")
                     && !automaticChannelCompletion && (client == null || !client.released)) {
                 complete(false, "Channeled ability did not release or complete automatically");
             }
@@ -762,65 +769,51 @@ public final class QaHarness {
             automaticChannelCompletion = false;
         }
 
-        private AbilityTiming abilityTiming(Case testCase, ServerPlayerEntity actor, ItemStack stack) {
-            int effectTicks = effectObservationTicks(testCase);
-            if (!testCase.action.equals("ability") || testCase.awakeningLevel < 4
-                    || !testCase.actorKind.equals("player")) {
-                return new AbilityTiming(false, 1, effectTicks);
-            }
-            int maxUseTicks = Math.max(0, stack.getMaxUseTime(actor));
-            if (maxUseTicks == 0) {
-                return new AbilityTiming(false, 1, effectTicks);
-            }
-            String path = testCase.weapon.getPath();
-            int holdTicks;
-            if (path.equals("dawnquiver")) {
-                holdTicks = Math.max(1, Config.uniqueEffects.dawnquiver.drawDuration);
-            } else if (path.endsWith("lichblade")) {
-                holdTicks = Math.max(1, Config.uniqueEffects.lichblade.duration + 5);
-            } else {
-                holdTicks = maxUseTicks;
-            }
-            int observationTicks = path.equals("dawnquiver")
-                    ? holdTicks + effectTicks
-                    : Math.max(effectTicks, holdTicks + 45);
-            return new AbilityTiming(true, holdTicks, observationTicks);
+        private QaAbilityTiming abilityTiming(Case testCase, ServerPlayerEntity actor, ItemStack stack) {
+            return QaAbilityTiming.resolve(testCase.weapon.getPath(), testCase.action.equals("ability"),
+                    testCase.awakeningLevel >= 4, testCase.actorKind.equals("player"),
+                    testCase.action.equals("ability") && testCase.awakeningLevel >= 4
+                            && testCase.actorKind.equals("player") ? stack.getMaxUseTime(actor) : 0,
+                    effectObservationTicks(testCase),
+                    Config.uniqueEffects.dawnquiver.drawDuration, Config.uniqueEffects.lichblade.duration,
+                    Config.uniqueEffects.magiblade.chargeDuration, Config.uniqueEffects.magiblade.summonDuration);
         }
 
-        private int effectObservationTicks(Case testCase) {
+        private long effectObservationTicks(Case testCase) {
             if (!testCase.action.equals("ability") || testCase.awakeningLevel < 4) return 45;
-            return switch (testCase.weapon.getPath()) {
-                case "arcanethyst" -> Math.max(45, Math.max(
+            double effectTicks = switch (testCase.weapon.getPath()) {
+                case "arcanethyst" -> Math.max(45L, Math.max(
                         Config.uniqueEffects.arcanethyst.duration,
-                        Config.uniqueEffects.arcanethyst.liftTicks
+                        (long) Config.uniqueEffects.arcanethyst.liftTicks
                                 + Config.uniqueEffects.arcanethyst.suspendTicks
                                 + Config.uniqueEffects.arcanethyst.slamTicks) + 10);
-                case "bramblethorn" -> Math.max(45,
-                        Config.uniqueEffects.bramblethorn.rootTravelTicks
+                case "bramblethorn" -> Math.max(45L,
+                        (long) Config.uniqueEffects.bramblethorn.rootTravelTicks
                                 + Config.uniqueEffects.bramblethorn.bindingDuration + 8 + 18 + 10);
-                case "brimstone_claymore" -> Math.max(45,
-                        Config.uniqueEffects.brimstone_claymore.duration + 18 + 10);
-                case "gloampiercer" -> Math.max(45,
-                        Config.uniqueEffects.gloampiercer.channelDuration + 10);
+                case "brimstone_claymore" -> Math.max(45L,
+                        (long) Config.uniqueEffects.brimstone_claymore.duration + 18 + 10);
+                case "gloampiercer" -> Math.max(45L,
+                        (long) Config.uniqueEffects.gloampiercer.channelDuration + 10);
                 case "shadowsting" -> testCase.actorKind.equals("player")
-                        ? Math.max(45, Config.uniqueEffects.shadowsting.duration / 2 + 18) : 45;
-                case "stars_edge" -> Math.max(45,
-                        (int) Math.ceil(Config.uniqueEffects.stars_edge.initialDashDistance
+                        ? Math.max(45L, (long) Config.uniqueEffects.shadowsting.duration / 2 + 18) : 45;
+                case "stars_edge" -> Math.max(45L,
+                        Math.ceil(Config.uniqueEffects.stars_edge.initialDashDistance
                                 / Math.max(0.1, Config.uniqueEffects.stars_edge.initialDashSpeed))
                                 + Config.uniqueEffects.stars_edge.recordingDuration
                                 + Config.uniqueEffects.stars_edge.constellationDuration
-                                + Math.max(1, Config.uniqueEffects.stars_edge.maxNodes - 1)
+                                + Math.max(1L, (long) Config.uniqueEffects.stars_edge.maxNodes - 1)
                                 * Config.uniqueEffects.stars_edge.segmentExplosionInterval + 20);
                 case "magispear" -> 55;
-                case "dawnquiver" -> Math.max(45,
-                        Config.uniqueEffects.dawnquiver.convergenceFormationDelay
-                                + Config.uniqueEffects.dawnquiver.maxChorus
+                case "dawnquiver" -> Math.max(45L,
+                        (long) Config.uniqueEffects.dawnquiver.convergenceFormationDelay
+                                + (long) Config.uniqueEffects.dawnquiver.maxChorus
                                 * Config.uniqueEffects.dawnquiver.convergenceFiringStagger + 30);
-                case "icewhisper" -> Math.max(45,
-                        Config.uniqueEffects.icewhisper.duration
+                case "icewhisper" -> Math.max(45L,
+                        (long) Config.uniqueEffects.icewhisper.duration
                                 + Config.uniqueEffects.icewhisper.cometFallTicks + 20);
                 default -> 45;
             };
+            return (long) Math.ceil(effectTicks);
         }
 
         private float effectiveHealth(LivingEntity entity) {
@@ -1068,10 +1061,10 @@ public final class QaHarness {
             if (success) passed++; else failed++;
             ClientProgress progress = active == null ? null : clientEvents.get(active.id);
             Map<String, Object> lifecycle = new HashMap<>();
-            lifecycle.put("observation_ticks", activeTiming.observationTicks);
+            lifecycle.put("observation_ticks", activeTiming.observationTicks());
             lifecycle.put("elapsed_observation_ticks", phaseTicks);
-            lifecycle.put("channelled", activeTiming.channelled);
-            lifecycle.put("hold_ticks", activeTiming.holdTicks);
+            lifecycle.put("channelled", activeTiming.channelled());
+            lifecycle.put("hold_ticks", activeTiming.holdTicks());
             lifecycle.put("channel_started", observedChannel);
             lifecycle.put("release_observed", progress != null && progress.released);
             lifecycle.put("automatic_completion", automaticChannelCompletion);
@@ -1085,7 +1078,7 @@ public final class QaHarness {
             phaseTicks = 0;
             discardSpawnedEntities();
             preparedStack = ItemStack.EMPTY;
-            activeTiming = AbilityTiming.INSTANT;
+            activeTiming = QaAbilityTiming.INSTANT;
         }
 
         private void finish(String result, String detail) {
