@@ -67,7 +67,6 @@ import net.sweenus.simplyswords.entity.RiftmaneChargerEntity;
 import net.sweenus.simplyswords.entity.WatcherBatEntity;
 import net.sweenus.simplyswords.registry.*;
 import net.sweenus.simplyswords.network.SimplySwordsNetwork;
-import net.sweenus.simplyswords.util.FileCopier;
 import net.sweenus.simplyswords.util.ModLootTableModifiers;
 import net.sweenus.simplyswords.world.ObserverStatusEffectSyncManager;
 import net.sweenus.simplyswords.world.DevourerAbilityManager;
@@ -124,7 +123,6 @@ import net.sweenus.simplyswords.world.ShadowstingShadowDanceManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
 
 public class SimplySwords {
     public static final String MOD_ID = "simplyswords";
@@ -359,11 +357,6 @@ public class SimplySwords {
         if (passVersionCheck("mythicmetals", minimumMythicMetalsVersion)) {
             LOGGER.info("Registering Mythic Metals items");
             MythicMetalsCompat.init();
-        }
-        try {
-            FileCopier.copyFileToConfigDirectory();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
 
         System.out.println(SimplySwordsExpectPlatform.getConfigDirectory().toAbsolutePath().normalize().toString());

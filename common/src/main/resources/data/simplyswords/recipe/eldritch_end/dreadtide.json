@@ -1,16 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:all_mods_loaded",
+      "condition": "fabric:registry_contains",
+      "registry": "minecraft:item",
       "values": [
-        "neverloadthisrecipekthx"
+        "eldritch_end:aberration_heart"
       ]
     }
   ],
-  "conditions": [
+  "neoforge:conditions": [
     {
-      "type": "forge:mod_loaded",
-      "modid": "neverloadthisrecipekthx"
+      "type": "neoforge:item_exists",
+      "item": "eldritch_end:aberration_heart"
     }
   ],
   "type": "minecraft:crafting_shaped",
