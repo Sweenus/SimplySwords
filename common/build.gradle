@@ -13,6 +13,11 @@ sourceSets {
     }
 }
 
+sourceSets.test {
+    compileClasspath += sourceSets.qaTest.output
+    runtimeClasspath += sourceSets.qaTest.output
+}
+
 loom {
     createRemapConfigurations(sourceSets.qaTest)
 }
